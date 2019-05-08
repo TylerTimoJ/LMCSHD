@@ -1,0 +1,15 @@
+C:\Users\tyler\OneDrive\LMCSHD\LMCSHD\LMCS2\obj\x86\Debug\LMCS2-HD.csprojAssemblyReference.cache
+C:\Users\tyler\OneDrive\LMCSHD\LMCSHD\LMCS2\obj\x86\Debug\MainWindow.g.cs
+C:\Users\tyler\OneDrive\LMCSHD\LMCSHD\LMCS2\obj\x86\Debug\App.g.cs
+C:\Users\tyler\OneDrive\LMCSHD\LMCSHD\LMCS2\obj\x86\Debug\MainWindow.baml
+C:\Users\tyler\OneDrive\LMCSHD\LMCSHD\LMCS2\obj\x86\Debug\LMCS2-HD.csproj.GenerateResource.cache
+C:\Users\tyler\OneDrive\LMCSHD\LMCSHD\LMCS2\obj\x86\Debug\LMCS2-HD.csproj.CoreCompileInputs.cache
+C:\Users\tyler\OneDrive\LMCSHD\LMCSHD\LMCS2\bin\x86\Debug\LMCS2-HD.exe.config
+C:\Users\tyler\OneDrive\LMCSHD\LMCSHD\LMCS2\bin\x86\Debug\LMCS2-HD.exe
+C:\Users\tyler\OneDrive\LMCSHD\LMCSHD\LMCS2\bin\x86\Debug\LMCS2-HD.pdb
+C:\Users\tyler\OneDrive\LMCSHD\LMCSHD\LMCS2\obj\x86\Debug\LMCS2-HD_MarkupCompile.cache
+C:\Users\tyler\OneDrive\LMCSHD\LMCSHD\LMCS2\obj\x86\Debug\LMCS2-HD_MarkupCompile.lref
+C:\Users\tyler\OneDrive\LMCSHD\LMCSHD\LMCS2\obj\x86\Debug\LMCS2-HD.g.resources
+C:\Users\tyler\OneDrive\LMCSHD\LMCSHD\LMCS2\obj\x86\Debug\LMCS2-HD.exe
+C:\Users\tyler\OneDrive\LMCSHD\LMCSHD\LMCS2\obj\x86\Debug\LMCS2-HD.pdb
+C:\Users\tyler\OneDrive\LMCSHD\LMCSHD\LMCS2\obj\x86\Debug\LMCS2HD.Properties.Resources.resources

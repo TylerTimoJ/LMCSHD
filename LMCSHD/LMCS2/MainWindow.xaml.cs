@@ -19,7 +19,7 @@ using System.IO.Ports;
 using System.Drawing;
 using System.Drawing.Drawing2D;
 
-namespace LMCS2
+namespace LMCSHD
 {
     /// <summary>
     /// Interaction logic for MainWindow.xaml

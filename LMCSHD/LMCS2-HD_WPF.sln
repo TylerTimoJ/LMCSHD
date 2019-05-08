@@ -1,0 +1,37 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 16
+VisualStudioVersion = 16.0.28803.202
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "LMCS2HD", "LMCS2\LMCS2HD.csproj", "{E30339AB-5377-4B08-BEFB-64FC03CFE58B}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Debug|x64 = Debug|x64
+		Debug|x86 = Debug|x86
+		Release|Any CPU = Release|Any CPU
+		Release|x64 = Release|x64
+		Release|x86 = Release|x86
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{E30339AB-5377-4B08-BEFB-64FC03CFE58B}.Debug|Any CPU.ActiveCfg = Debug|x64
+		{E30339AB-5377-4B08-BEFB-64FC03CFE58B}.Debug|Any CPU.Build.0 = Debug|x64
+		{E30339AB-5377-4B08-BEFB-64FC03CFE58B}.Debug|x64.ActiveCfg = Debug|x86
+		{E30339AB-5377-4B08-BEFB-64FC03CFE58B}.Debug|x64.Build.0 = Debug|x86
+		{E30339AB-5377-4B08-BEFB-64FC03CFE58B}.Debug|x86.ActiveCfg = Debug|x86
+		{E30339AB-5377-4B08-BEFB-64FC03CFE58B}.Debug|x86.Build.0 = Debug|x86
+		{E30339AB-5377-4B08-BEFB-64FC03CFE58B}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{E30339AB-5377-4B08-BEFB-64FC03CFE58B}.Release|Any CPU.Build.0 = Release|Any CPU
+		{E30339AB-5377-4B08-BEFB-64FC03CFE58B}.Release|x64.ActiveCfg = Release|Any CPU
+		{E30339AB-5377-4B08-BEFB-64FC03CFE58B}.Release|x64.Build.0 = Release|Any CPU
+		{E30339AB-5377-4B08-BEFB-64FC03CFE58B}.Release|x86.ActiveCfg = Release|Any CPU
+		{E30339AB-5377-4B08-BEFB-64FC03CFE58B}.Release|x86.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {EEE3BE1E-57FA-444D-8CC4-DA9EF5418CF7}
+	EndGlobalSection
+EndGlobal

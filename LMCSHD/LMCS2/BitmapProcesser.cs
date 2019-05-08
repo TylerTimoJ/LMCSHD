@@ -11,7 +11,7 @@ using System.Drawing.Drawing2D;
 using System.Runtime.InteropServices;
 
 
-namespace LMCS2
+namespace LMCSHD
 {
     public static class BitmapProcesser
     {
