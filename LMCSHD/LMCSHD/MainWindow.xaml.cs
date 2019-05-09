@@ -1,0 +1,276 @@
+﻿using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
+using System.Threading;
+using System.Threading.Tasks;
+using System.Windows.Threading;
+using System.Windows;
+using System.Windows.Controls;
+using System.Windows.Data;
+using System.Windows.Documents;
+using System.Windows.Input;
+using System.Windows.Media;
+using System.Windows.Media.Imaging;
+using System.Windows.Navigation;
+//using System.Windows.Shapes;
+using System.Diagnostics;
+using System.IO.Ports;
+using System.Drawing;
+using System.Drawing.Drawing2D;
+
+namespace LMCSHD
+{
+    /// <summary>
+    /// Interaction logic for MainWindow.xaml
+    /// </summary>
+    public partial class MainWindow : Window
+    {
+        private MatrixFrame frame;
+        private SerialPort sp;
+        public static WriteableBitmap previewBitmap;
+
+        //screen capture
+        private ScreenRecorder scRec;
+        private DispatcherTimer scOutlineTimer = new DispatcherTimer();
+        bool serialReady = true;
+
+        public MainWindow()
+        {
+            InitializeComponent();
+            scOutlineTimer.Interval = TimeSpan.FromMilliseconds(0);
+            scOutlineTimer.Tick += scOutlineTimer_Tick;
+            RefreshSerialPorts();
+        }
+
+        //Serial Functions
+        //===========================================================================================
+        private void sp_DataReceived(object sender, SerialDataReceivedEventArgs e)
+        {
+            serialReady = sp.ReadByte() == 0x06 ? true : false;
+            //Console.WriteLine(sp.ReadExisting());
+        }
+        void SerialSendFrame(MatrixFrame givenFrame)
+        {
+            if (sp != null && sp.IsOpen && serialReady)
+                sp.Write(givenFrame.GetSerializableFrame(), 0, givenFrame.GetFrameLength());
+        }
+        void RefreshSerialPorts()
+        {
+            string[] ports = SerialPort.GetPortNames();
+            SSerialPortList.ItemsSource = ports;
+            //  SerialPortList.
+        }
+        private void SSerialConnect_Click(object sender, RoutedEventArgs e)
+        {
+            serialReady = true;
+            sp = new SerialPort(SSerialPortList.SelectedValue.ToString(), int.Parse(SBaudRate.Text));
+            sp.Open();
+            sp.DataReceived += sp_DataReceived;
+        }
+        private void SSerialDisconnect_Click(object sender, RoutedEventArgs e)
+        {
+            if (sp != null && sp.IsOpen)
+                sp.Close();
+        }
+        //===========================================================================================
+
+        //Matrix Frame Functions
+        //===========================================================================================
+        public unsafe void UpdatePreview(MatrixFrame.Pixel[,] givenFrame)
+        {
+            int width = givenFrame.GetLength(0);
+            int height = givenFrame.GetLength(1);
+            try
+            {
+                previewBitmap.Lock();
+
+                int stride = previewBitmap.BackBufferStride;
+                for (int x = 0; x < width; x++)
+                {
+                    for (int y = 0; y < height; y++)
+                    {
+                        int pixelAddress = (int)previewBitmap.BackBuffer;
+                        pixelAddress += (y * stride);
+                        pixelAddress += (x * 4);
+                        int color_data = givenFrame[x, y].R << 16; // R
+                        color_data |= givenFrame[x, y].G << 8;   // G
+                        color_data |= givenFrame[x, y].B << 0;   // B
+                        *((int*)pixelAddress) = color_data;
+                    }
+                }
+                previewBitmap.AddDirtyRect(new Int32Rect(0, 0, width, height));
+            }
+            finally
+            {
+                previewBitmap.Unlock();
+            }
+
+
+        }
+        void SetupFrameObject(int width, int height)
+        {
+            frame = new MatrixFrame(width, height);
+            previewBitmap = new WriteableBitmap(frame.Width, frame.Height, 96, 96, PixelFormats.Bgr32, null);
+            PreviewImage.Source = previewBitmap;
+            SetupSCUI();
+            scRec = new ScreenRecorder(frame.Width, frame.Height);
+        }
+        private void BuildFrame_Click(object sender, RoutedEventArgs e)
+        {
+            SetupFrameObject(int.Parse(SFrameWidth.Text), int.Parse(SFrameHeight.Text));
+        }
+        //===========================================================================================
+
+        //Screen Capture Functions
+        //===========================================================================================
+
+        void callback(MatrixFrame.Pixel[,] givenFrame)
+        {
+            frame.SetFrame(givenFrame);
+            this.Dispatcher.Invoke(() => { UpdatePreview(frame.GetFrame()); });
+            SerialSendFrame(frame);
+        }
+
+        void StartCapture()
+        {
+            SetupSCUI();
+            Thread captureThread = new Thread(() => scRec.StartRecording(callback));
+            captureThread.Start();
+            if ((bool)SCDisplayOutline.IsChecked)
+                scOutlineTimer.Start();
+        }
+
+        void scOutlineTimer_Tick(object sender, EventArgs e)
+        {
+            BitmapProcesser.DrawRectOnScreen(new System.Drawing.Rectangle(scRec.CaptureRect.X - 1, scRec.CaptureRect.Y - 1, scRec.CaptureRect.Width + 2, scRec.CaptureRect.Height + 2));
+        }
+        //===========================================================================================
+
+        //Screen Capture UI Handlers
+        //===========================================================================================
+        void SetupSCUI()
+        {
+            int screenWidth = (int)SystemParameters.PrimaryScreenWidth;
+            int screenHeight = (int)SystemParameters.PrimaryScreenHeight;
+
+            SCStartXS.Maximum = SCEndXS.Maximum = screenWidth;
+            SCStartYS.Maximum = SCEndYS.Maximum = screenHeight;
+            SCStartXS.Value = 0;
+            SCStartYS.Value = 0;
+            SCEndXS.Value = screenWidth;
+            SCEndYS.Value = screenHeight;
+        }
+        private void SC_Start_Click(object sender, RoutedEventArgs e)
+        {
+            StartCapture();
+        }
+        private void SC_Stop_Click(object sender, RoutedEventArgs e)
+        {
+            scRec.shouldRecord = false;
+            scOutlineTimer.Stop();
+            BitmapProcesser.EraseRectOnScreen();
+        }
+        private void SCDisplayOutline_Checked(object sender, RoutedEventArgs e)
+        {
+            scOutlineTimer.Start();
+        }
+        private void SCDisplayOutline_Unchecked(object sender, RoutedEventArgs e)
+        {
+            scOutlineTimer.Stop();
+            BitmapProcesser.EraseRectOnScreen();
+        }
+        private void SCSlider_ValueChanged(object sender, RoutedPropertyChangedEventArgs<double> e)
+        {
+            if (scRec != null)
+            {
+                if ((bool)SCDisplayOutline.IsChecked)
+                    BitmapProcesser.EraseRectOnScreen();
+
+                switch (((Slider)sender).Name)
+                {
+                    case "SCStartXS":
+                        SCStartXS.Value = SCStartXS.Value > (SCEndXS.Value - frame.Width) ? SCEndXS.Value - frame.Width : SCStartXS.Value;
+                        SCStartXT.Text = ((int)((Slider)sender).Value).ToString();
+                        break;
+                    case "SCStartYS":
+                        SCStartYS.Value = SCStartYS.Value > (SCEndYS.Value - frame.Height) ? SCEndYS.Value - frame.Height : SCStartYS.Value;
+                        SCStartYT.Text = ((int)((Slider)sender).Value).ToString();
+                        break;
+                    case "SCEndXS":
+                        SCEndXS.Value = SCEndXS.Value < SCStartXS.Value + frame.Width ? SCStartXS.Value + frame.Width : SCEndXS.Value;
+                        SCEndXT.Text = ((int)((Slider)sender).Value).ToString();
+                        break;
+                    case "SCEndYS":
+                        SCEndYS.Value = SCEndYS.Value < SCStartYS.Value + frame.Height ? SCStartYS.Value + frame.Height : SCEndYS.Value;
+                        SCEndYT.Text = ((int)((Slider)sender).Value).ToString();
+                        break;
+                }
+                Rectangle rect = new Rectangle((int)SCStartXS.Value, (int)SCStartYS.Value, (int)SCEndXS.Value - (int)SCStartXS.Value, (int)SCEndYS.Value - (int)SCStartYS.Value);
+                scRec.CaptureRect = rect;
+
+
+                SCWidth.Text = "Width: " + scRec.CaptureRect.Width.ToString();
+                SCHeight.Text = "Height: " + scRec.CaptureRect.Height.ToString();
+            }
+        }
+        private void SC_Numeric_UPDOWN_Click(object sender, RoutedEventArgs e)
+        {
+            switch (((Button)sender).Name)
+            {
+                case "SCSXU":
+                    SCStartXS.Value += 1;
+                    break;
+                case "SCSXD":
+                    SCStartXS.Value -= 1;
+                    break;
+                case "SCSYU":
+                    SCStartYS.Value += 1;
+                    break;
+                case "SCSYD":
+                    SCStartYS.Value -= 1;
+                    break;
+                case "SCEXU":
+                    SCEndXS.Value += 1;
+                    break;
+                case "SCEXD":
+                    SCEndXS.Value -= 1;
+                    break;
+                case "SCEYU":
+                    SCEndYS.Value += 1;
+                    break;
+                case "SCEYD":
+                    SCEndYS.Value -= 1;
+                    break;
+            }
+        }
+        private void SCInterpModeDrop_SelectionChanged(object sender, SelectionChangedEventArgs e)
+        {
+            if (scRec != null)
+                switch (SCInterpModeDrop.SelectedIndex)
+                {
+                    case 0:
+                        scRec.InterpMode = System.Drawing.Drawing2D.InterpolationMode.NearestNeighbor;
+                        break;
+                    case 1:
+                        scRec.InterpMode = System.Drawing.Drawing2D.InterpolationMode.Bicubic;
+                        break;
+                    case 2:
+                        scRec.InterpMode = System.Drawing.Drawing2D.InterpolationMode.Bilinear;
+                        break;
+                    case 3:
+                        scRec.InterpMode = System.Drawing.Drawing2D.InterpolationMode.HighQualityBicubic;
+                        break;
+                    case 4:
+                        scRec.InterpMode = System.Drawing.Drawing2D.InterpolationMode.HighQualityBilinear;
+                        break;
+                }
+
+        }
+        private void SCResetSliders_Click(object sender, RoutedEventArgs e)
+        {
+            SetupSCUI();
+        }
+        //===========================================================================================
+    }
+}
