@@ -15,11 +15,12 @@ SMARTMATRIX_ALLOCATE_BUFFERS(matrix, kMatrixWidth, kMatrixHeight, kRefreshDepth,
 SMARTMATRIX_ALLOCATE_BACKGROUND_LAYER(backgroundLayer, kMatrixWidth, kMatrixHeight, COLOR_DEPTH, kBackgroundLayerOptions);
 
 char serialFrame[kMatrixWidth * kMatrixHeight * 3];
-
+const int serialFrameLength = kMatrixWidth * kMatrixHeight * 3;
+char frameDefData[2] = {(char)(byte)kMatrixWidth - 1, (char)(byte)kMatrixHeight - 1};
 void setup() {
   matrix.addLayer(&backgroundLayer);
   matrix.begin();
-  matrix.setBrightness(250);
+  matrix.setBrightness(254);
   Serial.begin(1000000);
 }
 
@@ -27,14 +28,23 @@ void loop() {}
 
 void serialEvent()
 {
-  Serial.readBytes(serialFrame, 12288);
-  int index = 0;
-  for (int x = 0; x < 64; x++) {
-    for (int y = 0; y < 64; y++) {
-      backgroundLayer.drawPixel(x, y, {serialFrame[index * 3], serialFrame[index * 3 + 1], serialFrame[index * 3 + 2]});
-      index++;
-    }
+  switch (Serial.read())
+  {
+    case 0x05:
+      Serial.write(frameDefData, 2);
+      break;
+
+    case 0x0F:
+      Serial.readBytes(serialFrame, serialFrameLength);
+      int index = 0;
+      for (int x = 0; x < kMatrixWidth; x++) {
+        for (int y = 0; y < kMatrixHeight; y++) {
+          backgroundLayer.drawPixel(x, y, {serialFrame[index * 3], serialFrame[index * 3 + 1], serialFrame[index * 3 + 2]});
+          index++;
+        }
+      }
+      backgroundLayer.swapBuffers(false);
+      Serial.write(6);
+      break;
   }
-  backgroundLayer.swapBuffers(false);
-  Serial.write(6);
 }

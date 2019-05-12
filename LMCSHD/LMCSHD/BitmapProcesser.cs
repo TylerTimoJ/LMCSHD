@@ -8,7 +8,7 @@ using System.Drawing.Imaging;
 using System.Windows;
 using System.Windows.Interop;
 using System.Drawing.Drawing2D;
-using System.Runtime.InteropServices;
+
 
 
 namespace LMCSHD
@@ -50,84 +50,6 @@ namespace LMCSHD
             }
             b.Dispose();
             return result;
-        }
-        /*
-        public static Bitmap ScreenToBitmap(Rectangle captureArea)
-        {
-            Bitmap screenBitmap = new Bitmap(captureArea.Width, captureArea.Height);
-            using (Graphics captureGraphics = Graphics.FromImage(screenBitmap))
-            {
-                captureGraphics.CopyFromScreen(captureArea.Left, captureArea.Top, 0, 0, captureArea.Size);
-            }
-            return screenBitmap;
-        }
-
-    */
-        #region DLL Imports
-        [DllImport("user32.dll")]
-        static extern bool InvalidateRect(IntPtr hWnd, IntPtr lpRect, bool bErase);
-
-        [DllImport("User32.dll")]
-        public static extern IntPtr GetDC(IntPtr hwnd);
-
-        [DllImport("user32.dll")]
-        static extern Int32 ReleaseDC(IntPtr hwnd, IntPtr hdc);
-
-        [DllImport("gdi32.dll")]
-        public static extern IntPtr CreateCompatibleDC(IntPtr hdc);
-
-        [DllImport("gdi32.dll")]
-        public static extern IntPtr CreateCompatibleBitmap(IntPtr hdc, int nWidth, int nHeight);
-
-        [DllImport("gdi32.dll")]
-        public static extern IntPtr SelectObject(IntPtr hdc, IntPtr hgdiobj);
-
-        [DllImport("gdi32.dll")]
-        public static extern bool BitBlt(IntPtr hdc, int nXDest, int nYDest, int nWidth, int nHeight, IntPtr hdcSrc, int nXSrc, int nYSrc, CopyPixelOperation dwRop);
-
-        [DllImport("gdi32.dll")]
-        public static extern bool DeleteDC(IntPtr hDC);
-
-        [DllImport("gdi32.dll")]
-        public static extern bool DeleteObject(IntPtr hObject);
-        #endregion
-
-        public static Bitmap ScreenToBitmap(Rectangle captureArea)
-        {
-            IntPtr handle = IntPtr.Zero;
-            IntPtr hdcSrc = GetDC(handle);
-            IntPtr hdcDest = CreateCompatibleDC(hdcSrc);
-            IntPtr hBitmap = CreateCompatibleBitmap(hdcSrc, captureArea.Width, captureArea.Height);
-            IntPtr hOld = SelectObject(hdcDest, hBitmap);
-            BitBlt(hdcDest, 0, 0, captureArea.Width, captureArea.Height, hdcSrc, captureArea.X, captureArea.Y, CopyPixelOperation.SourceCopy | CopyPixelOperation.CaptureBlt);
-
-            SelectObject(hdcDest, hOld);
-            DeleteDC(hdcDest);
-            ReleaseDC(handle, hdcSrc);
-            Bitmap bitmap = Bitmap.FromHbitmap(hBitmap);
-
-            DeleteObject(hBitmap);
-
-            return bitmap;
-        }
-
-
-
-        public static void DrawRectOnScreen(Rectangle r)
-        {
-            IntPtr ptr = GetDC(IntPtr.Zero);
-            using (Graphics g = Graphics.FromHdc(ptr))
-            {
-                g.DrawRectangle(new Pen(Color.Magenta, 1), r);
-            }
-           // ForcePaint(ptr);
-
-            ReleaseDC(IntPtr.Zero, ptr);
-        }
-        
-        public static void EraseRectOnScreen()
-        {
-            InvalidateRect(IntPtr.Zero, IntPtr.Zero, false);
         }
     }
 }

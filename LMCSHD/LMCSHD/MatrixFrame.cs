@@ -6,27 +6,25 @@ using System.Threading.Tasks;
 
 namespace LMCSHD
 {
-    public class MatrixFrame : IDisposable
+    public class MatrixFrame
     {
-
-        //Private Data
-        private int width, height;
-
         private Pixel[,] framePixels;
 
+
         private byte[] serialPixels;
+
+        //End Color Correction
         //End Private Data
 
 
-        public MatrixFrame(int w, int h)
-        {
-            width = w;
-            height = h;
-            framePixels = new Pixel[width, height];
-            serialPixels = new byte[width * height * 3];
-        }
-
-
+        //Data Properties
+        public int Width { get; }
+        public int Height { get; }
+        public float Brightness { get; set; } = 1f;
+        public float RCorrection { get; set; } = 1f;
+        public float GCorrection { get; set; } = 1f;
+        public float BCorrection { get; set; } = 1f;
+        //End Data Properties
         public struct Pixel
         {
             public byte R, G, B;
@@ -37,45 +35,39 @@ namespace LMCSHD
                 B = b;
             }
         }
-
-        //Data Properties
-        public int Width { get => width; }
-        public int Height { get => height; }
-        public Pixel[,] FramePixels { get => framePixels; set => framePixels = value; }
-
-        //End Data Properties
-
-
-        public void RebuildFrame()
+        public MatrixFrame(int w, int h)
         {
-            framePixels = null;
-            framePixels = new Pixel[width, height];
+            Width = w;
+            Height = h;
+            framePixels = new Pixel[Width, Height];
+            serialPixels = new byte[(Width * Height * 3) + 1];
         }
-
         public void SetPixel(int x, int y, Pixel color)
         {
             framePixels[x, y] = color;
         }
         public void SetFrame(Pixel[,] givenFrame)
         {
-            framePixels = givenFrame;
+            for (int x = 0; x < Width; x++)
+            {
+                for (int y = 0; y < Height; y++)
+                {
+                    framePixels[x, y].R = (byte)(givenFrame[x, y].R * RCorrection * Brightness);
+                    framePixels[x, y].G = (byte)(givenFrame[x, y].G * GCorrection * Brightness);
+                    framePixels[x, y].B = (byte)(givenFrame[x, y].B * BCorrection * Brightness);
+                }
+            }
         }
-        public Pixel[,] GetFrame()
-        {
-            return framePixels;
-        }
-
-        public int GetFrameLength()
-        {
-            return width * height * 3;
-        }
+        public Pixel[,] GetFrame() { return framePixels; }
+        public int GetFrameLength() { return (Width * Height * 3) + 1; }
 
         public byte[] GetSerializableFrame()
         {
-            int index = 0;
-            for (int x = 0; x < width; x++)
+            serialPixels[0] = 0x0F;
+            int index = 1;
+            for (int x = 0; x < Width; x++)
             {
-                for (int y = 0; y < height; y++)
+                for (int y = 0; y < Height; y++)
                 {
                     serialPixels[index] = framePixels[x, y].R;
                     serialPixels[index + 1] = framePixels[x, y].G;
@@ -84,12 +76,6 @@ namespace LMCSHD
                 }
             }
             return serialPixels;
-        }
-
-        public void Dispose()
-        {
-            framePixels = null;
-            serialPixels = null;
         }
     }
 }
