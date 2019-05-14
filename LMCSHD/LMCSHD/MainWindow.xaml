@@ -6,20 +6,18 @@
         xmlns:local="clr-namespace:LMCSHD"
         xmlns:xctk="http://schemas.xceed.com/wpf/xaml/toolkit"
         mc:Ignorable="d"
-        Title="LED Matrix Control Software HD" Height="400" Width="708" MinWidth="600" MinHeight="410" Closing="Window_Closing" SizeToContent="Width" >
+        Title="LED Matrix Control Software HD" Height="776" Width="706" Closing="Window_Closing" SizeToContent="Width" >
     <Grid>
 
 
 
         <Grid Margin="2">
             <Grid.ColumnDefinitions>
-                <ColumnDefinition Width="300" MinWidth="200" MaxWidth="700"/>
                 <ColumnDefinition Width="*"/>
             </Grid.ColumnDefinitions>
             <Grid.RowDefinitions>
                 <RowDefinition Height="20"/>
                 <RowDefinition Height="*"/>
-                <!--RowDefinition Height="16"/-->
             </Grid.RowDefinitions>
 
             <DockPanel Grid.ColumnSpan="2" Margin="0,0,0,2">
@@ -37,214 +35,232 @@
                 </Menu>
             </DockPanel>
 
-            <TabControl Grid.Column="0" Grid.Row="1">
+            <WrapPanel Grid.Row="1">
+
+                <GroupBox Grid.Column="1"
+                       Grid.Row="1"
+                      Header="Matrix Preview">
+
+                    <Image x:Name="PreviewImage"
+                       Width="300"
+                       Height="300"
+                       Margin="2"
+                       RenderOptions.BitmapScalingMode="NearestNeighbor"
+                       HorizontalAlignment="Left"
+                       VerticalAlignment="Top" Cursor="Cross"/>
+
+                </GroupBox>
+
+                <GroupBox Grid.Column="1"
+                       Grid.Row="1"
+                      Header="Matrix Preview">
+
+                    <Image x:Name="MatrixImage"
+                       Width="300"
+                       Height="300"
+                       Margin="2"
+                       RenderOptions.BitmapScalingMode="NearestNeighbor"
+                       HorizontalAlignment="Left"
+                       VerticalAlignment="Top" Cursor="Cross"/>
+
+                </GroupBox>
 
 
 
 
-                <TabItem IsEnabled="False">
-                    <TabItem.Header>
-                        <TextBlock Text="Imaging" />
-                    </TabItem.Header>
-                    <StackPanel>
-                    </StackPanel>
-                </TabItem>
 
-                <TabItem x:Name="SCTab" IsEnabled="False">
-                    <TabItem.Header>
-                        <TextBlock Text="Screen Capture" />
-                    </TabItem.Header>
-                    <StackPanel>
-                        <Grid>
+                <GroupBox Grid.Row="2">
+                    <GroupBox.Header>
+                        <StackPanel Orientation="Horizontal">
+                            <RadioButton />
+                            <TextBlock Text=" Screen Capture"/>
+                        </StackPanel>
+
+
+                    </GroupBox.Header>
+                    <Grid>
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*"/>
+                            <ColumnDefinition Width="*"/>
+                        </Grid.ColumnDefinitions>
+                        <Grid.RowDefinitions>
+                            <RowDefinition Height="auto"/>
+                            <RowDefinition Height="auto"/>
+                            <RowDefinition Height="auto"/>
+                            <RowDefinition Height="auto"/>
+                            <RowDefinition Height="auto"/>
+                        </Grid.RowDefinitions>
+
+                        <Button x:Name="SCStart"
+                                    Grid.Column="0"
+                                    Grid.Row="0"
+                                    Content="Start Capture"
+                                    Margin="2"
+                                    Click="SC_Start_Click">
+                        </Button>
+                        <Button x:Name="SCStop"
+                                    Grid.Column="1"
+                                    Grid.Row="0"
+                                    Content="Stop Capture"
+                                    Margin="2"
+                                    Click="SC_Stop_Click">
+                        </Button>
+
+                        <Grid Grid.Column="0" Grid.Row="1" Grid.ColumnSpan="2">
                             <Grid.ColumnDefinitions>
-                                <ColumnDefinition Width="*"/>
+                                <ColumnDefinition Width="auto"/>
                                 <ColumnDefinition Width="*"/>
                             </Grid.ColumnDefinitions>
+
+                            <TextBlock Margin="2" Text="Interpolation Mode" HorizontalAlignment="Right" VerticalAlignment="Center"/>
+
+                            <ComboBox x:Name="SCInterpModeDrop" Grid.Column="1" Margin="2" SelectedIndex="4" MinWidth="100" SelectionChanged="SCInterpModeDrop_SelectionChanged">
+                                <ComboBoxItem Content="Nearest Neighbor"/>
+                                <ComboBoxItem Content="Bicubic"/>
+                                <ComboBoxItem Content="Bilinear"/>
+                                <ComboBoxItem Content="High Quality Bicubic"/>
+                                <ComboBoxItem Content="High Quality Bilinear"/>
+                            </ComboBox>
+
+                        </Grid>
+
+                        <Grid Grid.ColumnSpan="2" Grid.Row="2">
+
+
                             <Grid.RowDefinitions>
-                                <RowDefinition Height="auto"/>
                                 <RowDefinition Height="auto"/>
                                 <RowDefinition Height="auto"/>
                                 <RowDefinition Height="auto"/>
                                 <RowDefinition Height="auto"/>
                             </Grid.RowDefinitions>
 
-                            <Button x:Name="SCStart"
-                                    Grid.Column="0"
-                                    Grid.Row="0"
-                                    Content="Start Capture"
-                                    Margin="2"
-                                    Click="SC_Start_Click">
-                            </Button>
-                            <Button x:Name="SCStop"
-                                    Grid.Column="1"
-                                    Grid.Row="0"
-                                    Content="Stop Capture"
-                                    Margin="2"
-                                    Click="SC_Stop_Click">
-                            </Button>
+                            <GroupBox Header="Start X">
+                                <Grid>
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="64"/>
+                                        <ColumnDefinition Width="*"/>
+                                    </Grid.ColumnDefinitions>
 
-                            <Grid Grid.Column="0" Grid.Row="1" Grid.ColumnSpan="2">
-                                <Grid.ColumnDefinitions>
-                                    <ColumnDefinition Width="auto"/>
-                                    <ColumnDefinition Width="*"/>
-                                </Grid.ColumnDefinitions>
-
-                                <TextBlock Margin="2" Text="Interpolation Mode" HorizontalAlignment="Right" VerticalAlignment="Center"/>
-
-                                <ComboBox x:Name="SCInterpModeDrop" Grid.Column="1" Margin="2" SelectedIndex="4" MinWidth="100" SelectionChanged="SCInterpModeDrop_SelectionChanged">
-                                    <ComboBoxItem Content="Nearest Neighbor"/>
-                                    <ComboBoxItem Content="Bicubic"/>
-                                    <ComboBoxItem Content="Bilinear"/>
-                                    <ComboBoxItem Content="High Quality Bicubic"/>
-                                    <ComboBoxItem Content="High Quality Bilinear"/>
-                                </ComboBox>
-
-                            </Grid>
-
-                            <Grid Grid.ColumnSpan="2" Grid.Row="2">
-
-
-                                <Grid.RowDefinitions>
-                                    <RowDefinition Height="auto"/>
-                                    <RowDefinition Height="auto"/>
-                                    <RowDefinition Height="auto"/>
-                                    <RowDefinition Height="auto"/>
-                                </Grid.RowDefinitions>
-
-                                <GroupBox Header="Start X">
-                                    <Grid>
-                                        <Grid.ColumnDefinitions>
-                                            <ColumnDefinition Width="64"/>
-                                            <ColumnDefinition Width="*"/>
-                                        </Grid.ColumnDefinitions>
-
-                                        <xctk:IntegerUpDown x:Name="SCStartXU"
+                                    <xctk:IntegerUpDown x:Name="SCStartXU"
                                                             Minimum="0"
                                                             Value="0"
                                                             Margin="2"
                                                             ValueChanged="SC_INT_UPDOWN_Click"/>
 
-                                        <Slider x:Name="SCStartXS"
+                                    <Slider x:Name="SCStartXS"
                                         VerticalAlignment="Center"
                                         Grid.Column="1"
                                         Margin="2"
                                         ValueChanged="SCSlider_ValueChanged">
-                                        </Slider>
-                                    </Grid>
-                                </GroupBox>
+                                    </Slider>
+                                </Grid>
+                            </GroupBox>
 
 
-                                <GroupBox Header="Start Y" Grid.Row="1">
-                                    <Grid>
-                                        <Grid.ColumnDefinitions>
-                                            <ColumnDefinition Width="64"/>
-                                            <ColumnDefinition Width="*"/>
-                                        </Grid.ColumnDefinitions>
+                            <GroupBox Header="Start Y" Grid.Row="1">
+                                <Grid>
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="64"/>
+                                        <ColumnDefinition Width="*"/>
+                                    </Grid.ColumnDefinitions>
 
-                                        <xctk:IntegerUpDown x:Name="SCStartYU"
+                                    <xctk:IntegerUpDown x:Name="SCStartYU"
                                                             Minimum="0"
                                                             Value="0"
                                                             Margin="2"
                                                             ValueChanged="SC_INT_UPDOWN_Click"/>
-                                        
-                                        <Slider x:Name="SCStartYS"
+
+                                    <Slider x:Name="SCStartYS"
                                         VerticalAlignment="Center"
                                         Grid.Column="1"
                                         Margin="2"
                                         ValueChanged="SCSlider_ValueChanged">
-                                        </Slider>
-                                    </Grid>
-                                </GroupBox>
+                                    </Slider>
+                                </Grid>
+                            </GroupBox>
 
-                                <GroupBox Header="End X" Grid.Row="2">
-                                    <Grid>
-                                        <Grid.ColumnDefinitions>
-                                            <ColumnDefinition Width="64"/>
-                                            <ColumnDefinition Width="*"/>
-                                        </Grid.ColumnDefinitions>
+                            <GroupBox Header="End X" Grid.Row="2">
+                                <Grid>
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="64"/>
+                                        <ColumnDefinition Width="*"/>
+                                    </Grid.ColumnDefinitions>
 
-                                        <xctk:IntegerUpDown x:Name="SCEndXU"
+                                    <xctk:IntegerUpDown x:Name="SCEndXU"
                                                             Value="0"
                                                             Margin="2"
                                                             ValueChanged="SC_INT_UPDOWN_Click"/>
 
-                                        <Slider x:Name="SCEndXS"
+                                    <Slider x:Name="SCEndXS"
                                         VerticalAlignment="Center"
                                         Grid.Column="1"
                                         Margin="2"
                                         ValueChanged="SCSlider_ValueChanged">
-                                        </Slider>
-                                    </Grid>
-                                </GroupBox>
-                                <GroupBox Header="End Y" Grid.Row="3">
-                                    <Grid>
-                                        <Grid.ColumnDefinitions>
-                                            <ColumnDefinition Width="64"/>
-                                            <ColumnDefinition Width="*"/>
-                                        </Grid.ColumnDefinitions>
+                                    </Slider>
+                                </Grid>
+                            </GroupBox>
+                            <GroupBox Header="End Y" Grid.Row="3">
+                                <Grid>
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="64"/>
+                                        <ColumnDefinition Width="*"/>
+                                    </Grid.ColumnDefinitions>
 
-                                        <xctk:IntegerUpDown x:Name="SCEndYU"
+                                    <xctk:IntegerUpDown x:Name="SCEndYU"
                                                             Value="0"
                                                             Margin="2"
                                                             ValueChanged="SC_INT_UPDOWN_Click"/>
-                                        
-                                        <Slider x:Name="SCEndYS"
+
+                                    <Slider x:Name="SCEndYS"
                                                 VerticalAlignment="Center"
                                                 Grid.Column="1"
                                                 Margin="2"
                                                 ValueChanged="SCSlider_ValueChanged">
-                                        </Slider>
-                                    </Grid>
-                                </GroupBox>
+                                    </Slider>
+                                </Grid>
+                            </GroupBox>
 
 
-                            </Grid>
-                            
-                            <Button x:Name="SCResetSliders"
+                        </Grid>
+
+                        <Button x:Name="SCResetSliders"
                                     Grid.Row="3"
                                     Margin="2"
                                     Content="Reset Bounds" Click="SCResetSliders_Click">
-
-                            </Button>
-                            <StackPanel Grid.Row="4" Grid.ColumnSpan="2">
-                                <CheckBox x:Name="SCLockDim"
+                        </Button>
+                        <StackPanel Grid.Row="4" Grid.ColumnSpan="2">
+                            <CheckBox x:Name="SCLockDim"
                                           Margin="2"
                                           Content="Lock Dimensions">
-                                </CheckBox>
+                            </CheckBox>
 
-                                <CheckBox x:Name="SCDisplayOutline"
+                            <CheckBox x:Name="SCDisplayOutline"
                                           Margin="2"
                                           Content="Display Outline"
                                           Checked="SCDisplayOutline_Checked"
                                           Unchecked="SCDisplayOutline_Unchecked">
-                                </CheckBox>
-                            </StackPanel>
-                            <WrapPanel Grid.Column="1" Grid.Row="3">
-                                <TextBlock x:Name="SCWidth"
+                            </CheckBox>
+                        </StackPanel>
+                        <WrapPanel Grid.Column="1" Grid.Row="3">
+                            <TextBlock x:Name="SCWidth"
                                            Grid.Column="0"
                                            Margin="2"
                                            Text="Width: ">
-                                </TextBlock>
+                            </TextBlock>
 
-                                <TextBlock x:Name="SCHeight"
+                            <TextBlock x:Name="SCHeight"
                                            Grid.Column="1"
                                            Margin="2"
                                            Text="Height: ">
-                                </TextBlock>
-                            </WrapPanel>
-                        </Grid>
-                    </StackPanel>
-                </TabItem>
-            </TabControl>
+                            </TextBlock>
+                        </WrapPanel>
+                    </Grid>
+                </GroupBox>
 
-            <GridSplitter HorizontalAlignment="Right" Grid.Column="0" Grid.Row="0" Width="2"/>
-            <Grid Grid.Column="1" Grid.Row="1">
-                <Image x:Name="PreviewImage"
-                       Margin="4,2,2,2"
-                       RenderOptions.BitmapScalingMode="NearestNeighbor"
-                       HorizontalAlignment="Left"
-                       VerticalAlignment="Top" Cursor="Cross"/>
-            </Grid>
+
+            </WrapPanel>
+
+
         </Grid>
     </Grid>
 </Window>

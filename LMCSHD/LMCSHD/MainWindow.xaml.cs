@@ -28,7 +28,7 @@ namespace LMCSHD
     {
         //Frame & Preview
         private MatrixFrame frame;
-        public static WriteableBitmap previewBitmap;
+        public static WriteableBitmap MatrixBitmap;
 
         //screen capture
         private ScreenRecorder scRec;
@@ -57,7 +57,7 @@ namespace LMCSHD
         {
             sm.Disconnect();
             MIConnect.IsEnabled = true;
-            previewBitmap = null;
+            MatrixBitmap = null;
         }
         //===========================================================================================
 
@@ -69,14 +69,14 @@ namespace LMCSHD
             int height = givenFrame.GetLength(1);
             try
             {
-                previewBitmap.Lock();
+                MatrixBitmap.Lock();
 
-                int stride = previewBitmap.BackBufferStride;
+                int stride = MatrixBitmap.BackBufferStride;
                 for (int x = 0; x < width; x++)
                 {
                     for (int y = 0; y < height; y++)
                     {
-                        int pixelAddress = (int)previewBitmap.BackBuffer;
+                        int pixelAddress = (int)MatrixBitmap.BackBuffer;
                         pixelAddress += (y * stride);
                         pixelAddress += (x * 4);
                         int color_data = givenFrame[x, y].R << 16; // R
@@ -85,11 +85,11 @@ namespace LMCSHD
                         *((int*)pixelAddress) = color_data;
                     }
                 }
-                previewBitmap.AddDirtyRect(new Int32Rect(0, 0, width, height));
+                MatrixBitmap.AddDirtyRect(new Int32Rect(0, 0, width, height));
             }
             finally
             {
-                previewBitmap.Unlock();
+                MatrixBitmap.Unlock();
             }
 
 
@@ -99,10 +99,9 @@ namespace LMCSHD
             frame = null;
             frame = new MatrixFrame(width, height);
             scRec = new ScreenRecorder(frame.Width, frame.Height);
-            previewBitmap = new WriteableBitmap(frame.Width, frame.Height, 96, 96, PixelFormats.Bgr32, null);
-            PreviewImage.Source = previewBitmap;
+            MatrixBitmap = new WriteableBitmap(frame.Width, frame.Height, 96, 96, PixelFormats.Bgr32, null);
+            MatrixImage.Source = MatrixBitmap;
             SetupSCUI();
-            SCTab.IsEnabled = true;
             MIConnect.IsEnabled = false;
         }
         //===========================================================================================
