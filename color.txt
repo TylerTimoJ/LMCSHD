@@ -1,0 +1,103 @@
+                <TabItem IsEnabled="True">
+                    <TabItem.Header>
+                        <TextBlock Text="Color" />
+                    </TabItem.Header>
+                    <StackPanel>
+                        <Grid Grid.ColumnSpan="2" Grid.Row="2">
+                            <Grid.RowDefinitions>
+                                <RowDefinition Height="auto"/>
+                                <RowDefinition Height="auto"/>
+                                <RowDefinition Height="auto"/>
+                                <RowDefinition Height="auto"/>
+                            </Grid.RowDefinitions>
+                            <GroupBox Header="Brightness">
+                                <Grid>
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="36"/>
+                                        <ColumnDefinition Width="*"/>
+                                    </Grid.ColumnDefinitions>
+                                    <TextBlock x:Name="CCBrightnessT"
+                                           Text="0"
+                                           HorizontalAlignment="Right"
+                                           VerticalAlignment="Center"
+                                           Margin="0,3,1,3">
+                                    </TextBlock>
+                                    <Slider x:Name="CCBrightnessS"
+                                            VerticalAlignment="Center"
+                                            Grid.Column="1"
+                                            Margin="2"
+                                            Value="255"
+                                            Maximum="255"
+                                            ValueChanged="CCSlider_ValueChanged">
+                                    </Slider>
+                                </Grid>
+                            </GroupBox>
+                            <GroupBox Header="Red Channel" Grid.Row="1">
+                                <Grid>
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="36"/>
+                                        <ColumnDefinition Width="*"/>
+                                    </Grid.ColumnDefinitions>
+                                    <TextBlock x:Name="CCRedT"
+                                           Text="0"
+                                           HorizontalAlignment="Right"
+                                           VerticalAlignment="Center"
+                                           Margin="0,3,1,3">
+                                    </TextBlock>
+                                    <Slider x:Name="CCRedS"
+                                            VerticalAlignment="Center"
+                                            Grid.Column="1"
+                                            Margin="2"
+                                            Value="255"
+                                            Maximum="255"
+                                            ValueChanged="CCSlider_ValueChanged">
+                                    </Slider>
+                                </Grid>
+                            </GroupBox>
+                            <GroupBox Header="Green Channel" Grid.Row="2">
+                                <Grid>
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="36"/>
+                                        <ColumnDefinition Width="*"/>
+                                    </Grid.ColumnDefinitions>
+                                    <TextBlock x:Name="CCGreenT"
+                                           Text="0"
+                                           HorizontalAlignment="Right"
+                                           VerticalAlignment="Center"
+                                           Margin="0,3,1,3">
+                                    </TextBlock>
+                                    <Slider x:Name="CCGreenS"
+                                            VerticalAlignment="Center"
+                                            Grid.Column="1"
+                                            Margin="2"
+                                            Value="255"
+                                            Maximum="255"
+                                            ValueChanged="CCSlider_ValueChanged">
+                                    </Slider>
+                                </Grid>
+                            </GroupBox>
+                            <GroupBox Header="Blue Channel" Grid.Row="3">
+                                <Grid>
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="36"/>
+                                        <ColumnDefinition Width="*"/>
+                                    </Grid.ColumnDefinitions>
+                                    <TextBlock x:Name="CCBlueT"
+                                           Text="0"
+                                           HorizontalAlignment="Right"
+                                           VerticalAlignment="Center"
+                                           Margin="0,3,1,3">
+                                    </TextBlock>
+                                    <Slider x:Name="CCBlueS"
+                                            VerticalAlignment="Center"
+                                            Grid.Column="1"
+                                            Margin="2"
+                                            Value="255"
+                                            Maximum="255"
+                                            ValueChanged="CCSlider_ValueChanged">
+                                    </Slider>
+                                </Grid>
+                            </GroupBox>
+                        </Grid>
+                    </StackPanel>
+                </TabItem>

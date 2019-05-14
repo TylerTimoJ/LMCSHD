@@ -13,11 +13,11 @@ using System.Windows.Input;
 using System.Windows.Media;
 using System.Windows.Media.Imaging;
 using System.Windows.Navigation;
-//using System.Windows.Shapes;
-using System.Diagnostics;
-using System.IO.Ports;
 //using System.Drawing;
 using System.Drawing.Drawing2D;
+using System.IO;
+using Microsoft.Win32;
+using Xceed.Wpf.Toolkit;
 
 namespace LMCSHD
 {
@@ -35,66 +35,29 @@ namespace LMCSHD
         private System.Drawing.Rectangle captureRect;
 
         //serial
-        private SerialPort sp;
-        bool serialReady = true;
+        private SerialManager sm = new SerialManager();
 
         public MainWindow()
         {
             InitializeComponent();
-            RefreshSerialPorts();
+            //   RefreshSerialPorts();
+
         }
 
         //Serial Functions
         //===========================================================================================
-        private void sp_DataReceived(object sender, SerialDataReceivedEventArgs e)
+        private void MIConnect_Click(object sender, RoutedEventArgs e)
         {
-            serialReady = sp.ReadByte() == 0x06 ? true : false;
+            MatrixConnection m = new MatrixConnection(sm, this);
+            m.Owner = this;
+            m.WindowStartupLocation = System.Windows.WindowStartupLocation.CenterOwner;
+            m.ShowDialog();
         }
-        void SerialSendFrame(MatrixFrame givenFrame)
+        private void MIDisconnect_Click(object sender, RoutedEventArgs e)
         {
-            if (sp != null && sp.IsOpen && serialReady)
-                sp.Write(givenFrame.GetSerializableFrame(), 0, givenFrame.GetFrameLength());
-        }
-        void RefreshSerialPorts()
-        {
-            string[] ports = SerialPort.GetPortNames();
-            SSerialPortList.ItemsSource = ports;
-            if (ports.Length > 0)
-                SSerialPortList.SelectedIndex = 0;
-        }
-        byte[] GetMatrixInfo()
-        {
-            byte[] b = { 0x05, 0x00 };
-            sp.Write(b, 0, 1);
-            b[0] = (byte)(sp.ReadByte() + 1);
-            b[1] = (byte)(sp.ReadByte() + 1);
-            return b;
-        }
-        private void SSerialConnect_Click(object sender, RoutedEventArgs e)
-        {
-            try
-            {
-                serialReady = true;
-                sp = new SerialPort(SSerialPortList.SelectedValue.ToString(), int.Parse(SBaudRate.Text));
-                sp.Open();
-                sp.DataReceived += sp_DataReceived;
-
-                byte[] b = GetMatrixInfo();
-                SetupFrameObject((int)b[0], (int)b[1]);
-            }
-            catch (Exception err)
-            {
-                MessageBox.Show(err.Message);
-            }
-        }
-        private void SSerialDisconnect_Click(object sender, RoutedEventArgs e)
-        {
-            if (sp != null && sp.IsOpen)
-                sp.Close();
-        }
-        private void SSerialRefreshPorts_Click(object sender, RoutedEventArgs e)
-        {
-            RefreshSerialPorts();
+            sm.Disconnect();
+            MIConnect.IsEnabled = true;
+            previewBitmap = null;
         }
         //===========================================================================================
 
@@ -131,19 +94,22 @@ namespace LMCSHD
 
 
         }
-        void SetupFrameObject(int width, int height)
+        public void SetupFrameObject(int width, int height)
         {
+            frame = null;
             frame = new MatrixFrame(width, height);
             scRec = new ScreenRecorder(frame.Width, frame.Height);
             previewBitmap = new WriteableBitmap(frame.Width, frame.Height, 96, 96, PixelFormats.Bgr32, null);
             PreviewImage.Source = previewBitmap;
             SetupSCUI();
             SCTab.IsEnabled = true;
+            MIConnect.IsEnabled = false;
         }
         //===========================================================================================
 
         //Color Correction Functions
         //===========================================================================================
+        /*
         private void CCSlider_ValueChanged(object sender, RoutedPropertyChangedEventArgs<double> e)
         {
             if (frame != null)
@@ -167,6 +133,7 @@ namespace LMCSHD
                         break;
                 }
         }
+        */
         //===========================================================================================
 
         //Screen Capture Functions
@@ -175,7 +142,7 @@ namespace LMCSHD
         {
             frame.SetFrame(givenFrame);
             this.Dispatcher.Invoke(() => { UpdatePreview(frame.GetFrame()); });
-            SerialSendFrame(frame);
+            sm.SerialSendFrame(frame);
         }
         void StartCapture()
         {
@@ -187,6 +154,10 @@ namespace LMCSHD
             SCLockDim.IsChecked = false;
             int screenWidth = (int)SystemParameters.PrimaryScreenWidth;
             int screenHeight = (int)SystemParameters.PrimaryScreenHeight;
+
+
+            SCEndXU.Maximum = screenWidth;
+            SCEndYU.Maximum = screenHeight;
 
             SCStartXS.Maximum = SCEndXS.Maximum = screenWidth;
             SCStartYS.Maximum = SCEndYS.Maximum = screenHeight;
@@ -220,25 +191,26 @@ namespace LMCSHD
         }
         private void SCSlider_ValueChanged(object sender, RoutedPropertyChangedEventArgs<double> e)
         {
+
             if (!(bool)SCLockDim.IsChecked)
             {
                 switch (((Slider)sender).Name)
                 {
                     case "SCStartXS":
                         SCStartXS.Value = SCStartXS.Value > (SCEndXS.Value - frame.Width) ? SCEndXS.Value - frame.Width : SCStartXS.Value;
-                        SCStartXT.Text = ((int)((Slider)sender).Value).ToString();
+                        SCStartXU.Value = (int)((Slider)sender).Value;
                         break;
                     case "SCStartYS":
                         SCStartYS.Value = SCStartYS.Value > (SCEndYS.Value - frame.Height) ? SCEndYS.Value - frame.Height : SCStartYS.Value;
-                        SCStartYT.Text = ((int)((Slider)sender).Value).ToString();
+                        SCStartYU.Value = (int)((Slider)sender).Value;
                         break;
                     case "SCEndXS":
                         SCEndXS.Value = SCEndXS.Value < SCStartXS.Value + frame.Width ? SCStartXS.Value + frame.Width : SCEndXS.Value;
-                        SCEndXT.Text = ((int)((Slider)sender).Value).ToString();
+                        SCEndXU.Value = (int)((Slider)sender).Value;
                         break;
                     case "SCEndYS":
                         SCEndYS.Value = SCEndYS.Value < SCStartYS.Value + frame.Height ? SCStartYS.Value + frame.Height : SCEndYS.Value;
-                        SCEndYT.Text = ((int)((Slider)sender).Value).ToString();
+                        SCEndYU.Value = (int)((Slider)sender).Value;
                         break;
                 }
             }
@@ -251,28 +223,28 @@ namespace LMCSHD
                             SCStartXS.Value = SCEndXS.Maximum - captureRect.Width;
                         else
                             SCEndXS.Value = SCStartXS.Value + captureRect.Width;
-                        SCStartXT.Text = ((int)((Slider)sender).Value).ToString();
+                        SCStartXU.Value = (int)((Slider)sender).Value;
                         break;
                     case "SCStartYS":
                         if (SCStartYS.Value + captureRect.Height > SCEndYS.Maximum)
                             SCStartYS.Value = SCEndYS.Maximum - captureRect.Height;
                         else
                             SCEndYS.Value = SCStartYS.Value + captureRect.Height;
-                        SCStartYT.Text = ((int)((Slider)sender).Value).ToString();
+                        SCStartYU.Value = (int)((Slider)sender).Value;
                         break;
                     case "SCEndXS":
                         if (SCEndXS.Value - captureRect.Width < 0)
                             SCEndXS.Value = captureRect.Width;
                         else
                             SCStartXS.Value = SCEndXS.Value - captureRect.Width;
-                        SCEndXT.Text = ((int)((Slider)sender).Value).ToString();
+                        SCEndXU.Value = (int)((Slider)sender).Value;
                         break;
                     case "SCEndYS":
                         if (SCEndYS.Value - captureRect.Height < 0)
                             SCEndYS.Value = captureRect.Height;
                         else
                             SCStartYS.Value = SCEndYS.Value - captureRect.Height;
-                        SCEndYT.Text = ((int)((Slider)sender).Value).ToString();
+                        SCEndYU.Value = (int)((Slider)sender).Value;
                         break;
                 }
             }
@@ -288,35 +260,24 @@ namespace LMCSHD
                 scRec.CaptureRect = captureRect;
             }
         }
-        private void SC_Numeric_UPDOWN_Click(object sender, RoutedEventArgs e)
+        private void SC_INT_UPDOWN_Click(object sender, RoutedEventArgs e)
         {
-            switch (((Button)sender).Name)
-            {
-                case "SCSXU":
-                    SCStartXS.Value += 1;
-                    break;
-                case "SCSXD":
-                    SCStartXS.Value -= 1;
-                    break;
-                case "SCSYU":
-                    SCStartYS.Value += 1;
-                    break;
-                case "SCSYD":
-                    SCStartYS.Value -= 1;
-                    break;
-                case "SCEXU":
-                    SCEndXS.Value += 1;
-                    break;
-                case "SCEXD":
-                    SCEndXS.Value -= 1;
-                    break;
-                case "SCEYU":
-                    SCEndYS.Value += 1;
-                    break;
-                case "SCEYD":
-                    SCEndYS.Value -= 1;
-                    break;
-            }
+            if (frame != null)
+                switch (((IntegerUpDown)sender).Name)
+                {
+                    case "SCStartXU":
+                            SCStartXS.Value = (int)((IntegerUpDown)sender).Value;
+                        break;
+                    case "SCStartYU":
+                        SCStartYS.Value = (int)((IntegerUpDown)sender).Value;
+                        break;
+                    case "SCEndXU":
+                        SCEndXS.Value = (int)((IntegerUpDown)sender).Value;
+                        break;
+                    case "SCEndYU":
+                        SCEndYS.Value = (int)((IntegerUpDown)sender).Value;
+                        break;
+                }
         }
         private void SCInterpModeDrop_SelectionChanged(object sender, SelectionChangedEventArgs e)
         {
@@ -351,8 +312,7 @@ namespace LMCSHD
         {
             if (scRec != null)
                 scRec.shouldRecord = false;
+            sm.SerialSendBlankFrame(frame);
         }
-
-
     }
 }

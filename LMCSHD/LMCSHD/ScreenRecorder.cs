@@ -19,36 +19,28 @@ namespace LMCSHD
 
         public bool shouldRecord, shouldDrawOutline = false;
 
-        private MatrixFrame.Pixel[,] currentFrame;
-        public MatrixFrame.Pixel[,] CurrentFrame { get => currentFrame; }
-
-
-
-        private Rectangle captureRect;
-        public Rectangle CaptureRect { get => captureRect; set => captureRect = value; }
-
-        private InterpolationMode interpMode = InterpolationMode.HighQualityBilinear;
-        public InterpolationMode InterpMode { get => interpMode; set => interpMode = value; }
+        public MatrixFrame.Pixel[,] CurrentFrame { get; private set; }
+        public Rectangle CaptureRect { get; set; }
+        public InterpolationMode InterpMode { get; set; } = InterpolationMode.HighQualityBilinear;
 
         public ScreenRecorder(int width, int height)
         {
             mWidth = width;
             mHeight = height;
-            currentFrame = new MatrixFrame.Pixel[width, height];
+            CurrentFrame = new MatrixFrame.Pixel[width, height];
         }
 
         public delegate void Callback(MatrixFrame.Pixel[,] pixels);
         public void StartRecording(Callback pixelDataCallback)
         {
             shouldRecord = true;
-
             while (shouldRecord)
             {
-                if (captureRect.Width == mWidth && captureRect.Height == mHeight)
-                    currentFrame = (BitmapProcesser.BitmapToPixelArray(ScreenToBitmap()));
+                if (CaptureRect.Width == mWidth && CaptureRect.Height == mHeight)
+                    CurrentFrame = (BitmapProcesser.BitmapToPixelArray(ScreenToBitmap()));
                 else
-                    currentFrame = BitmapProcesser.BitmapToPixelArray(BitmapProcesser.DownsampleBitmap(ScreenToBitmap(), mWidth, mHeight, interpMode));
-                pixelDataCallback(currentFrame);
+                    CurrentFrame = BitmapProcesser.BitmapToPixelArray(BitmapProcesser.DownsampleBitmap(ScreenToBitmap(), mWidth, mHeight, InterpMode));
+                pixelDataCallback(CurrentFrame);
             }
         }
 
@@ -57,7 +49,7 @@ namespace LMCSHD
             shouldDrawOutline = true;
             while (shouldDrawOutline)
             {
-                DrawRectOnScreen(new Rectangle(captureRect.X - 1, captureRect.Y - 1, captureRect.Width + 2, captureRect.Height + 2));
+                DrawRectOnScreen(new Rectangle(CaptureRect.X - 1, CaptureRect.Y - 1, CaptureRect.Width + 2, CaptureRect.Height + 2));
                 Thread.Sleep(32);
             }
             EraseRectOnScreen();
@@ -68,9 +60,9 @@ namespace LMCSHD
             IntPtr handle = IntPtr.Zero;
             IntPtr hdcSrc = GetDC(handle);
             IntPtr hdcDest = CreateCompatibleDC(hdcSrc);
-            IntPtr hBitmap = CreateCompatibleBitmap(hdcSrc, captureRect.Width, captureRect.Height);
+            IntPtr hBitmap = CreateCompatibleBitmap(hdcSrc, CaptureRect.Width, CaptureRect.Height);
             IntPtr hOld = SelectObject(hdcDest, hBitmap);
-            BitBlt(hdcDest, 0, 0, captureRect.Width, captureRect.Height, hdcSrc, captureRect.X, captureRect.Y, CopyPixelOperation.SourceCopy | CopyPixelOperation.CaptureBlt);
+            BitBlt(hdcDest, 0, 0, CaptureRect.Width, CaptureRect.Height, hdcSrc, CaptureRect.X, CaptureRect.Y, CopyPixelOperation.SourceCopy | CopyPixelOperation.CaptureBlt);
 
             SelectObject(hdcDest, hOld);
             DeleteDC(hdcDest);

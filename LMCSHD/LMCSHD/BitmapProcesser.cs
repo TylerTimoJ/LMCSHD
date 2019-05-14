@@ -51,5 +51,15 @@ namespace LMCSHD
             b.Dispose();
             return result;
         }
+
+        public static Bitmap LoadImageFromDisk(string path)
+        {
+            return new Bitmap(path);
+        }
+
+      //  public static Bitmap[] LoadGifFromDisk(string path)
+     //   {
+
+      //  }
     }
 }

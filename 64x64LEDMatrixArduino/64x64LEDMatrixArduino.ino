@@ -16,7 +16,6 @@ SMARTMATRIX_ALLOCATE_BACKGROUND_LAYER(backgroundLayer, kMatrixWidth, kMatrixHeig
 
 char serialFrame[kMatrixWidth * kMatrixHeight * 3];
 const int serialFrameLength = kMatrixWidth * kMatrixHeight * 3;
-char frameDefData[2] = {(char)(byte)kMatrixWidth - 1, (char)(byte)kMatrixHeight - 1};
 void setup() {
   matrix.addLayer(&backgroundLayer);
   matrix.begin();
@@ -30,11 +29,12 @@ void serialEvent()
 {
   switch (Serial.read())
   {
-    case 0x05:
-      Serial.write(frameDefData, 2);
+    case 0x05: //request for matrix definition
+      Serial.println(kMatrixWidth);
+      Serial.println(kMatrixHeight);
       break;
 
-    case 0x0F:
+    case 0x0F: //frame data
       Serial.readBytes(serialFrame, serialFrameLength);
       int index = 0;
       for (int x = 0; x < kMatrixWidth; x++) {
@@ -44,7 +44,7 @@ void serialEvent()
         }
       }
       backgroundLayer.swapBuffers(false);
-      Serial.write(6);
+      Serial.write(0x06); //acknkowledge
       break;
   }
 }
