@@ -13,7 +13,8 @@ using System.Windows.Input;
 using System.Windows.Media;
 using System.Windows.Media.Imaging;
 using System.Windows.Navigation;
-//using System.Drawing;
+using System.Drawing;
+using System.Drawing.Imaging;
 using System.Drawing.Drawing2D;
 using System.IO;
 using Microsoft.Win32;
@@ -29,10 +30,10 @@ namespace LMCSHD
         //Frame & Preview
         private MatrixFrame frame;
         public static WriteableBitmap MatrixBitmap;
-
         //screen capture
         private ScreenRecorder scRec;
         private System.Drawing.Rectangle captureRect;
+        Thread captureThread;
 
         //serial
         private SerialManager sm = new SerialManager();
@@ -40,8 +41,6 @@ namespace LMCSHD
         public MainWindow()
         {
             InitializeComponent();
-            //   RefreshSerialPorts();
-
         }
 
         //Serial Functions
@@ -57,42 +56,46 @@ namespace LMCSHD
         {
             sm.Disconnect();
             MIConnect.IsEnabled = true;
-            MatrixBitmap = null;
         }
         //===========================================================================================
 
         //Matrix Frame Functions
         //===========================================================================================
-        public unsafe void UpdatePreview(MatrixFrame.Pixel[,] givenFrame)
+        public unsafe void UpdatePreview()
         {
-            int width = givenFrame.GetLength(0);
-            int height = givenFrame.GetLength(1);
-            try
+            if ((bool)MPCheckBox.IsChecked)
             {
-                MatrixBitmap.Lock();
-
-                int stride = MatrixBitmap.BackBufferStride;
-                for (int x = 0; x < width; x++)
+                MatrixFrame.Pixel[,] frameData = frame.GetFrame();
+                try
                 {
-                    for (int y = 0; y < height; y++)
+                    MatrixBitmap.Lock();
+
+                    int stride = MatrixBitmap.BackBufferStride;
+                    for (int x = 0; x < frame.Width; x++)
                     {
-                        int pixelAddress = (int)MatrixBitmap.BackBuffer;
-                        pixelAddress += (y * stride);
-                        pixelAddress += (x * 4);
-                        int color_data = givenFrame[x, y].R << 16; // R
-                        color_data |= givenFrame[x, y].G << 8;   // G
-                        color_data |= givenFrame[x, y].B << 0;   // B
-                        *((int*)pixelAddress) = color_data;
+                        for (int y = 0; y < frame.Height; y++)
+                        {
+                            int pixelAddress = (int)MatrixBitmap.BackBuffer;
+                            pixelAddress += (y * stride);
+                            pixelAddress += (x * 4);
+                            int color_data = frameData[x, y].R << 16; // R
+                            color_data |= frameData[x, y].G << 8;   // G
+                            color_data |= frameData[x, y].B << 0;   // B
+                            *((int*)pixelAddress) = color_data;
+                        }
                     }
+                    MatrixBitmap.AddDirtyRect(new Int32Rect(0, 0, frame.Width, frame.Height));
                 }
-                MatrixBitmap.AddDirtyRect(new Int32Rect(0, 0, width, height));
+                finally
+                {
+                    MatrixBitmap.Unlock();
+                }
             }
-            finally
-            {
-                MatrixBitmap.Unlock();
-            }
-
-
+        }
+        public void UpdateContentImage()
+        {
+            if ((bool)CPCheckBox.IsChecked)
+                ContentImage.Source = frame.ContentImage;
         }
         public void SetupFrameObject(int width, int height)
         {
@@ -137,15 +140,18 @@ namespace LMCSHD
 
         //Screen Capture Functions
         //===========================================================================================
-        void PixelDataCallback(MatrixFrame.Pixel[,] givenFrame)
+        void PixelDataCallback(Bitmap capturedBitmap)
         {
-            frame.SetFrame(givenFrame);
-            this.Dispatcher.Invoke(() => { UpdatePreview(frame.GetFrame()); });
+            frame.InjestGDIBitmap(capturedBitmap);
+            frame.ContentImage.Freeze();
+            Dispatcher.Invoke(() => { UpdateContentImage(); });
+            Dispatcher.Invoke(() => { UpdatePreview(); });
             sm.SerialSendFrame(frame);
         }
+
         void StartCapture()
         {
-            Thread captureThread = new Thread(() => scRec.StartRecording(PixelDataCallback));
+            captureThread = new Thread(() => scRec.StartRecording(PixelDataCallback));
             captureThread.Start();
         }
         void SetupSCUI()
@@ -167,6 +173,15 @@ namespace LMCSHD
             if (scRec != null)
                 scRec.CaptureRect = new System.Drawing.Rectangle(0, 0, screenWidth, screenHeight);
         }
+
+        void AbortCaptureThread()
+        {
+            captureThread.Abort();
+            while (captureThread.IsAlive)
+            {
+                
+            }
+        }
         //===========================================================================================
 
         //Screen Capture UI Handlers
@@ -177,7 +192,7 @@ namespace LMCSHD
         }
         private void SC_Stop_Click(object sender, RoutedEventArgs e)
         {
-            scRec.shouldRecord = false;
+            AbortCaptureThread();
         }
         private void SCDisplayOutline_Checked(object sender, RoutedEventArgs e)
         {
@@ -265,7 +280,7 @@ namespace LMCSHD
                 switch (((IntegerUpDown)sender).Name)
                 {
                     case "SCStartXU":
-                            SCStartXS.Value = (int)((IntegerUpDown)sender).Value;
+                        SCStartXS.Value = (int)((IntegerUpDown)sender).Value;
                         break;
                     case "SCStartYU":
                         SCStartYS.Value = (int)((IntegerUpDown)sender).Value;
@@ -280,23 +295,23 @@ namespace LMCSHD
         }
         private void SCInterpModeDrop_SelectionChanged(object sender, SelectionChangedEventArgs e)
         {
-            if (scRec != null)
+            if (frame != null)
                 switch (SCInterpModeDrop.SelectedIndex)
                 {
                     case 0:
-                        scRec.InterpMode = System.Drawing.Drawing2D.InterpolationMode.NearestNeighbor;
+                        frame.InterpMode = System.Drawing.Drawing2D.InterpolationMode.NearestNeighbor;
                         break;
                     case 1:
-                        scRec.InterpMode = System.Drawing.Drawing2D.InterpolationMode.Bicubic;
+                        frame.InterpMode = System.Drawing.Drawing2D.InterpolationMode.Bicubic;
                         break;
                     case 2:
-                        scRec.InterpMode = System.Drawing.Drawing2D.InterpolationMode.Bilinear;
+                        frame.InterpMode = System.Drawing.Drawing2D.InterpolationMode.Bilinear;
                         break;
                     case 3:
-                        scRec.InterpMode = System.Drawing.Drawing2D.InterpolationMode.HighQualityBicubic;
+                        frame.InterpMode = System.Drawing.Drawing2D.InterpolationMode.HighQualityBicubic;
                         break;
                     case 4:
-                        scRec.InterpMode = System.Drawing.Drawing2D.InterpolationMode.HighQualityBilinear;
+                        frame.InterpMode = System.Drawing.Drawing2D.InterpolationMode.HighQualityBilinear;
                         break;
                 }
 
@@ -309,9 +324,9 @@ namespace LMCSHD
 
         private void Window_Closing(object sender, System.ComponentModel.CancelEventArgs e)
         {
-            if (scRec != null)
-                scRec.shouldRecord = false;
+            AbortCaptureThread();
             sm.SerialSendBlankFrame(frame);
+
         }
     }
 }

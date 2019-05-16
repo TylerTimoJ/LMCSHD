@@ -8,7 +8,8 @@ using System.Drawing.Imaging;
 using System.Windows;
 using System.Windows.Interop;
 using System.Drawing.Drawing2D;
-
+using System.Windows.Media.Imaging;
+using System.Windows.Media;
 
 
 namespace LMCSHD
@@ -17,7 +18,7 @@ namespace LMCSHD
     {
         public static unsafe MatrixFrame.Pixel[,] BitmapToPixelArray(Bitmap bitmap)
         {
-            BitmapData imageData = bitmap.LockBits(new Rectangle(0, 0, bitmap.Width, bitmap.Height), ImageLockMode.ReadOnly, PixelFormat.Format24bppRgb);
+            BitmapData imageData = bitmap.LockBits(new Rectangle(0, 0, bitmap.Width, bitmap.Height), ImageLockMode.ReadOnly, System.Drawing.Imaging.PixelFormat.Format24bppRgb);
 
             MatrixFrame.Pixel[,] frame = new MatrixFrame.Pixel[bitmap.Width, bitmap.Height];
 
@@ -57,9 +58,45 @@ namespace LMCSHD
             return new Bitmap(path);
         }
 
-      //  public static Bitmap[] LoadGifFromDisk(string path)
-     //   {
+        public static BitmapSource CreateBitmapSourceFromBitmap(Bitmap bitmap)
+        {
+            var bitmapData = bitmap.LockBits(
+                new Rectangle(0, 0, bitmap.Width, bitmap.Height),
+                ImageLockMode.ReadOnly, System.Drawing.Imaging.PixelFormat.Format32bppArgb);
 
-      //  }
+            var bitmapSource = BitmapSource.Create(
+                bitmapData.Width, bitmapData.Height,
+                bitmap.HorizontalResolution, bitmap.VerticalResolution,
+                PixelFormats.Bgra32, null,
+                bitmapData.Scan0, bitmapData.Stride * bitmapData.Height, bitmapData.Stride);
+
+            bitmap.UnlockBits(bitmapData);
+            return bitmapSource;
+        }
+
+
+        [System.Runtime.InteropServices.DllImport("gdi32.dll")]
+        public static extern bool DeleteObject(IntPtr hObject);
+
+        public static BitmapSource _CreateBitmapSourceFromBitmap(Bitmap bitmap)
+        {
+            IntPtr hBitmap = bitmap.GetHbitmap();
+            BitmapSource retval;
+
+            try
+            {
+                retval = Imaging.CreateBitmapSourceFromHBitmap(
+                             hBitmap,
+                             IntPtr.Zero,
+                             Int32Rect.Empty,
+                             BitmapSizeOptions.FromEmptyOptions());
+            }
+            finally
+            {
+                DeleteObject(hBitmap);
+            }
+
+            return retval;
+        }
     }
 }

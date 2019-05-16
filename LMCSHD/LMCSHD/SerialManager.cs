@@ -57,11 +57,18 @@ namespace LMCSHD
         }
         public int[] Connect(string portName, int baudRate)
         {
+            try
+            {
                 serialReady = true;
                 sp = new SerialPort(portName, baudRate);
                 sp.Open();
                 sp.DataReceived += sp_DataReceived;
                 return GetMatrixDefinition();
+            }
+            catch (Exception)
+            {
+                return null;
+            }
         }
         public void Disconnect()
         {

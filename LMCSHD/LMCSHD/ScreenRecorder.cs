@@ -10,38 +10,26 @@ using System.Diagnostics;
 using System.ComponentModel;
 using System.Drawing.Drawing2D;
 using System.Runtime.InteropServices;
+using System.Windows.Media.Imaging;
 
 namespace LMCSHD
 {
     public class ScreenRecorder
     {
-        private int mWidth, mHeight;
-
-        public bool shouldRecord, shouldDrawOutline = false;
-
+        public bool shouldDrawOutline;
         public MatrixFrame.Pixel[,] CurrentFrame { get; private set; }
         public Rectangle CaptureRect { get; set; }
-        public InterpolationMode InterpMode { get; set; } = InterpolationMode.HighQualityBilinear;
 
         public ScreenRecorder(int width, int height)
         {
-            mWidth = width;
-            mHeight = height;
             CurrentFrame = new MatrixFrame.Pixel[width, height];
         }
 
-        public delegate void Callback(MatrixFrame.Pixel[,] pixels);
+        public delegate void Callback(Bitmap capturedFrame);
         public void StartRecording(Callback pixelDataCallback)
         {
-            shouldRecord = true;
-            while (shouldRecord)
-            {
-                if (CaptureRect.Width == mWidth && CaptureRect.Height == mHeight)
-                    CurrentFrame = (BitmapProcesser.BitmapToPixelArray(ScreenToBitmap()));
-                else
-                    CurrentFrame = BitmapProcesser.BitmapToPixelArray(BitmapProcesser.DownsampleBitmap(ScreenToBitmap(), mWidth, mHeight, InterpMode));
-                pixelDataCallback(CurrentFrame);
-            }
+            while (true)
+                pixelDataCallback(ScreenToBitmap());
         }
 
         public void StartDrawOutline()

@@ -3,6 +3,11 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using System.Windows.Media;
+using System.Windows.Media.Imaging;
+using System.Drawing.Imaging;
+using System.Drawing;
+using System.Drawing.Drawing2D;
 
 namespace LMCSHD
 {
@@ -15,7 +20,11 @@ namespace LMCSHD
         //Data Properties
         public int Width { get; }
         public int Height { get; }
+        public BitmapSource ContentImage { get; set; }
+
+        public InterpolationMode InterpMode { get; set; } = InterpolationMode.HighQualityBilinear;
         public float Brightness { get; set; } = 1f;
+
         //End Data Properties
         public struct Pixel
         {
@@ -48,6 +57,17 @@ namespace LMCSHD
                 }
             }
         }
+
+        public void InjestGDIBitmap(Bitmap b)
+        {
+            ContentImage = BitmapProcesser.CreateBitmapSourceFromBitmap(b);
+            if (b.Width == Width && b.Height == Height)
+                pixelArray = BitmapProcesser.BitmapToPixelArray(b);
+            else
+                pixelArray = BitmapProcesser.BitmapToPixelArray(BitmapProcesser.DownsampleBitmap(b, Width, Height, InterpMode));
+        }
+
+
         public Pixel[,] GetFrame() { return pixelArray; }
         public byte[] GetSerializableFrame()
         {
@@ -66,5 +86,16 @@ namespace LMCSHD
             return serialPixels;
         }
         public int GetFrameLength() { return (Width * Height * 3) + 1; }
+    }
+
+    public class FrameObject
+    {
+        public FrameObject(MatrixFrame.Pixel[,] pixels, BitmapSource image)
+        {
+            PixelArray = pixels;
+            contentImage = image;
+        }
+        public MatrixFrame.Pixel[,] PixelArray { get; set; }
+        public BitmapSource contentImage { get; set; }
     }
 }

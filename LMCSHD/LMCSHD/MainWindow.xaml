@@ -6,7 +6,30 @@
         xmlns:local="clr-namespace:LMCSHD"
         xmlns:xctk="http://schemas.xceed.com/wpf/xaml/toolkit"
         mc:Ignorable="d"
-        Title="LED Matrix Control Software HD" Height="776" Width="706" Closing="Window_Closing" SizeToContent="Width" >
+        Title="LED Matrix Control Software HD"
+        Height="776"
+        Width="706"
+        Closing="Window_Closing"
+        SizeToContent="Width">
+
+    
+    
+    <Window.Resources>
+
+        <SolidColorBrush x:Key="Black" Color="#000000" />
+        <SolidColorBrush x:Key="G1" Color="#212121" />
+        <SolidColorBrush x:Key="G2" Color="#303030" />
+        <SolidColorBrush x:Key="G3" Color="#424242" />
+
+        
+        
+        
+        
+    </Window.Resources>
+    
+    
+    
+    
     <Grid>
 
 
@@ -20,8 +43,8 @@
                 <RowDefinition Height="*"/>
             </Grid.RowDefinitions>
 
-            <DockPanel Grid.ColumnSpan="2" Margin="0,0,0,2">
-                <Menu DockPanel.Dock="Top">
+
+                <Menu Grid.ColumnSpan="2">
                     <MenuItem Header="_File">
                         <MenuItem Header="_New" />
                         <MenuItem Header="_Open" />
@@ -33,15 +56,20 @@
                     <MenuItem x:Name="MIConnect" Header="Connect" Click="MIConnect_Click"/>
                     <MenuItem Header="Disconnect" Click="MIDisconnect_Click"/>
                 </Menu>
-            </DockPanel>
+
 
             <WrapPanel Grid.Row="1">
 
-                <GroupBox Grid.Column="1"
-                       Grid.Row="1"
-                      Header="Matrix Preview">
-
-                    <Image x:Name="PreviewImage"
+                <GroupBox Grid.Column="1" Grid.Row="1">
+                    
+                    <GroupBox.Header>
+                        <StackPanel Orientation="Horizontal">
+                            <CheckBox x:Name="CPCheckBox" IsChecked="True"/>
+                            <TextBlock Text=" Content Preview"/>
+                        </StackPanel>
+                    </GroupBox.Header>
+                    
+                    <Image x:Name="ContentImage"
                        Width="300"
                        Height="300"
                        Margin="2"
@@ -51,10 +79,14 @@
 
                 </GroupBox>
 
-                <GroupBox Grid.Column="1"
-                       Grid.Row="1"
-                      Header="Matrix Preview">
-
+                <GroupBox Grid.Column="1" Grid.Row="1">
+                    <GroupBox.Header>
+                        <StackPanel Orientation="Horizontal">
+                            <CheckBox x:Name="MPCheckBox" IsChecked="True"/>
+                            <TextBlock Text=" Matrix Preview"/>
+                        </StackPanel>
+                    </GroupBox.Header>
+                    
                     <Image x:Name="MatrixImage"
                        Width="300"
                        Height="300"
@@ -80,8 +112,8 @@
                     </GroupBox.Header>
                     <Grid>
                         <Grid.ColumnDefinitions>
-                            <ColumnDefinition Width="*"/>
-                            <ColumnDefinition Width="*"/>
+                            <ColumnDefinition Width="128"/>
+                            <ColumnDefinition Width="128"/>
                         </Grid.ColumnDefinitions>
                         <Grid.RowDefinitions>
                             <RowDefinition Height="auto"/>
