@@ -34,14 +34,29 @@ namespace LMCSHD
         private ScreenRecorder scRec;
         private System.Drawing.Rectangle captureRect;
         Thread captureThread;
-
+        AudioProcesser p;
         //serial
         private SerialManager sm = new SerialManager();
+
+        //audio
+        //  DispatcherTimer t;
 
         public MainWindow()
         {
             InitializeComponent();
+
         }
+
+        //Window Function
+        //===========================================================================================
+        private void Window_Closing(object sender, System.ComponentModel.CancelEventArgs e)
+        {
+            AbortCaptureThread();
+            if(sm != null)
+            sm.SerialSendBlankFrame(frame);
+
+        }
+        //===========================================================================================
 
         //Serial Functions
         //===========================================================================================
@@ -61,7 +76,25 @@ namespace LMCSHD
 
         //Matrix Frame Functions
         //===========================================================================================
-        public unsafe void UpdatePreview()
+        public void SetupFrameObject(int width, int height)
+        {
+            frame = null;
+            frame = new MatrixFrame(width, height);
+            scRec = new ScreenRecorder();
+            MatrixBitmap = new WriteableBitmap(frame.Width, frame.Height, 96, 96, PixelFormats.Bgr32, null);
+            MatrixImage.Source = MatrixBitmap;
+            MatrixPreviewGroup.Text = " Matrix Preview: " + frame.Width.ToString() + "x" + frame.Height.ToString();
+            SetupSCUI();
+            MIConnect.IsEnabled = false;
+            p = new AudioProcesser(FFTCallback);
+
+            //      t = new DispatcherTimer();
+            //    t.Interval = TimeSpan.FromMilliseconds(30);
+            //    t.Tick += DisplayFFT;
+            //    t.Start();
+        }
+
+        private unsafe void UpdatePreview()
         {
             if ((bool)MPCheckBox.IsChecked)
             {
@@ -97,58 +130,60 @@ namespace LMCSHD
             if ((bool)CPCheckBox.IsChecked)
                 ContentImage.Source = frame.ContentImage;
         }
-        public void SetupFrameObject(int width, int height)
-        {
-            frame = null;
-            frame = new MatrixFrame(width, height);
-            scRec = new ScreenRecorder(frame.Width, frame.Height);
-            MatrixBitmap = new WriteableBitmap(frame.Width, frame.Height, 96, 96, PixelFormats.Bgr32, null);
-            MatrixImage.Source = MatrixBitmap;
-            SetupSCUI();
-            MIConnect.IsEnabled = false;
-        }
-        //===========================================================================================
 
-        //Color Correction Functions
-        //===========================================================================================
-        /*
-        private void CCSlider_ValueChanged(object sender, RoutedPropertyChangedEventArgs<double> e)
+        private void CPCheckBox_CheckedChanged(object sender, RoutedEventArgs e)
         {
             if (frame != null)
-                switch (((Slider)sender).Name)
-                {
-                    case "CCBrightnessS":
-                        frame.Brightness = (float)CCBrightnessS.Value / 255;
-                        CCBrightnessT.Text = ((int)((Slider)sender).Value / 255f).ToString("#00" + "%");
-                        break;
-                    case "CCRedS":
-                        frame.RCorrection = (float)CCRedS.Value / 255;
-                        CCRedT.Text = ((int)((Slider)sender).Value / 255f).ToString("#00" + "%");
-                        break;
-                    case "CCGreenS":
-                        frame.GCorrection = (float)CCGreenS.Value / 255;
-                        CCGreenT.Text = ((int)((Slider)sender).Value / 255f).ToString("#00" + "%");
-                        break;
-                    case "CCBlueS":
-                        frame.BCorrection = (float)CCBlueS.Value / 255;
-                        CCBlueT.Text = ((int)((Slider)sender).Value / 255f).ToString("#00" + "%");
-                        break;
-                }
+                frame.RenderContentPreview = (bool)CPCheckBox.IsChecked;
         }
-        */
         //===========================================================================================
 
-        //Screen Capture Functions
+        //FFT Functions
+        //============================================================================================
+
+
+        void FFTCallback(float[] fftData)
+        {
+            Dispatcher.Invoke(() =>
+            {
+                frame.InjestFFT(fftData);
+
+                sm.SerialSendFrame(frame);
+                UpdatePreview();
+            });
+        }
+        void DisplayFFT()
+        {
+
+        }
+
+        private void Button_Click(object sender, RoutedEventArgs e)
+        {
+            p.BeginCapture(FFTCallback, p.GetDefaultDevice(NAudio.CoreAudioApi.DataFlow.Render));
+        }
+
+        private void Button1_Click(object sender, RoutedEventArgs e)
+        {
+            p.StopRecording();
+        }
+
         //===========================================================================================
+
+
+
+
+        #region ScreenCapFunctions
         void PixelDataCallback(Bitmap capturedBitmap)
         {
             frame.InjestGDIBitmap(capturedBitmap);
-            frame.ContentImage.Freeze();
-            Dispatcher.Invoke(() => { UpdateContentImage(); });
+            if (frame.ContentImage != null)
+            {
+                frame.ContentImage.Freeze();
+                Dispatcher.Invoke(() => { UpdateContentImage(); });
+            }
             Dispatcher.Invoke(() => { UpdatePreview(); });
             sm.SerialSendFrame(frame);
         }
-
         void StartCapture()
         {
             captureThread = new Thread(() => scRec.StartRecording(PixelDataCallback));
@@ -173,26 +208,31 @@ namespace LMCSHD
             if (scRec != null)
                 scRec.CaptureRect = new System.Drawing.Rectangle(0, 0, screenWidth, screenHeight);
         }
-
         void AbortCaptureThread()
         {
-            captureThread.Abort();
-            while (captureThread.IsAlive)
+            if (captureThread != null)
             {
-                
+                captureThread.Abort();
+                while (captureThread.IsAlive)
+                {
+
+                }
             }
         }
-        //===========================================================================================
+        #endregion
 
-        //Screen Capture UI Handlers
-        //===========================================================================================
+        #region ScreenCapUIHandlers
         private void SC_Start_Click(object sender, RoutedEventArgs e)
         {
             StartCapture();
+            SCStart.IsEnabled = false;
+            SCStop.IsEnabled = true;
         }
         private void SC_Stop_Click(object sender, RoutedEventArgs e)
         {
             AbortCaptureThread();
+            SCStart.IsEnabled = true;
+            SCStop.IsEnabled = false;
         }
         private void SCDisplayOutline_Checked(object sender, RoutedEventArgs e)
         {
@@ -320,13 +360,6 @@ namespace LMCSHD
         {
             SetupSCUI();
         }
-        //===========================================================================================
-
-        private void Window_Closing(object sender, System.ComponentModel.CancelEventArgs e)
-        {
-            AbortCaptureThread();
-            sm.SerialSendBlankFrame(frame);
-
-        }
+        #endregion
     }
 }

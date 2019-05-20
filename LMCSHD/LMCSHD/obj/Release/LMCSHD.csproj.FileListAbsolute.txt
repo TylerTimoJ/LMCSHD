@@ -31,3 +31,5 @@ C:\Users\tyler\OneDrive\LMCSHD\LMCSHD\LMCSHD\bin\Release\ru\Xceed.Wpf.AvalonDock
 C:\Users\tyler\OneDrive\LMCSHD\LMCSHD\LMCSHD\bin\Release\sv\Xceed.Wpf.AvalonDock.resources.dll
 C:\Users\tyler\OneDrive\LMCSHD\LMCSHD\LMCSHD\bin\Release\zh-Hans\Xceed.Wpf.AvalonDock.resources.dll
 C:\Users\tyler\OneDrive\LMCSHD\LMCSHD\LMCSHD\obj\Release\LMCSHD.csproj.CopyComplete
+C:\Users\tyler\OneDrive\LMCSHD\LMCSHD\LMCSHD\bin\Release\NAudio.dll
+C:\Users\tyler\OneDrive\LMCSHD\LMCSHD\LMCSHD\bin\Release\NAudio.xml

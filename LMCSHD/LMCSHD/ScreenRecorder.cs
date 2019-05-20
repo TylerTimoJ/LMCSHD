@@ -17,12 +17,11 @@ namespace LMCSHD
     public class ScreenRecorder
     {
         public bool shouldDrawOutline;
-        public MatrixFrame.Pixel[,] CurrentFrame { get; private set; }
         public Rectangle CaptureRect { get; set; }
 
-        public ScreenRecorder(int width, int height)
+        public ScreenRecorder()
         {
-            CurrentFrame = new MatrixFrame.Pixel[width, height];
+
         }
 
         public delegate void Callback(Bitmap capturedFrame);

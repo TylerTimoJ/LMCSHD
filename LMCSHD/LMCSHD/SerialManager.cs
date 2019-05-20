@@ -33,14 +33,27 @@ namespace LMCSHD
         public void SerialSendFrame(MatrixFrame frame)
         {
             if (SerialReady())
-                sp.Write(frame.GetSerializableFrame(), 0, frame.GetFrameLength());
+            {
+                try
+                {
+                    sp.Write(frame.GetSerializableFrame(), 0, frame.GetFrameLength());
+                    serialReady = false;
+                }
+                catch (Exception)
+                {
+
+                }
+            }
         }
         public void SerialSendBlankFrame(MatrixFrame frame)
         {
-            byte[] blankFrameData = new byte[(frame.Width * frame.Height * 3) + 1];
-            blankFrameData[0] = 0x0F;
             if (SerialReady())
+            {
+                byte[] blankFrameData = new byte[(frame.Width * frame.Height * 3) + 1];
+                blankFrameData[0] = 0x0F;
                 sp.Write(blankFrameData, 0, frame.GetFrameLength());
+                serialReady = false;
+            }
         }
         public string[] GetPortNames()
         {

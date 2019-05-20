@@ -23,7 +23,8 @@ namespace LMCSHD
         public BitmapSource ContentImage { get; set; }
 
         public InterpolationMode InterpMode { get; set; } = InterpolationMode.HighQualityBilinear;
-        public float Brightness { get; set; } = 1f;
+
+        public bool RenderContentPreview { get; set; } = true;
 
         //End Data Properties
         public struct Pixel
@@ -47,25 +48,94 @@ namespace LMCSHD
         }
         public void SetFrame(Pixel[,] givenFrame)
         {
-            for (int x = 0; x < Width; x++)
-            {
-                for (int y = 0; y < Height; y++)
-                {
-                    pixelArray[x, y].R = (byte)(givenFrame[x, y].R * Brightness);
-                    pixelArray[x, y].G = (byte)(givenFrame[x, y].G * Brightness);
-                    pixelArray[x, y].B = (byte)(givenFrame[x, y].B * Brightness);
-                }
-            }
+            pixelArray = givenFrame;
         }
 
         public void InjestGDIBitmap(Bitmap b)
         {
-            ContentImage = BitmapProcesser.CreateBitmapSourceFromBitmap(b);
+            if (RenderContentPreview)
+                ContentImage = BitmapProcesser.CreateBitmapSourceFromBitmap(b);
+            else
+                ContentImage = null;
             if (b.Width == Width && b.Height == Height)
                 pixelArray = BitmapProcesser.BitmapToPixelArray(b);
             else
                 pixelArray = BitmapProcesser.BitmapToPixelArray(BitmapProcesser.DownsampleBitmap(b, Width, Height, InterpMode));
         }
+
+        public void InjestFFT(float[] fftData)
+        {
+            //    float[] averageData = AverageSamples(fftData);
+            SetFrameColor(new Pixel(0, 0, 0));
+
+            //  float[] downSampledData = DownsampleSamples(fftData, Width);
+            for (int i = 0; i < Width; i++)
+            {
+                //  DrawColumn(i, (int)(fftData[i] * Height / 2));
+                DrawColumnMirrored(i, (int)(fftData[i] * Height));
+            }
+        }
+
+        void SetFrameColor(Pixel color)
+        {
+            for (int x = 0; x < Width; x++)
+            {
+                for (int y = 0; y < Height; y++)
+                {
+                    pixelArray[x, y] = color;
+                }
+            }
+        }
+
+        void DrawColumn(int x, int height)
+        {
+            for (int y = Height - 1; y > Height - height; y--)
+            {
+                if (y < 0)
+                    break;
+                pixelArray[x, y] = new Pixel(0, 0, 139);
+            }
+        }
+
+        void DrawColumnMirrored(int x, int height)
+        {
+            pixelArray[x, ((Height / 2) - 1)] = new Pixel(0, 255, 255);
+            for (int y = (Height / 2) - 2; y > (Height / 2) - 2 - height; y--)
+            {
+                if (y < 0)
+                    break;
+                pixelArray[x, y] = new Pixel(0, 255, 255);
+            }
+
+            pixelArray[x, Height / 2] = new Pixel(255, 255, 0);
+            for (int y = (Height / 2) + 1; y < (Height / 2) + 1 + height; y++)
+            {
+                if (y > Height - 1)
+                    break;
+                pixelArray[x, y] = new Pixel(255, 255, 0);
+            }
+        }
+
+
+        float[] DownsampleSamples(float[] rawData, int newSize)
+        {
+            int ratio = rawData.Length / newSize;
+            float[] newData = new float[newSize];
+            for (int i = 0; i < newSize; i++)
+            {
+                int sampleIndex = ratio * i;
+                float piece = 0;
+                for (int e = sampleIndex; e < sampleIndex + ratio; e++)
+                {
+                    piece += rawData[e];
+                }
+                newData[i] = (piece /= ratio);
+            }
+            return newData;
+        }
+
+
+
 
 
         public Pixel[,] GetFrame() { return pixelArray; }
