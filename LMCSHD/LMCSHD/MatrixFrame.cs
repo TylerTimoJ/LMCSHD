@@ -26,6 +26,8 @@ namespace LMCSHD
 
         public bool RenderContentPreview { get; set; } = true;
 
+        public PixelOrder pixelOrder { get; set; }
+
         //End Data Properties
         public struct Pixel
         {
@@ -65,13 +67,10 @@ namespace LMCSHD
 
         public void InjestFFT(float[] fftData)
         {
-            //    float[] averageData = AverageSamples(fftData);
             SetFrameColor(new Pixel(0, 0, 0));
 
-            //  float[] downSampledData = DownsampleSamples(fftData, Width);
             for (int i = 0; i < Width; i++)
             {
-                //  DrawColumn(i, (int)(fftData[i] * Height / 2));
                 DrawColumnMirrored(i, (int)(fftData[i] * Height));
             }
         }
@@ -116,7 +115,6 @@ namespace LMCSHD
             }
         }
 
-
         float[] DownsampleSamples(float[] rawData, int newSize)
         {
             int ratio = rawData.Length / newSize;
@@ -134,26 +132,22 @@ namespace LMCSHD
             return newData;
         }
 
-
-
-
-
         public Pixel[,] GetFrame() { return pixelArray; }
         public byte[] GetSerializableFrame()
         {
-            serialPixels[0] = 0x0F;
-            int index = 1;
-            for (int x = 0; x < Width; x++)
-            {
-                for (int y = 0; y < Height; y++)
+                serialPixels[0] = 0x0F;
+                int index = 1;
+                for (int x = 0; x < Width; x++)
                 {
-                    serialPixels[index] = pixelArray[x, y].R;
-                    serialPixels[index + 1] = pixelArray[x, y].G;
-                    serialPixels[index + 2] = pixelArray[x, y].B;
-                    index += 3;
+                    for (int y = 0; y < Height; y++)
+                    {
+                        serialPixels[index] = pixelArray[x, y].R;
+                        serialPixels[index + 1] = pixelArray[x, y].G;
+                        serialPixels[index + 2] = pixelArray[x, y].B;
+                        index += 3;
+                    }
                 }
-            }
-            return serialPixels;
+                return serialPixels;
         }
         public int GetFrameLength() { return (Width * Height * 3) + 1; }
     }
@@ -168,4 +162,6 @@ namespace LMCSHD
         public MatrixFrame.Pixel[,] PixelArray { get; set; }
         public BitmapSource contentImage { get; set; }
     }
+
+
 }

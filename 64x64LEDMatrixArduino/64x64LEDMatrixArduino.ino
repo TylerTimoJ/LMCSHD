@@ -35,15 +35,39 @@ void serialEvent()
       break;
 
     case 0x0F: //frame data
-      Serial.readBytes(serialFrame, serialFrameLength);
+      Serial.readBytes(serialFrame, serialFrameLength); //read all incomming data from serial connection
       int index = 0;
       for (int x = 0; x < kMatrixWidth; x++) {
         for (int y = 0; y < kMatrixHeight; y++) {
-          backgroundLayer.drawPixel(x, y, {serialFrame[index * 3], serialFrame[index * 3 + 1], serialFrame[index * 3 + 2]});
+          backgroundLayer.drawPixel(x, y, {serialFrame[index * 3], serialFrame[index * 3 + 1], serialFrame[index * 3 + 2]}); //update each pixel with data from serial
           index++;
         }
       }
       backgroundLayer.swapBuffers(false);
+      Serial.write(0x06); //acknkowledge
+      break;
+  }
+}
+
+
+
+
+
+
+
+
+void serialEvent()
+{
+  switch (Serial.read())
+  {
+    case 0x05: //request for matrix definition
+      Serial.println(<matrix width>);
+      Serial.println(<matrix height>);
+      break;
+
+    case 0x0F: //frame data
+      Serial.readBytes(serialFrame, serialFrameLength); //read all incomming data from serial connection
+      <use data in serialFrame to update display>
       Serial.write(0x06); //acknkowledge
       break;
   }

@@ -66,9 +66,18 @@
                     <Separator />
                     <MenuItem Header="_Exit" />
                 </MenuItem>
+                
+                <MenuItem Header="_Serial">
+                    <MenuItem x:Name="MIConnect" Header="Connect" Click="MIConnect_Click"/>
+                    <MenuItem Header="Disconnect" Click="MIDisconnect_Click"/>
+                </MenuItem>
 
-                <MenuItem x:Name="MIConnect" Header="Connect" Click="MIConnect_Click"/>
-                <MenuItem Header="Disconnect" Click="MIDisconnect_Click"/>
+                <MenuItem Header="Edit">
+                    <MenuItem Header="PixelOrder" Click="NewPixelOrder_Click"/>
+                </MenuItem>
+                
+
+
             </Menu>
 
 

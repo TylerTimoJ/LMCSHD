@@ -56,6 +56,12 @@ namespace LMCSHD
             sm.SerialSendBlankFrame(frame);
 
         }
+
+        private void NewPixelOrder_Click(object sender, RoutedEventArgs e)
+        {
+            PixelOrderEditor editor = new PixelOrderEditor(frame, this);
+            editor.ShowDialog();
+        }
         //===========================================================================================
 
         //Serial Functions
@@ -87,11 +93,6 @@ namespace LMCSHD
             SetupSCUI();
             MIConnect.IsEnabled = false;
             p = new AudioProcesser(FFTCallback);
-
-            //      t = new DispatcherTimer();
-            //    t.Interval = TimeSpan.FromMilliseconds(30);
-            //    t.Tick += DisplayFFT;
-            //    t.Start();
         }
 
         private unsafe void UpdatePreview()
@@ -361,5 +362,7 @@ namespace LMCSHD
             SetupSCUI();
         }
         #endregion
+
+
     }
 }

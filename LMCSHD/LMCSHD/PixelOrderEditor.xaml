@@ -1,0 +1,163 @@
+﻿<Window x:Class="LMCSHD.PixelOrderEditor"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:local="clr-namespace:LMCSHD"
+        mc:Ignorable="d"
+        Title="Pixel Order Editor" WindowStyle="ToolWindow" WindowStartupLocation="CenterOwner" ShowInTaskbar="False" ResizeMode="NoResize" SizeToContent="WidthAndHeight">
+
+    <Window.Resources>
+        <Style TargetType="{x:Type Button}">
+            <Setter Property="Margin" Value="2"/>
+        </Style>
+        <Style TargetType="TextBlock">
+            <Setter Property="VerticalAlignment" Value="Center"/>
+            <Setter Property="HorizontalAlignment" Value="Right"/>
+            <Setter Property="Margin" Value="2"/>
+        </Style>
+
+
+    </Window.Resources>
+    <Grid Margin="2">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="auto"/>
+            <RowDefinition Height="auto"/>
+            <RowDefinition Height="auto"/>
+            <RowDefinition Height="auto"/>
+        </Grid.RowDefinitions>
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="84"/>
+            <ColumnDefinition Width="103"/>
+            <ColumnDefinition Width="*"/>
+        </Grid.ColumnDefinitions>
+
+        <TextBlock Text="Orientation"/>
+        <ComboBox x:Name="UIOrientation"
+                          Grid.Column="1"
+                              Margin="2"
+                              SelectedIndex="0"
+                  SelectionChanged="Direction_SelectionChanged">
+            <ComboBoxItem Content="Horizontal"/>
+            <ComboBoxItem Content="Vertical"/>
+        </ComboBox>
+
+        <TextBlock Text="Starting Corner"
+                           Grid.Row="1"/>
+        <ComboBox x:Name="UIStartingCorner"
+                          Grid.Column="1"
+                          Grid.Row="1"
+                              Margin="2"
+                              SelectedIndex="0"
+                  SelectionChanged="StartingCorner_SelectionChanged">
+            <ComboBoxItem Content="Top Left"/>
+            <ComboBoxItem Content="Top Right"/>
+            <ComboBoxItem Content="Bottom Left"/>
+            <ComboBoxItem Content="Bottom Right"/>
+        </ComboBox>
+
+        <TextBlock Text="New Line"
+                           Grid.Row="2"/>
+        <ComboBox x:Name="UINewLine"
+                          Grid.Column="1"
+                          Grid.Row="2"
+                              Margin="2"
+                              SelectedIndex="0"
+                  SelectionChanged="NewLine_SelectionChanged">
+            <ComboBoxItem Content="Scan"/>
+            <ComboBoxItem Content="Snake"/>
+        </ComboBox>
+
+        <Button Grid.Row="3" Grid.ColumnSpan="2" Margin="2" Content="Save" Click="Button_Click"/>
+
+
+        <Image x:Name="HelperImage"
+            Grid.Column="2"
+               Grid.RowSpan="4"
+                   Margin="2"
+                   Width="100"
+                   Height="100">
+            <Image.Source>
+                <BitmapImage UriSource="/Images/HZ_BL_SC.png"/>
+            </Image.Source>
+        </Image>
+
+
+    </Grid>
+</Window>
+
+
+<!--Grid>
+            <Grid.RowDefinitions>
+                <RowDefinition Height="136"/>
+            </Grid.RowDefinitions>
+
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="200"/>
+                <ColumnDefinition Width="138"/>
+            </Grid.ColumnDefinitions>
+
+            <Grid Margin="2,2,0,2">
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="26"/>
+                    <RowDefinition Height="26"/>
+                    <RowDefinition Height="26"/>
+                    <RowDefinition Height="26"/>
+                </Grid.RowDefinitions>
+
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="100"/>
+                    <ColumnDefinition Width="100"/>
+                </Grid.ColumnDefinitions>
+
+                <TextBlock Text="Orientation"/>
+                <ComboBox x:Name="Direction"
+                          Grid.Column="1"
+                              Margin="2"
+                              SelectedIndex="0">
+                    <ComboBoxItem Content="Horizontal"/>
+                    <ComboBoxItem Content="Vertical"/>
+                </ComboBox>
+
+                <TextBlock Text="Starting Corner"
+                           Grid.Row="1"/>
+                <ComboBox x:Name="StartingCorner"
+                          Grid.Column="1"
+                          Grid.Row="1"
+                              Margin="2"
+                              SelectedIndex="3">
+                    <ComboBoxItem Content="Top Left"/>
+                    <ComboBoxItem Content="Top Right"/>
+                    <ComboBoxItem Content="Bottom Left"/>
+                    <ComboBoxItem Content="Bottom Right"/>
+                </ComboBox>
+
+                <TextBlock Text="New Line"
+                           Grid.Row="2"/>
+                <ComboBox x:Name="NewLine"
+                          Grid.Column="1"
+                          Grid.Row="2"
+                              Margin="2"
+                              SelectedIndex="0">
+                    <ComboBoxItem Content="Scan"/>
+                    <ComboBoxItem Content="Snake"/>
+                </ComboBox>
+
+                <Button Grid.Row="3" Grid.ColumnSpan="2" Margin="2" Content="Save"/>
+
+            </Grid>
+
+            <Image Grid.Column="1"
+                   Margin="2,4,4,4"
+                   Width="128"
+                   Height="128">
+                <Image.Source>
+                    <BitmapImage UriSource="/Images/HZ_BL_SC.png"/>
+                </Image.Source>
+            </Image>
+
+
+
+
+        </Grid-->
+

@@ -18,13 +18,8 @@ namespace LMCSHD
         private IWaveIn waveIn;
         private static int fftLength = 1024; // NAudio fft wants powers of two!
 
-
-
         // There might be a sample aggregator in NAudio somewhere but I made a variation for my needs
         private SampleAggregator sampleAggregator = new SampleAggregator(fftLength);
-
-        float highCutoff = 1f;
-
 
         Callback fftDataCallback;
 
