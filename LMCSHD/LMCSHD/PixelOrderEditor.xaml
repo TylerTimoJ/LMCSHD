@@ -36,7 +36,6 @@
         <ComboBox x:Name="UIOrientation"
                           Grid.Column="1"
                               Margin="2"
-                              SelectedIndex="0"
                   SelectionChanged="Direction_SelectionChanged">
             <ComboBoxItem Content="Horizontal"/>
             <ComboBoxItem Content="Vertical"/>
@@ -48,7 +47,6 @@
                           Grid.Column="1"
                           Grid.Row="1"
                               Margin="2"
-                              SelectedIndex="0"
                   SelectionChanged="StartingCorner_SelectionChanged">
             <ComboBoxItem Content="Top Left"/>
             <ComboBoxItem Content="Top Right"/>
@@ -62,7 +60,6 @@
                           Grid.Column="1"
                           Grid.Row="2"
                               Margin="2"
-                              SelectedIndex="0"
                   SelectionChanged="NewLine_SelectionChanged">
             <ComboBoxItem Content="Scan"/>
             <ComboBoxItem Content="Snake"/>
@@ -77,9 +74,6 @@
                    Margin="2"
                    Width="100"
                    Height="100">
-            <Image.Source>
-                <BitmapImage UriSource="/Images/HZ_BL_SC.png"/>
-            </Image.Source>
         </Image>
 
 

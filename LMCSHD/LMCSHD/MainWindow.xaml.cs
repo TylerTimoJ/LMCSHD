@@ -39,7 +39,6 @@ namespace LMCSHD
         private SerialManager sm = new SerialManager();
 
         //audio
-        //  DispatcherTimer t;
 
         public MainWindow()
         {
@@ -59,8 +58,13 @@ namespace LMCSHD
 
         private void NewPixelOrder_Click(object sender, RoutedEventArgs e)
         {
-            PixelOrderEditor editor = new PixelOrderEditor(frame, this);
+            PixelOrderEditor editor = new PixelOrderEditor(this, sm);
             editor.ShowDialog();
+        }
+
+        public void ApplyPixelOrder(PixelOrder order)
+        {
+            sm.pixelOrder = order;
         }
         //===========================================================================================
 
@@ -160,7 +164,11 @@ namespace LMCSHD
 
         private void Button_Click(object sender, RoutedEventArgs e)
         {
-            p.BeginCapture(FFTCallback, p.GetDefaultDevice(NAudio.CoreAudioApi.DataFlow.Render));
+            NAudio.CoreAudioApi.MMDevice device = p.GetDefaultDevice(NAudio.CoreAudioApi.DataFlow.Render);
+            if (device != null)
+                p.BeginCapture(FFTCallback, device);
+            else
+                System.Windows.MessageBox.Show("No Device Found");
         }
 
         private void Button1_Click(object sender, RoutedEventArgs e)

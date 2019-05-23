@@ -1,8 +1,7 @@
 ﻿using System;
 using NAudio.Wave;
-using NAudio.Dsp; // The Complex and FFT are here!
+using NAudio.Dsp;
 using NAudio.CoreAudioApi;
-
 using System.IO;
 using System.Windows;
 using System.Threading;
@@ -41,7 +40,14 @@ namespace LMCSHD
         public MMDevice GetDefaultDevice(DataFlow flow)
         {
             var enumerator = new MMDeviceEnumerator();
-            return enumerator.GetDefaultAudioEndpoint(flow, Role.Multimedia);
+            try
+            {
+                return enumerator.GetDefaultAudioEndpoint(flow, Role.Multimedia);
+            }
+            catch (Exception)
+            {
+                return null;
+            }
         }
 
 
@@ -81,7 +87,7 @@ namespace LMCSHD
 
         private void WaveIn_RecordingStopped(object sender, StoppedEventArgs e)
         {
-           // MessageBox.Show("rip, it has stopped");
+
         }
 
         void OnDataAvailable(object sender, WaveInEventArgs e)
@@ -102,13 +108,14 @@ namespace LMCSHD
 
         void FftCalculated(object sender, FftEventArgs e)
         {
+            float amplification = 1024;
             // float[] topHalfFFT = new float[(e.Result.Length / 2) / 8];
             float[] topHalfFFT = new float[64];
 
-            for (int i = 4; i < 68; i++)
+            for (int i = 0; i < 64; i++)
             {
                 //     topHalfFFT[i] = 2048 * Math.Abs( (float)Math.Sqrt((e.Result[i].X * e.Result[i].X) + (e.Result[i].Y * e.Result[i].Y)));
-                topHalfFFT[i - 4] = (float)Math.Sqrt((e.Result[i].X * e.Result[i].X) * 256 + (e.Result[i].Y * e.Result[i].Y) * 256);
+                topHalfFFT[i] = (float)Math.Sqrt((e.Result[i].X * e.Result[i].X) * amplification + (e.Result[i].Y * e.Result[i].Y) * amplification);
                 //topHalfFFT[i] = (float)Math.Sqrt((e.Result[i].X * e.Result[i].X) + (e.Result[i].Y * e.Result[i].Y));
               //   MessageBox.Show("index" + i + "value" + topHalfFFT[i].ToString("0.00000000"));
                 // MessageBox.Show(e.Result[i].Y.ToString());

@@ -40,7 +40,7 @@
                          Grid.Row="1"
                          Grid.Column="1"
                          Margin="2"
-                         Text="1000000"
+                         Text="2000000"
                          PreviewTextInput="SBaudRate_PreviewTextInput"
                          DataObject.Pasting="SBaudRate_TextBoxPasting"/>
 

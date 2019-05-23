@@ -5,11 +5,15 @@ using System.Text;
 using System.Threading.Tasks;
 using System.IO.Ports;
 using System.Windows;
+using System.IO;
+using static LMCSHD.PixelOrder;
+
 
 namespace LMCSHD
 {
     public class SerialManager
     {
+        public PixelOrder pixelOrder { get; set; } = new PixelOrder();
 
         private SerialPort sp;
         private bool serialReady = true;
@@ -34,9 +38,13 @@ namespace LMCSHD
         {
             if (SerialReady())
             {
+                byte[] orderedFrame = GetOrderedSerialFrame(frame);
+
                 try
                 {
-                    sp.Write(frame.GetSerializableFrame(), 0, frame.GetFrameLength());
+                    byte[] header = { 0x0F };
+                    sp.Write(header, 0, 1);
+                    sp.Write(orderedFrame, 0, orderedFrame.Length);
                     serialReady = false;
                 }
                 catch (Exception)
@@ -45,6 +53,49 @@ namespace LMCSHD
                 }
             }
         }
+
+        byte[] GetOrderedSerialFrame(MatrixFrame frame)
+        {
+            MatrixFrame.Pixel[,] pixelArray = frame.GetFrame();
+            byte[] orderedFrame = new byte[frame.Width * frame.Height * 3];
+
+            int index = 0;
+
+            int startX = pixelOrder.startCorner == StartCorner.TR || pixelOrder.startCorner == StartCorner.BR ? frame.Width - 1 : 0;
+            int termX = pixelOrder.startCorner == StartCorner.TR || pixelOrder.startCorner == StartCorner.BR ? -1 : frame.Width;
+            int incX = pixelOrder.startCorner == StartCorner.TR || pixelOrder.startCorner == StartCorner.BR ? -1 : 1;
+
+            int startY = pixelOrder.startCorner == StartCorner.BL || pixelOrder.startCorner == StartCorner.BR ? frame.Height - 1 : 0;
+            int termY = pixelOrder.startCorner == StartCorner.BL || pixelOrder.startCorner == StartCorner.BR ? -1 : frame.Height;
+            int incY = pixelOrder.startCorner == StartCorner.BL || pixelOrder.startCorner == StartCorner.BR ? -1 : 1;
+
+            if (pixelOrder.orientation == Orientation.HZ)
+                for (int y = startY; y != termY; y += incY)
+                {
+                    for (int x = startX; x != termX; x += incX)
+                    {
+                        int xPos = pixelOrder.newLine == NewLine.SC || y % 2 == 0 ? x : frame.Width - 1 - x;
+                        orderedFrame[index * 3] = pixelArray[xPos, y].R;
+                        orderedFrame[index * 3 + 1] = pixelArray[xPos, y].G;
+                        orderedFrame[index * 3 + 2] = pixelArray[xPos, y].B;
+                        index++;
+                    }
+                }
+            else
+                for (int x = startX; x != termX; x += incX)
+                {
+                    for (int y = startY; y != termY; y += incY)
+                    {
+                        int yPos = pixelOrder.newLine == NewLine.SC || x % 2 == 0 ? y : frame.Height - 1 - y;
+                        orderedFrame[index * 3] = pixelArray[x, yPos].R;
+                        orderedFrame[index * 3 + 1] = pixelArray[x, yPos].G;
+                        orderedFrame[index * 3 + 2] = pixelArray[x, yPos].B;
+                        index++;
+                    }
+                }
+            return orderedFrame;
+        }
+
         public void SerialSendBlankFrame(MatrixFrame frame)
         {
             if (SerialReady())

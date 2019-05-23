@@ -19,8 +19,8 @@ const int serialFrameLength = kMatrixWidth * kMatrixHeight * 3;
 void setup() {
   matrix.addLayer(&backgroundLayer);
   matrix.begin();
-  matrix.setBrightness(254);
-  Serial.begin(1000000);
+  matrix.setBrightness(127);
+  Serial.begin(2000000);
 }
 
 void loop() {}
@@ -37,8 +37,8 @@ void serialEvent()
     case 0x0F: //frame data
       Serial.readBytes(serialFrame, serialFrameLength); //read all incomming data from serial connection
       int index = 0;
-      for (int x = 0; x < kMatrixWidth; x++) {
-        for (int y = 0; y < kMatrixHeight; y++) {
+      for (int y = 0; y < kMatrixHeight; y++) {
+        for (int x = 0; x < kMatrixWidth; x++) {
           backgroundLayer.drawPixel(x, y, {serialFrame[index * 3], serialFrame[index * 3 + 1], serialFrame[index * 3 + 2]}); //update each pixel with data from serial
           index++;
         }
@@ -55,9 +55,9 @@ void serialEvent()
 
 
 
-
-void serialEvent()
-{
+/*
+  void serialEvent()
+  {
   switch (Serial.read())
   {
     case 0x05: //request for matrix definition
@@ -71,4 +71,5 @@ void serialEvent()
       Serial.write(0x06); //acknkowledge
       break;
   }
-}
+  }
+*/

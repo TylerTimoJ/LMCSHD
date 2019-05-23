@@ -204,22 +204,22 @@
     </BootstrapperPackage>
   </ItemGroup>
   <ItemGroup>
-    <Resource Include="Images\HZ_BL_SC.png" />
-    <Resource Include="Images\HZ_BL_SN.png" />
-    <Resource Include="Images\HZ_BR_SC.png" />
-    <Resource Include="Images\HZ_BR_SN.png" />
-    <Resource Include="Images\HZ_TL_SC.png" />
-    <Resource Include="Images\HZ_TL_SN.png" />
-    <Resource Include="Images\HZ_TR_SC.png" />
-    <Resource Include="Images\HZ_TR_SN.png" />
-    <Resource Include="Images\VT_BL_SC.png" />
-    <Resource Include="Images\VT_BL_SN.png" />
-    <Resource Include="Images\VT_BR_SC.png" />
-    <Resource Include="Images\VT_BR_SN.png" />
-    <Resource Include="Images\VT_TL_SC.png" />
-    <Resource Include="Images\VT_TL_SN.png" />
-    <Resource Include="Images\VT_TR_SC.png" />
-    <Resource Include="Images\VT_TR_SN.png" />
+    <Resource Include="Images\HZ_SC_BL.png" />
+    <Resource Include="Images\HZ_SN_BL.png" />
+    <Resource Include="Images\HZ_SC_BR.png" />
+    <Resource Include="Images\HZ_SN_BR.png" />
+    <Resource Include="Images\HZ_SC_TL.png" />
+    <Resource Include="Images\HZ_SN_TL.png" />
+    <Resource Include="Images\HZ_SC_TR.png" />
+    <Resource Include="Images\HZ_SN_TR.png" />
+    <Resource Include="Images\VT_SC_BL.png" />
+    <Resource Include="Images\VT_SN_BL.png" />
+    <Resource Include="Images\VT_SC_BR.png" />
+    <Resource Include="Images\VT_SN_BR.png" />
+    <Resource Include="Images\VT_SC_TL.png" />
+    <Resource Include="Images\VT_SN_TL.png" />
+    <Resource Include="Images\VT_SC_TR.png" />
+    <Resource Include="Images\VT_SN_TR.png" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>

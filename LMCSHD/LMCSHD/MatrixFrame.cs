@@ -26,7 +26,7 @@ namespace LMCSHD
 
         public bool RenderContentPreview { get; set; } = true;
 
-        public PixelOrder pixelOrder { get; set; }
+
 
         //End Data Properties
         public struct Pixel
@@ -98,20 +98,20 @@ namespace LMCSHD
 
         void DrawColumnMirrored(int x, int height)
         {
-            pixelArray[x, ((Height / 2) - 1)] = new Pixel(0, 255, 255);
+            pixelArray[x, ((Height / 2) - 1)] = new Pixel(255, 0, 255);
             for (int y = (Height / 2) - 2; y > (Height / 2) - 2 - height; y--)
             {
                 if (y < 0)
                     break;
-                pixelArray[x, y] = new Pixel(0, 255, 255);
+                pixelArray[x, y] = new Pixel(255, 0, 255);
             }
 
-            pixelArray[x, Height / 2] = new Pixel(255, 255, 0);
+            pixelArray[x, Height / 2] = new Pixel(255, 0, 0);
             for (int y = (Height / 2) + 1; y < (Height / 2) + 1 + height; y++)
             {
                 if (y > Height - 1)
                     break;
-                pixelArray[x, y] = new Pixel(255, 255, 0);
+                pixelArray[x, y] = new Pixel(255, 0, 0);
             }
         }
 
@@ -133,22 +133,7 @@ namespace LMCSHD
         }
 
         public Pixel[,] GetFrame() { return pixelArray; }
-        public byte[] GetSerializableFrame()
-        {
-                serialPixels[0] = 0x0F;
-                int index = 1;
-                for (int x = 0; x < Width; x++)
-                {
-                    for (int y = 0; y < Height; y++)
-                    {
-                        serialPixels[index] = pixelArray[x, y].R;
-                        serialPixels[index + 1] = pixelArray[x, y].G;
-                        serialPixels[index + 2] = pixelArray[x, y].B;
-                        index += 3;
-                    }
-                }
-                return serialPixels;
-        }
+
         public int GetFrameLength() { return (Width * Height * 3) + 1; }
     }
 
