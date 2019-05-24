@@ -66,7 +66,7 @@
                     <Separator />
                     <MenuItem Header="_Exit" />
                 </MenuItem>
-                
+
                 <MenuItem Header="_Serial">
                     <MenuItem x:Name="MIConnect" Header="Connect" Click="MIConnect_Click"/>
                     <MenuItem Header="Disconnect" Click="MIDisconnect_Click"/>
@@ -75,7 +75,7 @@
                 <MenuItem Header="Edit">
                     <MenuItem Header="PixelOrder" Click="NewPixelOrder_Click"/>
                 </MenuItem>
-                
+
 
 
             </Menu>
@@ -190,7 +190,7 @@
 
                         <Button x:Name="SCResetSliders"
                                     Grid.Row="3"
-                                    Content="Reset Bounds" Click="SCResetSliders_Click"/>
+                                       Content="Reset Bounds" Click="SCResetSliders_Click"/>
                         <StackPanel Grid.Row="4" Grid.ColumnSpan="2">
                             <CheckBox x:Name="SCLockDim"
                                           Margin="2"
@@ -215,13 +215,62 @@
                         </WrapPanel>
                     </Grid>
                 </GroupBox>
-                <Button x:Name="button" Content="Button" Margin="0" Width="75" Click="Button_Click"/>
-                <Button x:Name="button1" Content="Button" Margin="0" Width="75" Click="Button1_Click"/>
+
+                <GroupBox Width="300">
+                    <GroupBox.Header>
+                        <StackPanel Orientation="Horizontal">
+                            <RadioButton />
+                            <TextBlock Text=" Spectrum Analyzer"/>
+                        </StackPanel>
+                    </GroupBox.Header>
+
+                    <Grid>
+
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*"/>
+                            <ColumnDefinition Width="*"/>
+                        </Grid.ColumnDefinitions>
+                        <Grid.RowDefinitions>
+                            <RowDefinition Height="auto"/>
+                            <RowDefinition Height="auto"/>
+                            <RowDefinition Height="auto"/>
+                            <RowDefinition Height="auto"/>
+                            <RowDefinition Height="auto"/>
+                        </Grid.RowDefinitions>
+                        
+                        <Button x:Name="SAStart"
+                                Content="Start Capture"
+                                Click="Button_Click"/>
+                        <Button x:Name="SAStop"
+                                Grid.Column="1"
+                                Content="Stop Capture"
+                                Click="Button1_Click"/>
+
+                        <TextBlock Grid.Row="1"
+                                   Margin="2"
+                                   Text="Audio Device"
+                                   HorizontalAlignment="Right"
+                                   VerticalAlignment="Center"/>
+
+                        <ComboBox x:Name="SADeviceDrop"
+                                  Grid.Column="1"
+                                  Grid.Row="1"
+                                  Margin="2"
+                                  SelectedIndex="0"
+                                  SelectionChanged="SADeviceDrop_SelectionChanged"/>
 
 
+                        <Button x:Name="SARefreshDevices"
+                                Grid.Column="1"
+                                Grid.Row="2"
+                                Content="Refresh Devices"
+                                Click="SARefreshDevices_Click"/>
+
+                    </Grid>
+                </GroupBox>
+                
+                
             </WrapPanel>
-
-
         </Grid>
     </Grid>
 </Window>

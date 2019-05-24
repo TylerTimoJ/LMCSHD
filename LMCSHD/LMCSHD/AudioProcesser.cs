@@ -10,9 +10,10 @@ using NAudio.Wave.Compression;
 
 namespace LMCSHD
 {
-    class AudioProcesser
+    class AudioProcesser : IDisposable
     {
         public delegate void Callback(float[] fftData);
+        public bool isRecording { get; set; } = false;
         // Other inputs are also usable. Just look through the NAudio library.
         private IWaveIn waveIn;
         private static int fftLength = 1024; // NAudio fft wants powers of two!
@@ -22,58 +23,76 @@ namespace LMCSHD
 
         Callback fftDataCallback;
 
+        MMDeviceEnumerator enumerator;
+
         public AudioProcesser(Callback fftCallback)
         {
             fftDataCallback = fftCallback;
             sampleAggregator.FftCalculated += new EventHandler<FftEventArgs>(FftCalculated);
             sampleAggregator.PerformFFT = true;
 
+            enumerator = new MMDeviceEnumerator();
+
             // Here you decide what you want to use as the waveIn.
             // There are many options in NAudio and you can use other streams/files.
             // Note that the code varies for each different source.
 
-           // waveIn = new WasapiLoopbackCapture();
+            // waveIn = new WasapiLoopbackCapture();
 
 
         }
 
+        public void Dispose()
+        {
+            if (waveIn != null)
+                waveIn.Dispose();
+        }
+
         public MMDevice GetDefaultDevice(DataFlow flow)
         {
-            var enumerator = new MMDeviceEnumerator();
-            try
-            {
+            if (enumerator.HasDefaultAudioEndpoint(flow, Role.Multimedia))
+            { 
                 return enumerator.GetDefaultAudioEndpoint(flow, Role.Multimedia);
             }
-            catch (Exception)
+            else
             {
                 return null;
             }
         }
 
+        public MMDeviceCollection GetActiveDevices()
+        {
+            return enumerator.EnumerateAudioEndPoints(DataFlow.All, DeviceState.Active);
+        }
+
 
         public void BeginCapture(Callback fftCallback, MMDevice device)
         {
-            if(device.DataFlow == DataFlow.Render)
+            if (!isRecording)
             {
-                waveIn = new WasapiLoopbackCapture(device);
-            }
-            else
-            {
-                waveIn = new WasapiCapture(device);
-            }
-            if (waveIn.WaveFormat.SampleRate != 44100)
-            {
-                MessageBox.Show("Device: " + device.DeviceFriendlyName + "\n" + "has its sample rate set to: " + waveIn.WaveFormat.SampleRate.ToString() + " Hz.\n" + "Please set it to 44100 Hz.");
-                StopRecording();
-            }
-            else
-            {
-                waveIn.DataAvailable += OnDataAvailable;
-                waveIn.RecordingStopped += WaveIn_RecordingStopped;
+                if (device.DataFlow == DataFlow.Render)
+                {
+                    waveIn = new WasapiLoopbackCapture(device);
+                }
+                else
+                {
+                    waveIn = new WasapiCapture(device);
+                }
 
-                waveIn.StartRecording();
-            }
+                if (waveIn.WaveFormat.SampleRate != 44100)
+                {
+                    MessageBox.Show("Device: " + device.DeviceFriendlyName + "\n" + "has its sample rate set to: " + waveIn.WaveFormat.SampleRate.ToString() + " Hz.\n" + "Please set it to 44100 Hz.");
+                    StopRecording();
+                }
+                else
+                {
+                    waveIn.DataAvailable += OnDataAvailable;
+                    waveIn.RecordingStopped += WaveIn_RecordingStopped;
 
+                    waveIn.StartRecording();
+                    isRecording = true;
+                }
+            }
         }
 
         public void StopRecording()
@@ -81,13 +100,14 @@ namespace LMCSHD
             if (waveIn != null)
             {
                 waveIn.StopRecording();
-                waveIn.Dispose();
+                isRecording = false;
+                //waveIn.Dispose();
             }
         }
 
         private void WaveIn_RecordingStopped(object sender, StoppedEventArgs e)
         {
-
+           // isRecording = false;
         }
 
         void OnDataAvailable(object sender, WaveInEventArgs e)
@@ -114,17 +134,13 @@ namespace LMCSHD
 
             for (int i = 0; i < 64; i++)
             {
-                //     topHalfFFT[i] = 2048 * Math.Abs( (float)Math.Sqrt((e.Result[i].X * e.Result[i].X) + (e.Result[i].Y * e.Result[i].Y)));
+
                 topHalfFFT[i] = (float)Math.Sqrt((e.Result[i].X * e.Result[i].X) * amplification + (e.Result[i].Y * e.Result[i].Y) * amplification);
-                //topHalfFFT[i] = (float)Math.Sqrt((e.Result[i].X * e.Result[i].X) + (e.Result[i].Y * e.Result[i].Y));
-              //   MessageBox.Show("index" + i + "value" + topHalfFFT[i].ToString("0.00000000"));
-                // MessageBox.Show(e.Result[i].Y.ToString());
+
             }
 
-                fftDataCallback(topHalfFFT);
+            fftDataCallback(topHalfFFT);
 
-            //Thread.Sleep(200);
-            // frame.InjestFFT(topHalfFFT);
         }
     }
 

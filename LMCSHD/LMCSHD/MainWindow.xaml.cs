@@ -19,6 +19,7 @@ using System.Drawing.Drawing2D;
 using System.IO;
 using Microsoft.Win32;
 using Xceed.Wpf.Toolkit;
+using System.Collections.ObjectModel;
 
 namespace LMCSHD
 {
@@ -51,8 +52,8 @@ namespace LMCSHD
         private void Window_Closing(object sender, System.ComponentModel.CancelEventArgs e)
         {
             AbortCaptureThread();
-            if(sm != null)
-            sm.SerialSendBlankFrame(frame);
+            if (sm != null)
+                sm.SerialSendBlankFrame(frame);
 
         }
 
@@ -97,6 +98,7 @@ namespace LMCSHD
             SetupSCUI();
             MIConnect.IsEnabled = false;
             p = new AudioProcesser(FFTCallback);
+            RefreshAudioDeviceList();
         }
 
         private unsafe void UpdatePreview()
@@ -157,23 +159,50 @@ namespace LMCSHD
                 UpdatePreview();
             });
         }
-        void DisplayFFT()
-        {
-
-        }
-
         private void Button_Click(object sender, RoutedEventArgs e)
         {
-            NAudio.CoreAudioApi.MMDevice device = p.GetDefaultDevice(NAudio.CoreAudioApi.DataFlow.Render);
-            if (device != null)
-                p.BeginCapture(FFTCallback, device);
-            else
-                System.Windows.MessageBox.Show("No Device Found");
+            BeginAudioCapture();
+        }
+        private void BeginAudioCapture()
+        {
+            NAudio.CoreAudioApi.MMDevice device;
+            NAudio.CoreAudioApi.MMDeviceCollection devices = p.GetActiveDevices();
+
+            device = devices[SADeviceDrop.SelectedIndex];
+
+            p.BeginCapture(FFTCallback, device);
         }
 
         private void Button1_Click(object sender, RoutedEventArgs e)
         {
             p.StopRecording();
+        }
+
+        void RefreshAudioDeviceList()
+        {
+            NAudio.CoreAudioApi.MMDeviceCollection devices = p.GetActiveDevices();
+
+            ObservableCollection<string> list = new ObservableCollection<string>();
+            foreach (NAudio.CoreAudioApi.MMDevice device in devices)
+            {
+                string deviceType = device.DataFlow == NAudio.CoreAudioApi.DataFlow.Capture ? "Microphone " : "Speaker ";
+                list.Add(deviceType + device.DeviceFriendlyName);
+            }
+            SADeviceDrop.ItemsSource = list;
+        }
+
+        private void SARefreshDevices_Click(object sender, RoutedEventArgs e)
+        {
+            RefreshAudioDeviceList();
+        }
+
+        private void SADeviceDrop_SelectionChanged(object sender, SelectionChangedEventArgs e)
+        {
+            if (p.isRecording)
+            {
+                p.StopRecording();
+                BeginAudioCapture();
+            }
         }
 
         //===========================================================================================
@@ -369,6 +398,7 @@ namespace LMCSHD
         {
             SetupSCUI();
         }
+
         #endregion
 
 
