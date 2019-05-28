@@ -18,6 +18,8 @@ namespace LMCSHD
         private SerialPort sp;
         private bool serialReady = true;
 
+
+
         public SerialManager()
         {
 
@@ -33,6 +35,7 @@ namespace LMCSHD
             {
 
             }
+
         }
         public void SerialSendFrame(MatrixFrame frame)
         {

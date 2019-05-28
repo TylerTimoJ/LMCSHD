@@ -31,20 +31,22 @@ namespace LMCSHD
         //Frame & Preview
         private MatrixFrame frame;
         public static WriteableBitmap MatrixBitmap;
+
         //screen capture
         private ScreenRecorder scRec;
-        private System.Drawing.Rectangle captureRect;
+        private Rectangle captureRect;
         Thread captureThread;
-        AudioProcesser p;
+
+
         //serial
         private SerialManager sm = new SerialManager();
 
         //audio
+        AudioProcesser ap;
 
         public MainWindow()
         {
             InitializeComponent();
-
         }
 
         //Window Function
@@ -61,11 +63,6 @@ namespace LMCSHD
         {
             PixelOrderEditor editor = new PixelOrderEditor(this, sm);
             editor.ShowDialog();
-        }
-
-        public void ApplyPixelOrder(PixelOrder order)
-        {
-            sm.pixelOrder = order;
         }
         //===========================================================================================
 
@@ -97,7 +94,7 @@ namespace LMCSHD
             MatrixPreviewGroup.Text = " Matrix Preview: " + frame.Width.ToString() + "x" + frame.Height.ToString();
             SetupSCUI();
             MIConnect.IsEnabled = false;
-            p = new AudioProcesser(FFTCallback);
+            ap = new AudioProcesser(FFTCallback);
             RefreshAudioDeviceList();
         }
 
@@ -145,10 +142,7 @@ namespace LMCSHD
         }
         //===========================================================================================
 
-        //FFT Functions
-        //============================================================================================
-
-
+        #region FFT
         void FFTCallback(float[] fftData)
         {
             Dispatcher.Invoke(() =>
@@ -159,28 +153,18 @@ namespace LMCSHD
                 UpdatePreview();
             });
         }
-        private void Button_Click(object sender, RoutedEventArgs e)
-        {
-            BeginAudioCapture();
-        }
         private void BeginAudioCapture()
         {
-            NAudio.CoreAudioApi.MMDevice device;
-            NAudio.CoreAudioApi.MMDeviceCollection devices = p.GetActiveDevices();
-
-            device = devices[SADeviceDrop.SelectedIndex];
-
-            p.BeginCapture(FFTCallback, device);
+            ap.BeginCapture(FFTCallback, SADeviceDrop.SelectedIndex);
         }
-
-        private void Button1_Click(object sender, RoutedEventArgs e)
+        private void StopAudioCapture()
         {
-            p.StopRecording();
+            ap.StopRecording();
         }
 
         void RefreshAudioDeviceList()
         {
-            NAudio.CoreAudioApi.MMDeviceCollection devices = p.GetActiveDevices();
+            NAudio.CoreAudioApi.MMDeviceCollection devices = ap.GetActiveDevices();
 
             ObservableCollection<string> list = new ObservableCollection<string>();
             foreach (NAudio.CoreAudioApi.MMDevice device in devices)
@@ -190,7 +174,17 @@ namespace LMCSHD
             }
             SADeviceDrop.ItemsSource = list;
         }
+        #endregion
 
+        #region FFT_UI
+        private void SAStart_Click(object sender, RoutedEventArgs e)
+        {
+            BeginAudioCapture();
+        }
+        private void SAStop_Click(object sender, RoutedEventArgs e)
+        {
+            StopAudioCapture();
+        }
         private void SARefreshDevices_Click(object sender, RoutedEventArgs e)
         {
             RefreshAudioDeviceList();
@@ -198,19 +192,54 @@ namespace LMCSHD
 
         private void SADeviceDrop_SelectionChanged(object sender, SelectionChangedEventArgs e)
         {
-            if (p.isRecording)
+            if (ap.isRecording)
             {
-                p.StopRecording();
+                StopAudioCapture();
                 BeginAudioCapture();
             }
         }
 
-        //===========================================================================================
+        private void SARangeS_HigherValueChanged(object sender, RoutedEventArgs e)
+        {
+            if (ap != null)
+            {
+                ap.HighFreqClip = (int)((RangeSlider)sender).HigherValue;
+                SAHighClipU.Value = (int)((RangeSlider)sender).HigherValue;
+            }
+        }
 
+        private void SARangeS_LowerValueChanged(object sender, RoutedEventArgs e)
+        {
+            if (ap != null)
+            {
+                ap.LowFreqClip = (int)((RangeSlider)sender).LowerValue;
+                SALowClipU.Value = (int)((RangeSlider)sender).LowerValue;
+            }
+        }
+        private void SAIntUpDown_ValueChanged(object sender, RoutedPropertyChangedEventArgs<object> e)
+        {
+            if (ap != null)
+                switch (((IntegerUpDown)sender).Name)
+                {
+                    case "SALowClipU":
+                        SARangeS.LowerValue = (int)((IntegerUpDown)sender).Value;
+                        //SALowClipS.Value = (int)((IntegerUpDown)sender).Value;
+                        break;
+                    case "SAHighClipU":
+                        SARangeS.HigherValue = (int)((IntegerUpDown)sender).Value;
+                        //   SAHighClipS.Value = (int)((IntegerUpDown)sender).Value;
+                        break;
+                }
+        }
 
+        private void SAAmpU_ValueChanged(object sender, RoutedPropertyChangedEventArgs<object> e)
+        {
+            if (ap != null)
+                ap.Amplitiude = (int)((IntegerUpDown)sender).Value;
+        }
+        #endregion
 
-
-        #region ScreenCapFunctions
+        #region Screen_Capture
         void PixelDataCallback(Bitmap capturedBitmap)
         {
             frame.InjestGDIBitmap(capturedBitmap);
@@ -221,6 +250,7 @@ namespace LMCSHD
             }
             Dispatcher.Invoke(() => { UpdatePreview(); });
             sm.SerialSendFrame(frame);
+            GC.Collect();
         }
         void StartCapture()
         {
@@ -259,7 +289,7 @@ namespace LMCSHD
         }
         #endregion
 
-        #region ScreenCapUIHandlers
+        #region Screen_Capture_UI
         private void SC_Start_Click(object sender, RoutedEventArgs e)
         {
             StartCapture();
@@ -283,73 +313,76 @@ namespace LMCSHD
         }
         private void SCSlider_ValueChanged(object sender, RoutedPropertyChangedEventArgs<double> e)
         {
-
-            if (!(bool)SCLockDim.IsChecked)
+            if (frame != null)
             {
-                switch (((Slider)sender).Name)
+                if (!(bool)SCLockDim.IsChecked)
                 {
-                    case "SCStartXS":
-                        SCStartXS.Value = SCStartXS.Value > (SCEndXS.Value - frame.Width) ? SCEndXS.Value - frame.Width : SCStartXS.Value;
-                        SCStartXU.Value = (int)((Slider)sender).Value;
-                        break;
-                    case "SCStartYS":
-                        SCStartYS.Value = SCStartYS.Value > (SCEndYS.Value - frame.Height) ? SCEndYS.Value - frame.Height : SCStartYS.Value;
-                        SCStartYU.Value = (int)((Slider)sender).Value;
-                        break;
-                    case "SCEndXS":
-                        SCEndXS.Value = SCEndXS.Value < SCStartXS.Value + frame.Width ? SCStartXS.Value + frame.Width : SCEndXS.Value;
-                        SCEndXU.Value = (int)((Slider)sender).Value;
-                        break;
-                    case "SCEndYS":
-                        SCEndYS.Value = SCEndYS.Value < SCStartYS.Value + frame.Height ? SCStartYS.Value + frame.Height : SCEndYS.Value;
-                        SCEndYU.Value = (int)((Slider)sender).Value;
-                        break;
+                    switch (((Slider)sender).Name)
+                    {
+                        case "SCStartXS":
+                            SCStartXS.Value = SCStartXS.Value > (SCEndXS.Value - frame.Width) ? SCEndXS.Value - frame.Width : SCStartXS.Value;
+                            SCStartXU.Value = (int)((Slider)sender).Value;
+                            break;
+                        case "SCStartYS":
+                            SCStartYS.Value = SCStartYS.Value > (SCEndYS.Value - frame.Height) ? SCEndYS.Value - frame.Height : SCStartYS.Value;
+                            SCStartYU.Value = (int)((Slider)sender).Value;
+                            break;
+                        case "SCEndXS":
+                            SCEndXS.Value = SCEndXS.Value < SCStartXS.Value + frame.Width ? SCStartXS.Value + frame.Width : SCEndXS.Value;
+                            SCEndXU.Value = (int)((Slider)sender).Value;
+                            break;
+                        case "SCEndYS":
+                            SCEndYS.Value = SCEndYS.Value < SCStartYS.Value + frame.Height ? SCStartYS.Value + frame.Height : SCEndYS.Value;
+                            SCEndYU.Value = (int)((Slider)sender).Value;
+                            break;
+                    }
                 }
-            }
-            else
-            {
-                switch (((Slider)sender).Name)
+                else
                 {
-                    case "SCStartXS":
-                        if (SCStartXS.Value + captureRect.Width > SCEndXS.Maximum)
-                            SCStartXS.Value = SCEndXS.Maximum - captureRect.Width;
-                        else
-                            SCEndXS.Value = SCStartXS.Value + captureRect.Width;
-                        SCStartXU.Value = (int)((Slider)sender).Value;
-                        break;
-                    case "SCStartYS":
-                        if (SCStartYS.Value + captureRect.Height > SCEndYS.Maximum)
-                            SCStartYS.Value = SCEndYS.Maximum - captureRect.Height;
-                        else
-                            SCEndYS.Value = SCStartYS.Value + captureRect.Height;
-                        SCStartYU.Value = (int)((Slider)sender).Value;
-                        break;
-                    case "SCEndXS":
-                        if (SCEndXS.Value - captureRect.Width < 0)
-                            SCEndXS.Value = captureRect.Width;
-                        else
-                            SCStartXS.Value = SCEndXS.Value - captureRect.Width;
-                        SCEndXU.Value = (int)((Slider)sender).Value;
-                        break;
-                    case "SCEndYS":
-                        if (SCEndYS.Value - captureRect.Height < 0)
-                            SCEndYS.Value = captureRect.Height;
-                        else
-                            SCStartYS.Value = SCEndYS.Value - captureRect.Height;
-                        SCEndYU.Value = (int)((Slider)sender).Value;
-                        break;
+                    switch (((Slider)sender).Name)
+                    {
+                        case "SCStartXS":
+                            if (SCStartXS.Value + captureRect.Width > SCEndXS.Maximum)
+                                SCStartXS.Value = SCEndXS.Maximum - captureRect.Width;
+                            else
+                                SCEndXS.Value = SCStartXS.Value + captureRect.Width;
+                            SCStartXU.Value = (int)((Slider)sender).Value;
+                            break;
+                        case "SCStartYS":
+                            if (SCStartYS.Value + captureRect.Height > SCEndYS.Maximum)
+                                SCStartYS.Value = SCEndYS.Maximum - captureRect.Height;
+                            else
+                                SCEndYS.Value = SCStartYS.Value + captureRect.Height;
+                            SCStartYU.Value = (int)((Slider)sender).Value;
+                            break;
+                        case "SCEndXS":
+                            if (SCEndXS.Value - captureRect.Width < 0)
+                                SCEndXS.Value = captureRect.Width;
+                            else
+                                SCStartXS.Value = SCEndXS.Value - captureRect.Width;
+                            SCEndXU.Value = (int)((Slider)sender).Value;
+                            break;
+                        case "SCEndYS":
+                            if (SCEndYS.Value - captureRect.Height < 0)
+                                SCEndYS.Value = captureRect.Height;
+                            else
+                                SCStartYS.Value = SCEndYS.Value - captureRect.Height;
+                            SCEndYU.Value = (int)((Slider)sender).Value;
+                            break;
+                    }
                 }
-            }
-            captureRect = new System.Drawing.Rectangle((int)SCStartXS.Value, (int)SCStartYS.Value, (int)SCEndXS.Value - (int)SCStartXS.Value, (int)SCEndYS.Value - (int)SCStartYS.Value);
 
-            SCWidth.Text = "Width: " + captureRect.Width.ToString();
-            SCHeight.Text = "Height: " + captureRect.Height.ToString();
+                captureRect = new System.Drawing.Rectangle((int)SCStartXS.Value, (int)SCStartYS.Value, (int)SCEndXS.Value - (int)SCStartXS.Value, (int)SCEndYS.Value - (int)SCStartYS.Value);
 
-            if (scRec != null)
-            {
-                if ((bool)SCDisplayOutline.IsChecked)
-                    scRec.EraseRectOnScreen();
-                scRec.CaptureRect = captureRect;
+                SCWidth.Text = "Width: " + captureRect.Width.ToString();
+                SCHeight.Text = "Height: " + captureRect.Height.ToString();
+
+                if (scRec != null)
+                {
+                    if ((bool)SCDisplayOutline.IsChecked)
+                        scRec.EraseRectOnScreen();
+                    scRec.CaptureRect = captureRect;
+                }
             }
         }
         private void SC_INT_UPDOWN_Click(object sender, RoutedEventArgs e)
@@ -398,6 +431,9 @@ namespace LMCSHD
         {
             SetupSCUI();
         }
+
+
+
 
         #endregion
 

@@ -14,9 +14,14 @@ namespace LMCSHD
     {
         public delegate void Callback(float[] fftData);
         public bool isRecording { get; set; } = false;
+
+        public int LowFreqClip { get; set; } = 0;
+        public int HighFreqClip { get; set; } = 22050;
+
+        public int Amplitiude { get; set; } = 1024;
         // Other inputs are also usable. Just look through the NAudio library.
         private IWaveIn waveIn;
-        private static int fftLength = 1024; // NAudio fft wants powers of two!
+        private static int fftLength = 2048; // NAudio fft wants powers of two!
 
         // There might be a sample aggregator in NAudio somewhere but I made a variation for my needs
         private SampleAggregator sampleAggregator = new SampleAggregator(fftLength);
@@ -51,7 +56,7 @@ namespace LMCSHD
         public MMDevice GetDefaultDevice(DataFlow flow)
         {
             if (enumerator.HasDefaultAudioEndpoint(flow, Role.Multimedia))
-            { 
+            {
                 return enumerator.GetDefaultAudioEndpoint(flow, Role.Multimedia);
             }
             else
@@ -66,10 +71,13 @@ namespace LMCSHD
         }
 
 
-        public void BeginCapture(Callback fftCallback, MMDevice device)
+        public void BeginCapture(Callback fftCallback, int deviceIndex)
         {
             if (!isRecording)
             {
+
+                MMDevice device = GetActiveDevices()[deviceIndex];
+
                 if (device.DataFlow == DataFlow.Render)
                 {
                     waveIn = new WasapiLoopbackCapture(device);
@@ -107,7 +115,7 @@ namespace LMCSHD
 
         private void WaveIn_RecordingStopped(object sender, StoppedEventArgs e)
         {
-           // isRecording = false;
+            // isRecording = false;
         }
 
         void OnDataAvailable(object sender, WaveInEventArgs e)
@@ -128,14 +136,22 @@ namespace LMCSHD
 
         void FftCalculated(object sender, FftEventArgs e)
         {
-            float amplification = 1024;
-            // float[] topHalfFFT = new float[(e.Result.Length / 2) / 8];
-            float[] topHalfFFT = new float[64];
+            float binFreqRange = 44100f / (float)fftLength;
 
-            for (int i = 0; i < 64; i++)
+            int freqRange = HighFreqClip - LowFreqClip;
+
+            int arrayLength = (int)(freqRange / binFreqRange);
+            if (arrayLength < 1)
+                arrayLength = 1;
+
+            int startIndex = (int)(LowFreqClip / binFreqRange);
+
+            float[] topHalfFFT = new float[arrayLength];
+
+            for (int i = startIndex; i < arrayLength + startIndex; i++)
             {
 
-                topHalfFFT[i] = (float)Math.Sqrt((e.Result[i].X * e.Result[i].X) * amplification + (e.Result[i].Y * e.Result[i].Y) * amplification);
+                topHalfFFT[i - startIndex] = (float)Math.Sqrt((e.Result[i].X * e.Result[i].X) * Amplitiude + (e.Result[i].Y * e.Result[i].Y) * Amplitiude);
 
             }
 
@@ -178,7 +194,7 @@ namespace LMCSHD
             {
 
                 // Remember the window function! There are many others as well.
-                fftBuffer[fftPos].X = (float)(value * FastFourierTransform.BlackmannHarrisWindow(fftPos, fftLength));
+                fftBuffer[fftPos].X = (float)(value * FastFourierTransform.HammingWindow(fftPos, fftLength));
                 fftBuffer[fftPos].Y = 0; // This is always zero with audio.
                 fftPos++;
                 if (fftPos >= fftLength)

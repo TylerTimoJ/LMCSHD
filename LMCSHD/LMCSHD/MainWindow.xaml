@@ -237,14 +237,14 @@
                             <RowDefinition Height="auto"/>
                             <RowDefinition Height="auto"/>
                         </Grid.RowDefinitions>
-                        
+
                         <Button x:Name="SAStart"
                                 Content="Start Capture"
-                                Click="Button_Click"/>
+                                Click="SAStart_Click"/>
                         <Button x:Name="SAStop"
                                 Grid.Column="1"
                                 Content="Stop Capture"
-                                Click="Button1_Click"/>
+                                Click="SAStop_Click"/>
 
                         <TextBlock Grid.Row="1"
                                    Margin="2"
@@ -266,10 +266,66 @@
                                 Content="Refresh Devices"
                                 Click="SARefreshDevices_Click"/>
 
+                        <StackPanel Grid.ColumnSpan="2" Grid.Row="3">
+                            <GroupBox>
+                                <GroupBox.Header>
+                                    <TextBlock Text="Frequency Range (Hz)" Margin="2"/>
+                                </GroupBox.Header>
+                                <Grid>
+                                    <Grid.RowDefinitions>
+                                        <RowDefinition Height="auto"/>
+                                        <RowDefinition Height="auto"/>
+                                    </Grid.RowDefinitions>
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="*"/>
+                                        <ColumnDefinition Width="*"/>
+                                    </Grid.ColumnDefinitions>
+                                    
+                                    <xctk:RangeSlider x:Name="SARangeS"
+                                                      Grid.ColumnSpan="2"
+                                                      Minimum="100"
+                                                      Maximum="22050"
+                                                      HigherValue="22050"
+                                                      Margin="2"
+                                                      IsSnapToTickEnabled="True"
+                                                      HigherValueChanged="SARangeS_HigherValueChanged"
+                                                      LowerValueChanged="SARangeS_LowerValueChanged"/>
+                                    <xctk:IntegerUpDown x:Name="SALowClipU"
+                                                        Grid.Row="1"
+                                                        ValueChanged="SAIntUpDown_ValueChanged"
+                                                        Maximum="22050"
+                                                        Minimum="100"
+                                                        HorizontalAlignment="Left"/>
+                                    <xctk:IntegerUpDown x:Name="SAHighClipU"
+                                                        Grid.Row="1"
+                                                        Grid.Column="1"
+                                                        ValueChanged="SAIntUpDown_ValueChanged"
+                                                        Value="22050"
+                                                        Maximum="22050"
+                                                        Minimum="100"
+                                                        HorizontalAlignment="Right"/>
+
+                                </Grid>
+                            </GroupBox>
+                        </StackPanel>
+                        <TextBlock Grid.Row="4"
+                                   Margin="2"
+                                   Text="Amplitude"
+                                   HorizontalAlignment="Right"
+                                   VerticalAlignment="Center"/>
+                        
+                        <xctk:IntegerUpDown x:Name="SAAmpU"
+                                            Grid.Row="4"
+                                            Grid.Column="1"
+                                            Width="auto"
+                                            ValueChanged="SAAmpU_ValueChanged"
+                                            Value="1024"
+                                            Maximum="8192"
+                                            Minimum="1"/>
                     </Grid>
                 </GroupBox>
-                
-                
+
+
             </WrapPanel>
         </Grid>
     </Grid>
