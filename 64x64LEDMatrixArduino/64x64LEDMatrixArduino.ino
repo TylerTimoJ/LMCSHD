@@ -19,7 +19,7 @@ const int serialFrameLength = kMatrixWidth * kMatrixHeight * 3;
 void setup() {
   matrix.addLayer(&backgroundLayer);
   matrix.begin();
-  matrix.setBrightness(200);
+  matrix.setBrightness(254);
   Serial.begin(12000000);
 }
 

@@ -237,6 +237,18 @@ namespace LMCSHD
             if (ap != null)
                 ap.Amplitiude = (int)((IntegerUpDown)sender).Value;
         }
+
+        private void SA_SelectedColorChanged(object sender, RoutedPropertyChangedEventArgs<System.Windows.Media.Color?> e)
+        {
+            if (frame != null)
+            {
+                MatrixFrame.Pixel color1 = new MatrixFrame.Pixel(SAColor1.SelectedColor.Value.R, SAColor1.SelectedColor.Value.G, SAColor1.SelectedColor.Value.B);
+                MatrixFrame.Pixel color2 = new MatrixFrame.Pixel(SAColor2.SelectedColor.Value.R, SAColor2.SelectedColor.Value.G, SAColor2.SelectedColor.Value.B);
+                frame.SetSpectrumGradient(color1, color2);
+            }
+
+        }
+
         #endregion
 
         #region Screen_Capture
@@ -431,6 +443,7 @@ namespace LMCSHD
         {
             SetupSCUI();
         }
+
 
 
 

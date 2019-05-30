@@ -26,6 +26,8 @@ namespace LMCSHD
         public InterpolationMode InterpMode { get; set; } = InterpolationMode.HighQualityBilinear;
 
         public bool RenderContentPreview { get; set; } = true;
+
+        private Pixel[] gradient;
         //End Data Properties
 
         public struct Pixel
@@ -41,6 +43,7 @@ namespace LMCSHD
             Width = w;
             Height = h;
             pixelArray = new Pixel[Width, Height];
+            SetSpectrumGradient(new Pixel(255, 0, 0), new Pixel(0, 0, 255));
         }
         public void SetPixel(int x, int y, Pixel color)
         {
@@ -129,25 +132,39 @@ namespace LMCSHD
             }
         }
 
+        public void SetSpectrumGradient(Pixel color1, Pixel color2)
+        {
+            gradient = new Pixel[Height / 2];
+
+            float rInc = (float)(color2.R - color1.R) / (float)(Height / 2);
+            float gInc = (float)(color2.G - color1.G) / (float)(Height / 2);
+            float bInc = (float)(color2.B - color1.B) / (float)(Height / 2);
+
+            for (int i = 0; i < gradient.Length; i++)
+            {
+                gradient[i] = new Pixel((byte)((rInc * i) + color1.R), (byte)((gInc * i) + color1.G), (byte)((bInc * i) + color1.B));
+            }
+        }
+
         void DrawColumnMirrored(int x, int height)
         {
-            Pixel topcolor = new Pixel(2, 50, 100);
-            Pixel bottomColor = new Pixel(100, 25, 5);
-
-            pixelArray[x, ((Height / 2) - 1)] = topcolor;
+            int gradientIndex = 0;
+            pixelArray[x, ((Height / 2) - 1)] = gradient[0];
             for (int y = (Height / 2) - 2; y > (Height / 2) - 2 - height; y--)
             {
                 if (y < 0)
                     break;
-                pixelArray[x, y] = topcolor;
+                pixelArray[x, y] = gradient[gradientIndex];
+                gradientIndex++;
             }
-
-            pixelArray[x, Height / 2] = bottomColor;
+            gradientIndex = 0;
+            pixelArray[x, Height / 2] = gradient[0];
             for (int y = (Height / 2) + 1; y < (Height / 2) + 1 + height; y++)
             {
                 if (y > Height - 1)
                     break;
-                pixelArray[x, y] = bottomColor;
+                pixelArray[x, y] = gradient[gradientIndex];
+                gradientIndex++;
             }
         }
 
