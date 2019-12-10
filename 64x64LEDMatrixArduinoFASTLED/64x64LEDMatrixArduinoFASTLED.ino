@@ -46,7 +46,7 @@ switch (Serial.read())
     case 0x0F: //frame data
       Serial.readBytes((char*)leds, NUM_LEDS * 3);
       FastLED.show();
-      Serial.write(0x06); //acknkowledge
+      Serial.write(0x06); //acknowledge
       break;
   }
 

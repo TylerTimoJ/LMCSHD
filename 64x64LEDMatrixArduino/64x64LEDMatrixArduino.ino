@@ -62,7 +62,7 @@ void serialEvent()
         }
       }
       backgroundLayer.swapBuffers();
-      Serial.write(0x06); //acknkowledge
+      Serial.write(0x06); //acknowledge
       break;
   }
 }
