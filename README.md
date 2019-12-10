@@ -3,13 +3,12 @@ LED Matrix Control Software HD
 
 Protocol Configuration - see 64x64LEDMatrixArduino.ino lines 46-68 for serial protocol example.
 
-In order for LMCSHD to properly communicate with a Matrix, or other type of display, the LMCSHD protocol must be followed. Below is a brief overview of the protocol, and it is up to the end user to imlement it to suit their needs.
+In order for LMCSHD to properly communicate with a Matrix, or other type of display, the LMCSHD protocol must be followed. Below is a brief overview of the protocol, and it is up to the end user to implement it to suit their needs.
 
 1. Read one byte of data from the Serial buffer when data becomes available. 
 
 2. Use a switch statement to determine the branch of execution to follow.
 
-3. If byte is 0x05, LMCSHD is requesting the Width and Height of the matrix. In your matrix firmware, you must specifiy a width and height and send that data back to LMCSHD. It should be in ascii text followed by a new line symbol "Serial.println(<matrix height>);"
+3. If byte is 0x05, LMCSHD is requesting the Width and Height of the matrix. In your matrix firmware, you must specify a width and height and send that data back to LMCSHD. It should be in ASCII text followed by a new line symbol "Serial.println(<matrix height>);"
 
-4. if byte is 0x0F read in matrixWidth * matrixHeight * 3 bytes of data. The first byte will be the red channel of the first LED as configured in the LMCSHD pixel order. This will be followed by the green byte and blue byte, which then repeats for every pixel. Then, write the byte 0x06 to the serial port once the display has been updated with the new data acknowledging to LMCSHD the Matrix is ready to receive more data. The framerate LMCSHD operates at is dependant on the speed the Matrix can recieve and process and frame of data, so it should happen as fast as possible.
-
+4. If byte is 0x0F read in matrixWidth * matrixHeight * 3 bytes of data. The first byte will be the red channel of the first LED as configured in the LMCSHD pixel order. This will be followed by the green byte and blue byte, which then repeats for every pixel. Then, write the byte 0x06 to the serial port once the display has been updated with the new data acknowledging to LMCSHD the Matrix is ready to receive more data. The framerate LMCSHD operates at is dependent on the speed the Matrix can receive and process and frame of data, so it should happen as fast as possible.
