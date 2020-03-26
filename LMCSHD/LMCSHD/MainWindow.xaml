@@ -8,8 +8,8 @@
         x:Class="LMCSHD.MainWindow"
         mc:Ignorable="d"
         Title="LED Matrix Control Software HD"
-        Height="776"
-        Width="706"
+        Height="963.5"
+        Width="1211.5"
         Closing="Window_Closing"
         SizeToContent="Width">
 
@@ -64,7 +64,7 @@
                     <MenuItem Header="_Open" />
                     <MenuItem Header="_Save" />
                     <Separator />
-                    <MenuItem Header="_Exit" />
+                    <MenuItem Header="_Exit" Click="MenuItem_Click"/>
                 </MenuItem>
 
                 <MenuItem Header="_Serial">
@@ -324,7 +324,7 @@
                                             Value="1024"
                                             Maximum="8192"
                                             Minimum="1"/>
-                        
+
                         <GroupBox Grid.Row="5" Grid.ColumnSpan="2">
                             <GroupBox.Header>
                                 <TextBlock Text="Gradient Colors" Margin="2"/>
@@ -348,7 +348,7 @@
                                                   SelectedColorChanged="SA_SelectedColorChanged"/>
                             </StackPanel>
                         </GroupBox>
-                        
+
                         <TextBlock Grid.Row="6"
                                    Margin="2"
                                    Text="Display Mode"
@@ -360,7 +360,7 @@
                                   Grid.Row="6"
                                   Margin="2"
                                   SelectedIndex="0">
-                            
+
                             <ComboBoxItem Content="Mirrored"/>
                             <ComboBoxItem Content="Standard"/>
                         </ComboBox>

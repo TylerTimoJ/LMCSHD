@@ -22,49 +22,45 @@ namespace LMCSHD
     {
 
         private MainWindow w;
-        private SerialManager sm;
-        private PixelOrder pixelOrder;
 
-        public PixelOrderEditor(MainWindow window, SerialManager serialM)
+        public PixelOrderEditor(MainWindow window)
         {
-            sm = serialM;
             w = window;
             InitializeComponent();
-            pixelOrder = new PixelOrder();
-            pixelOrder.newLine = sm.pixelOrder.newLine;
-            pixelOrder.orientation = sm.pixelOrder.orientation;
-            pixelOrder.startCorner = sm.pixelOrder.startCorner;
-            UIOrientation.SelectedIndex = (int)pixelOrder.orientation;
-            UIStartingCorner.SelectedIndex = (int)pixelOrder.startCorner;
-            UINewLine.SelectedIndex = (int)pixelOrder.newLine;
+            PixelOrder.newLine = PixelOrder.newLine;
+            PixelOrder.orientation = PixelOrder.orientation;
+            PixelOrder.startCorner = PixelOrder.startCorner;
+            UIOrientation.SelectedIndex = (int)PixelOrder.orientation;
+            UIStartingCorner.SelectedIndex = (int)PixelOrder.startCorner;
+            UINewLine.SelectedIndex = (int)PixelOrder.newLine;
         }
 
         private void Direction_SelectionChanged(object sender, SelectionChangedEventArgs e)
         {
-            pixelOrder.orientation = (PixelOrder.Orientation)UIOrientation.SelectedIndex;
+            PixelOrder.orientation = (PixelOrder.Orientation)UIOrientation.SelectedIndex;
             OrderUpdated();
         }
 
         private void StartingCorner_SelectionChanged(object sender, SelectionChangedEventArgs e)
         {
-            pixelOrder.startCorner = (PixelOrder.StartCorner)UIStartingCorner.SelectedIndex;
+            PixelOrder.startCorner = (PixelOrder.StartCorner)UIStartingCorner.SelectedIndex;
             OrderUpdated();
         }
 
         private void NewLine_SelectionChanged(object sender, SelectionChangedEventArgs e)
         {
-            pixelOrder.newLine = (PixelOrder.NewLine)UINewLine.SelectedIndex;
+            PixelOrder.newLine = (PixelOrder.NewLine)UINewLine.SelectedIndex;
             OrderUpdated();
         }
 
         private void Button_Click(object sender, RoutedEventArgs e)
         {
-            sm.pixelOrder = pixelOrder;
+            
             Close();
         }
         public void OrderUpdated()
         {
-            BitmapImage bitmapImage = new BitmapImage(new Uri("/LMCSHD;component/Images/" + pixelOrder.orientation.ToString() + "_" + pixelOrder.newLine.ToString() + "_" + pixelOrder.startCorner.ToString() + ".png", UriKind.Relative));
+            BitmapImage bitmapImage = new BitmapImage(new Uri("/LMCSHD;component/Images/" + PixelOrder.orientation.ToString() + "_" + PixelOrder.newLine.ToString() + "_" + PixelOrder.startCorner.ToString() + ".png", UriKind.Relative));
             HelperImage.Source = bitmapImage;
         }
     }

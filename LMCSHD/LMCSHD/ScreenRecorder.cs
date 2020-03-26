@@ -12,44 +12,34 @@ using System.Drawing.Drawing2D;
 using System.Runtime.InteropServices;
 using System.Windows.Media.Imaging;
 
+//using Xceed.Wpf.Toolkit;
+
 namespace LMCSHD
 {
-    public class ScreenRecorder
+    public static class ScreenRecorder
     {
-        public bool shouldDrawOutline;
-        public Rectangle CaptureRect { get; set; }
+        public static bool shouldDrawOutline;
+        public static Rectangle CaptureRect { get; set; }
 
-        public ScreenRecorder()
-        {
-
-        }
 
         public delegate void Callback(Bitmap capturedFrame);
-        public void StartRecording(Callback pixelDataCallback)
+        public static void StartRecording(Callback pixelDataCallback)
         {
             while (true)
                 pixelDataCallback(ScreenToBitmap());
         }
+        
 
-        public void StartDrawOutline()
-        {
-            shouldDrawOutline = true;
-            while (shouldDrawOutline)
-            {
-                DrawRectOnScreen(new Rectangle(CaptureRect.X - 1, CaptureRect.Y - 1, CaptureRect.Width + 2, CaptureRect.Height + 2));
-                Thread.Sleep(32);
-            }
-            EraseRectOnScreen();
-        }
 
-        private Bitmap ScreenToBitmap()
+
+        private static Bitmap ScreenToBitmap()
         {
             IntPtr handle = IntPtr.Zero;
             IntPtr hdcSrc = GetDC(handle);
             IntPtr hdcDest = CreateCompatibleDC(hdcSrc);
             IntPtr hBitmap = CreateCompatibleBitmap(hdcSrc, CaptureRect.Width, CaptureRect.Height);
             IntPtr hOld = SelectObject(hdcDest, hBitmap);
-            BitBlt(hdcDest, 0, 0, CaptureRect.Width, CaptureRect.Height, hdcSrc, CaptureRect.X, CaptureRect.Y, CopyPixelOperation.SourceCopy | CopyPixelOperation.CaptureBlt);
+            BitBlt(hdcDest, 0, 0, CaptureRect.Width, CaptureRect.Height, hdcSrc, CaptureRect.X, CaptureRect.Y, CopyPixelOperation.SourceCopy);
 
             SelectObject(hdcDest, hOld);
             DeleteDC(hdcDest);
@@ -61,17 +51,28 @@ namespace LMCSHD
             return bitmap;
         }
 
+        public static void StartDrawOutline()
+        {
+            shouldDrawOutline = true;
+            while (shouldDrawOutline)
+            {
+                DrawRectOnScreen(new Rectangle(CaptureRect.X - 1, CaptureRect.Y - 1, CaptureRect.Width + 2, CaptureRect.Height + 2));
+                Thread.Sleep(6);
+            }
+            EraseRectOnScreen();
+        }
+
         private static void DrawRectOnScreen(Rectangle expandedCaptureArea)
         {
             IntPtr ptr = GetDC(IntPtr.Zero);
             using (Graphics g = Graphics.FromHdc(ptr))
             {
-                g.DrawRectangle(new Pen(Color.Magenta, 1), expandedCaptureArea);
+                g.DrawRectangle(new Pen(Color.DarkMagenta, 1), expandedCaptureArea);
             }
             ReleaseDC(IntPtr.Zero, ptr);
         }
 
-        public void EraseRectOnScreen()
+        public static void EraseRectOnScreen()
         {
             InvalidateRect(IntPtr.Zero, IntPtr.Zero, false);
         }
@@ -79,6 +80,8 @@ namespace LMCSHD
         #region DLL Imports
         [DllImport("user32.dll")]
         static extern bool InvalidateRect(IntPtr hWnd, IntPtr lpRect, bool bErase);
+        [DllImport("user32.dll")]
+        static extern bool ValidateRect(IntPtr hWnd, IntPtr lpRect);
 
         [DllImport("User32.dll")]
         public static extern IntPtr GetDC(IntPtr hwnd);
@@ -103,6 +106,9 @@ namespace LMCSHD
 
         [DllImport("gdi32.dll")]
         public static extern bool DeleteObject(IntPtr hObject);
+
+      //  [DllImport("user32.dll")]
+      //  public static extern bool 
         #endregion
     }
 }

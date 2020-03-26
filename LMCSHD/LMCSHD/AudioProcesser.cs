@@ -68,8 +68,9 @@ namespace LMCSHD
         public MMDeviceCollection GetActiveDevices()
         {
             return enumerator.EnumerateAudioEndPoints(DataFlow.All, DeviceState.Active);
+            
         }
-
+        
 
         public void BeginCapture(Callback fftCallback, int deviceIndex)
         {

@@ -11,25 +11,19 @@ using static LMCSHD.PixelOrder;
 
 namespace LMCSHD
 {
-    public class SerialManager
+    public static class SerialManager
     {
-        public PixelOrder pixelOrder { get; set; } = new PixelOrder();
+        //public PixelOrder pixelOrder { get; set; } = new PixelOrder();
 
-        private SerialPort sp;
-        private bool serialReady = true;
+        private static SerialPort _sp = null;
+        private static bool _serialReady = false;
 
 
-
-        public SerialManager()
-        {
-
-        }
-
-        private void sp_DataReceived(object sender, SerialDataReceivedEventArgs e)
+        private static void sp_DataReceived(object sender, SerialDataReceivedEventArgs e)
         {
             try
             {
-                serialReady = sp.ReadByte() == 0x06 ? true : false;
+                _serialReady = _sp.ReadByte() == 0x06 ? true : false;
             }
             catch (Exception)
             {
@@ -37,47 +31,49 @@ namespace LMCSHD
             }
 
         }
-        public void SerialSendFrame(MatrixFrame frame)
+        public static void SerialSendFrame()
         {
-            if (SerialReady())
+            if (_serialReady)
             {
-                byte[] orderedFrame = GetOrderedSerialFrame(frame);
+                byte[] orderedFrame = GetOrderedSerialFrame();
 
                 try
                 {
                     byte[] header = { 0x0F };
-                    sp.Write(header, 0, 1);
-                    sp.Write(orderedFrame, 0, orderedFrame.Length);
-                    serialReady = false;
+                    _sp.Write(header, 0, 1);
+                    _sp.Write(orderedFrame, 0, orderedFrame.Length);
+                    _serialReady = false;
                 }
-                catch (Exception)
+                catch (Exception e)
                 {
-
+                    _serialReady = false;
+                    MessageBox.Show(e.Message);
                 }
             }
+
         }
 
-        byte[] GetOrderedSerialFrame(MatrixFrame frame)
+        static byte[] GetOrderedSerialFrame()
         {
-            MatrixFrame.Pixel[,] pixelArray = frame.GetFrame();
-            byte[] orderedFrame = new byte[frame.Width * frame.Height * 3];
+            MatrixFrame.Pixel[,] pixelArray = MatrixFrame.GetFrame();
+            byte[] orderedFrame = new byte[MatrixFrame.Width * MatrixFrame.Height * 3];
 
             int index = 0;
 
-            int startX = pixelOrder.startCorner == StartCorner.TR || pixelOrder.startCorner == StartCorner.BR ? frame.Width - 1 : 0;
-            int termX = pixelOrder.startCorner == StartCorner.TR || pixelOrder.startCorner == StartCorner.BR ? -1 : frame.Width;
-            int incX = pixelOrder.startCorner == StartCorner.TR || pixelOrder.startCorner == StartCorner.BR ? -1 : 1;
+            int startX = PixelOrder.startCorner == StartCorner.TR || PixelOrder.startCorner == StartCorner.BR ? MatrixFrame.Width - 1 : 0;
+            int termX = PixelOrder.startCorner == StartCorner.TR || PixelOrder.startCorner == StartCorner.BR ? -1 : MatrixFrame.Width;
+            int incX = PixelOrder.startCorner == StartCorner.TR || PixelOrder.startCorner == StartCorner.BR ? -1 : 1;
 
-            int startY = pixelOrder.startCorner == StartCorner.BL || pixelOrder.startCorner == StartCorner.BR ? frame.Height - 1 : 0;
-            int termY = pixelOrder.startCorner == StartCorner.BL || pixelOrder.startCorner == StartCorner.BR ? -1 : frame.Height;
-            int incY = pixelOrder.startCorner == StartCorner.BL || pixelOrder.startCorner == StartCorner.BR ? -1 : 1;
+            int startY = PixelOrder.startCorner == StartCorner.BL || PixelOrder.startCorner == StartCorner.BR ? MatrixFrame.Height - 1 : 0;
+            int termY = PixelOrder.startCorner == StartCorner.BL || PixelOrder.startCorner == StartCorner.BR ? -1 : MatrixFrame.Height;
+            int incY = PixelOrder.startCorner == StartCorner.BL || PixelOrder.startCorner == StartCorner.BR ? -1 : 1;
 
-            if (pixelOrder.orientation == Orientation.HZ)
+            if (PixelOrder.orientation == Orientation.HZ)
                 for (int y = startY; y != termY; y += incY)
                 {
                     for (int x = startX; x != termX; x += incX)
                     {
-                        int xPos = pixelOrder.newLine == NewLine.SC || y % 2 == 0 ? x : frame.Width - 1 - x;
+                        int xPos = PixelOrder.newLine == NewLine.SC || y % 2 == 0 ? x : MatrixFrame.Width - 1 - x;
                         orderedFrame[index * 3] = pixelArray[xPos, y].R;
                         orderedFrame[index * 3 + 1] = pixelArray[xPos, y].G;
                         orderedFrame[index * 3 + 2] = pixelArray[xPos, y].B;
@@ -89,7 +85,7 @@ namespace LMCSHD
                 {
                     for (int y = startY; y != termY; y += incY)
                     {
-                        int yPos = pixelOrder.newLine == NewLine.SC || x % 2 == 0 ? y : frame.Height - 1 - y;
+                        int yPos = PixelOrder.newLine == NewLine.SC || x % 2 == 0 ? y : MatrixFrame.Height - 1 - y;
                         orderedFrame[index * 3] = pixelArray[x, yPos].R;
                         orderedFrame[index * 3 + 1] = pixelArray[x, yPos].G;
                         orderedFrame[index * 3 + 2] = pixelArray[x, yPos].B;
@@ -99,55 +95,83 @@ namespace LMCSHD
             return orderedFrame;
         }
 
-        public void SerialSendBlankFrame(MatrixFrame frame)
+        public static void SerialSendBlankFrame()
         {
-            if (SerialReady())
+            if (_serialReady)
             {
-                byte[] blankFrameData = new byte[(frame.Width * frame.Height * 3) + 1];
-                blankFrameData[0] = 0x0F;
-                sp.Write(blankFrameData, 0, frame.GetFrameLength());
-                serialReady = false;
+                try
+                {
+                    byte[] blankFrameData = new byte[(MatrixFrame.Width * MatrixFrame.Height * 3) + 1];
+                    blankFrameData[0] = 0x0F;
+                    _sp.Write(blankFrameData, 0, MatrixFrame.GetFrameLength());
+                    _serialReady = false;
+                }
+                catch (Exception e)
+                {
+                    _serialReady = false;
+                    MessageBox.Show(e.Message);
+                }
             }
         }
-        public string[] GetPortNames()
+        public static string[] GetPortNames()
         {
             return SerialPort.GetPortNames();
         }
-        private int[] GetMatrixDefinition()
+        private static int[] GetMatrixDefinition()
         {
             byte[] b = { 0x05 };
-            sp.Write(b, 0, 1);
-            string width = sp.ReadLine().Trim();
-            string height = sp.ReadLine().Trim();
+            _sp.Write(b, 0, 1);
+            string width, height;
+            try
+            {
+                width = _sp.ReadLine();
+                height = _sp.ReadLine();
+            }
+            catch (Exception e)
+            {
+                MessageBox.Show("Application cannot parse matrix width/height definition\n" + e.Message);
+                return null;
+            }
             int[] data = { int.Parse(width), int.Parse(height) };
             return data;
         }
-        public int[] Connect(string portName, int baudRate)
+        public static int[] Connect(string portName, int baudRate)
         {
             try
             {
-                serialReady = true;
-                sp = new SerialPort(portName, baudRate);
-                sp.Open();
-                sp.DataReceived += sp_DataReceived;
-                return GetMatrixDefinition();
+                _sp = new SerialPort(portName, baudRate);
+                _sp.ReadTimeout = 10;
+                _sp.Open();
+
+                var def = GetMatrixDefinition();
+                if (def != null)
+                {
+                    _sp.DataReceived += sp_DataReceived;
+                    _serialReady = true;
+                    return def;
+                }
+                else
+                {
+                    Disconnect();
+                    return null;
+                }
             }
-            catch (Exception)
+            catch (Exception e)
             {
+                MessageBox.Show(e.Message);
                 return null;
             }
         }
-        public void Disconnect()
+        public static void Disconnect()
         {
-            if (sp != null)
+            if (_sp != null)
             {
-                sp.Close();
-                sp.Dispose();
+                _serialReady = false;
+                _sp.DataReceived -= sp_DataReceived;
+                _sp.Close();
+                _sp.Dispose();
+                _sp = null;
             }
-        }
-        private bool SerialReady()
-        {
-            return sp != null && sp.IsOpen && serialReady;
         }
     }
 }

@@ -1,33 +1,25 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using System.Windows;
-using System.Windows.Media;
-using System.Windows.Media.Imaging;
-using System.Drawing.Imaging;
-using System.Drawing;
+﻿using System.Drawing;
 using System.Drawing.Drawing2D;
+using System.Windows.Media.Imaging;
 using static LMCSHD.BitmapProcesser;
 
 namespace LMCSHD
 {
-    public class MatrixFrame
+    public static class MatrixFrame
     {
-        private Pixel[,] pixelArray;
+        private static Pixel[,] pixelArray;
 
+        public static bool isSetup = false;
 
         //Data Properties
-        public int Width { get; }
-        public int Height { get; }
-        public BitmapSource ContentImage { get; set; }
+        public static int Width = 16, Height = 16;
+        public static BitmapSource ContentImage { get; set; }
 
-        public InterpolationMode InterpMode { get; set; } = InterpolationMode.HighQualityBilinear;
+        public static InterpolationMode InterpMode { get; set; } = InterpolationMode.HighQualityBilinear;
 
-        public bool RenderContentPreview { get; set; } = true;
+        public static bool RenderContentPreview { get; set; } = true;
 
-        private Pixel[] gradient;
+        private static Pixel[] gradient;
         //End Data Properties
 
         public struct Pixel
@@ -38,23 +30,24 @@ namespace LMCSHD
                 R = r; G = g; B = b;
             }
         }
-        public MatrixFrame(int w, int h)
+        public static void SetDimensions(int w, int h)
         {
             Width = w;
             Height = h;
+            pixelArray = null;
             pixelArray = new Pixel[Width, Height];
-            SetSpectrumGradient(new Pixel(255, 0, 0), new Pixel(0, 0, 255));
+            //SetSpectrumGradient(new Pixel(255, 0, 0), new Pixel(0, 0, 255));
+            isSetup = true;
         }
-        public void SetPixel(int x, int y, Pixel color)
+        public static void SetPixel(int x, int y, Pixel color)
         {
             pixelArray[x, y] = color;
         }
-        public void SetFrame(Pixel[,] givenFrame)
+        public static void SetFrame(Pixel[,] givenFrame)
         {
             pixelArray = givenFrame;
         }
-
-        public void InjestGDIBitmap(Bitmap b)
+        public static void InjestGDIBitmap(Bitmap b)
         {
             if (RenderContentPreview)
                 ContentImage = CreateBitmapSourceFromBitmap(b);
@@ -65,8 +58,7 @@ namespace LMCSHD
             else
                 pixelArray = BitmapToPixelArray(DownsampleBitmap(b, Width, Height, InterpMode));
         }
-
-        public void InjestFFT(float[] fftData)
+        public static void InjestFFT(float[] fftData)
         {
             SetFrameColor(new Pixel(0, 0, 0));
 
@@ -77,8 +69,7 @@ namespace LMCSHD
                 DrawColumnMirrored(i, (int)(downSampledData[i] * Height));
             }
         }
-
-        float[] ResizeSampleArray(float[] rawData, int newSize)
+        public static float[] ResizeSampleArray(float[] rawData, int newSize)
         {
             float[] newData = new float[newSize];
 
@@ -110,8 +101,7 @@ namespace LMCSHD
             }
             return newData;
         }
-
-        void SetFrameColor(Pixel color)
+        public static void SetFrameColor(Pixel color)
         {
             for (int x = 0; x < Width; x++)
             {
@@ -121,8 +111,7 @@ namespace LMCSHD
                 }
             }
         }
-
-        void DrawColumn(int x, int height)
+        public static void DrawColumn(int x, int height)
         {
             for (int y = Height - 1; y > Height - height; y--)
             {
@@ -131,9 +120,10 @@ namespace LMCSHD
                 pixelArray[x, y] = new Pixel(0, 0, 139);
             }
         }
-
-        public void SetSpectrumGradient(Pixel color1, Pixel color2)
+        public static void SetSpectrumGradient(Pixel color1, Pixel color2)
         {
+            //REIMPLEMENT
+            /*
             gradient = new Pixel[Height / 2];
 
             float rInc = (float)(color2.R - color1.R) / (float)(Height / 2);
@@ -144,9 +134,9 @@ namespace LMCSHD
             {
                 gradient[i] = new Pixel((byte)((rInc * i) + color1.R), (byte)((gInc * i) + color1.G), (byte)((bInc * i) + color1.B));
             }
+            */
         }
-
-        void DrawColumnMirrored(int x, int height)
+        public static void DrawColumnMirrored(int x, int height)
         {
             int gradientIndex = 0;
             pixelArray[x, ((Height / 2) - 1)] = gradient[0];
@@ -170,21 +160,8 @@ namespace LMCSHD
 
 
 
-        public Pixel[,] GetFrame() { return pixelArray; }
+        public static Pixel[,] GetFrame() { return pixelArray; }
 
-        public int GetFrameLength() { return (Width * Height * 3) + 1; }
+        public static int GetFrameLength() { return (Width * Height * 3) + 1; }
     }
-
-    public class FrameObject
-    {
-        public FrameObject(MatrixFrame.Pixel[,] pixels, BitmapSource image)
-        {
-            PixelArray = pixels;
-            contentImage = image;
-        }
-        public MatrixFrame.Pixel[,] PixelArray { get; set; }
-        public BitmapSource contentImage { get; set; }
-    }
-
-
 }
