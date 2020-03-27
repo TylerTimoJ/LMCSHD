@@ -39,24 +39,24 @@ void serialEvent()
       }
       break;
     case 0x05: //request for matrix definition
-      Serial.println(kMatrixWidth);
-      Serial.println(kMatrixHeight);
+      Serial.printf("%08d\n", kMatrixWidth);
+      Serial.printf("%08d\n", kMatrixHeight);
       break;
 
     case 0x0F: //frame data
-      
-        mil[inc] = micros() - prevMillis;
-        prevMillis = micros();
-        inc++;
-        unsigned char pix[3] = { 0 };
-        while (backgroundLayer.isSwapPending());
-        rgb24 *buffer = backgroundLayer.backBuffer();
-        for (int i = 0; i < kMatrixWidth * kMatrixHeight; i++) {
-          Serial.readBytes(pix, 3);
-           *buffer++ = rgb24{constrain(pix[0], BLK, 255), constrain(pix[1], BLK, 255), constrain(pix[2], BLK, 255)};
-        }
-        backgroundLayer.swapBuffers(false);
-        Serial.write(0x06); //acknowledge
-        break;
+
+      mil[inc] = micros() - prevMillis;
+      prevMillis = micros();
+      inc++;
+      unsigned char pix[3] = { 0 };
+      while (backgroundLayer.isSwapPending());
+      rgb24 *buffer = backgroundLayer.backBuffer();
+      for (int i = 0; i < kMatrixWidth * kMatrixHeight; i++) {
+        Serial.readBytes(pix, 3);
+        *buffer++ = rgb24{constrain(pix[0], BLK, 255), constrain(pix[1], BLK, 255), constrain(pix[2], BLK, 255)};
+      }
+      backgroundLayer.swapBuffers(false);
+      Serial.write(0x06); //acknowledge
+      break;
   }
 }

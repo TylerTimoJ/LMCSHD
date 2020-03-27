@@ -10,11 +10,9 @@ namespace LMCSHD
     /// </summary>
     public partial class MatrixConnection : Window
     {
-        private MainWindow m;
-        public MatrixConnection(MainWindow main)
+        public MatrixConnection()
         {
             InitializeComponent();
-            m = main;
             RefreshSerialPorts();
         }
         void RefreshSerialPorts()
@@ -29,7 +27,7 @@ namespace LMCSHD
             int[] matrixDef = SerialManager.Connect(SSerialPortList.SelectedValue.ToString(), int.Parse(SBaudRate.Text));
             if (matrixDef != null)
             {
-                m.SetupFrameObject(matrixDef[0], matrixDef[1]);
+                ((MainWindow)Application.Current.MainWindow).SetMatrixDimensions(matrixDef[0], matrixDef[1]);
                 Close();
             }
             else

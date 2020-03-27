@@ -121,7 +121,8 @@ namespace LMCSHD
         {
             byte[] b = { 0x05 };
             _sp.Write(b, 0, 1);
-            string width, height;
+            string width = "", height = "";
+
             try
             {
                 width = _sp.ReadLine();
@@ -129,7 +130,7 @@ namespace LMCSHD
             }
             catch (Exception e)
             {
-                MessageBox.Show("Application cannot parse matrix width/height definition\n" + e.Message);
+                MessageBox.Show("Application cannot parse matrix width/height definition\n" + width + height + "\n" + e.Message);
                 return null;
             }
             int[] data = { int.Parse(width), int.Parse(height) };
@@ -140,7 +141,7 @@ namespace LMCSHD
             try
             {
                 _sp = new SerialPort(portName, baudRate);
-                _sp.ReadTimeout = 10;
+                _sp.ReadTimeout = 100;
                 _sp.Open();
 
                 var def = GetMatrixDefinition();
@@ -170,7 +171,7 @@ namespace LMCSHD
                 _sp.DataReceived -= sp_DataReceived;
                 _sp.Close();
                 _sp.Dispose();
-                _sp = null;
+                //_sp = null;
             }
         }
     }

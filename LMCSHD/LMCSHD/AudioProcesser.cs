@@ -10,50 +10,42 @@ using NAudio.Wave.Compression;
 
 namespace LMCSHD
 {
-    class AudioProcesser : IDisposable
+    public static class AudioProcesser
     {
         public delegate void Callback(float[] fftData);
-        public bool isRecording { get; set; } = false;
+        public static bool isRecording = false;
 
-        public int LowFreqClip { get; set; } = 0;
-        public int HighFreqClip { get; set; } = 22050;
+        public static int LowFreqClip = 0;
+        public static int HighFreqClip = 22050;
 
-        public int Amplitiude { get; set; } = 1024;
+        public static int Amplitiude { get; set; } = 1024;
         // Other inputs are also usable. Just look through the NAudio library.
-        private IWaveIn waveIn;
+        private static IWaveIn waveIn;
         private static int fftLength = 2048; // NAudio fft wants powers of two!
 
         // There might be a sample aggregator in NAudio somewhere but I made a variation for my needs
-        private SampleAggregator sampleAggregator = new SampleAggregator(fftLength);
+        private static SampleAggregator sampleAggregator = new SampleAggregator(fftLength);
 
-        Callback fftDataCallback;
+        private static Callback fftDataCallback;
 
-        MMDeviceEnumerator enumerator;
+        private static MMDeviceEnumerator enumerator;
 
-        public AudioProcesser(Callback fftCallback)
+        public static void SetupAudioProcessor(Callback fftCallback)
         {
             fftDataCallback = fftCallback;
             sampleAggregator.FftCalculated += new EventHandler<FftEventArgs>(FftCalculated);
             sampleAggregator.PerformFFT = true;
 
             enumerator = new MMDeviceEnumerator();
-
-            // Here you decide what you want to use as the waveIn.
-            // There are many options in NAudio and you can use other streams/files.
-            // Note that the code varies for each different source.
-
-            // waveIn = new WasapiLoopbackCapture();
-
-
         }
 
-        public void Dispose()
+        public static void Dispose()
         {
             if (waveIn != null)
                 waveIn.Dispose();
         }
 
-        public MMDevice GetDefaultDevice(DataFlow flow)
+        public static MMDevice GetDefaultDevice(DataFlow flow)
         {
             if (enumerator.HasDefaultAudioEndpoint(flow, Role.Multimedia))
             {
@@ -65,14 +57,14 @@ namespace LMCSHD
             }
         }
 
-        public MMDeviceCollection GetActiveDevices()
+        public static MMDeviceCollection GetActiveDevices()
         {
             return enumerator.EnumerateAudioEndPoints(DataFlow.All, DeviceState.Active);
-            
-        }
-        
 
-        public void BeginCapture(Callback fftCallback, int deviceIndex)
+        }
+
+
+        public static void BeginCapture(Callback fftCallback, int deviceIndex)
         {
             if (!isRecording)
             {
@@ -104,7 +96,7 @@ namespace LMCSHD
             }
         }
 
-        public void StopRecording()
+        public static void StopRecording()
         {
             if (waveIn != null)
             {
@@ -114,12 +106,12 @@ namespace LMCSHD
             }
         }
 
-        private void WaveIn_RecordingStopped(object sender, StoppedEventArgs e)
+        private static void WaveIn_RecordingStopped(object sender, StoppedEventArgs e)
         {
             // isRecording = false;
         }
 
-        void OnDataAvailable(object sender, WaveInEventArgs e)
+        static void OnDataAvailable(object sender, WaveInEventArgs e)
         {
 
             byte[] buffer = e.Buffer;
@@ -135,7 +127,7 @@ namespace LMCSHD
 
         }
 
-        void FftCalculated(object sender, FftEventArgs e)
+        static void FftCalculated(object sender, FftEventArgs e)
         {
             float binFreqRange = 44100f / (float)fftLength;
 

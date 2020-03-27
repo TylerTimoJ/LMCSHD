@@ -1,4 +1,6 @@
 ﻿using System;
+using System.ComponentModel;
+using System.Runtime.CompilerServices;
 using System.Collections.ObjectModel;
 using System.Drawing;
 using System.Threading;
@@ -14,27 +16,190 @@ namespace LMCSHD
     /// <summary>
     /// Interaction logic for MainWindow.xaml
     /// </summary>
-    public partial class MainWindow : Window
+    public partial class MainWindow : INotifyPropertyChanged
     {
         //Frame & Preview
         public static WriteableBitmap MatrixBitmap;
 
         //screen capture
-        private Rectangle captureRect;
         Thread captureThread;
 
 
         //serial
 
         //audio
-        AudioProcesser ap;
-
         public MainWindow()
         {
+            DataContext = this;
             InitializeComponent();
-            SetupFrameObject(MatrixFrame.Width, MatrixFrame.Height);
+            SetMatrixDimensions(MatrixFrame.Width, MatrixFrame.Height);
         }
-        
+
+        private int _audioHighSliderValue = 20000;
+        public int AudioHighSliderValue
+        {
+            get { return _audioHighSliderValue; }
+            set
+            {
+                if (_audioHighSliderValue != value)
+                {
+                    _audioHighSliderValue = value;
+                    OnPropertyChanged();
+                }
+            }
+        }
+        #region ScreenRecorderDataBindings
+        private int _scX1;
+        private int _scX2;
+        private int _scY1;
+        private int _scY2;
+
+        private int _scXMax;
+        private int _scYMax;
+        private bool? _lockDim = false;
+
+        public int SCXMax
+        {
+            get { return _scXMax; }
+            set
+            {
+                if (value != _scXMax)
+                {
+                    _scXMax = value;
+                    OnPropertyChanged();
+                }
+            }
+        }
+        public int SCYMax
+        {
+            get { return _scYMax; }
+            set
+            {
+                if (value != _scYMax)
+                {
+                    _scYMax = value;
+                    OnPropertyChanged();
+                }
+            }
+        }
+        public bool? LockDim
+        {
+            get { return _lockDim; }
+            set
+            {
+                if (value != _lockDim)
+                {
+                    _lockDim = value;
+                    OnPropertyChanged();
+                }
+            }
+        }
+        public bool? LockDimInverted
+        {
+            get 
+            {
+                return !_lockDim;
+            }
+        }
+
+        public int SCX1
+        {
+            get { return _scX1; }
+            set
+            {
+                if (value != _scX1)
+                {
+                    if (LockDim == true)
+                    {
+                        if (value + ScreenRecorder.CaptureRect.Width > SCXMax)
+                        {
+                            _scX1 = SCXMax - ScreenRecorder.CaptureRect.Width;
+                            SCX2 = SCXMax;
+                        }
+                        else
+                        {
+                            _scX1 = value;
+                            SCX2 = value + ScreenRecorder.CaptureRect.Width;
+                        }
+                    }
+                    else
+                        _scX1 = value > SCX2 - MatrixFrame.Width ? SCX2 - MatrixFrame.Width : value;
+                    OnPropertyChanged();
+                    SCDimensionsChanged();
+                }
+            }
+        }
+        public int SCX2
+        {
+            get { return _scX2; }
+            set
+            {
+                if (value != _scX2)
+                {
+                    _scX2 = value < SCX1 + MatrixFrame.Width ? SCX1 + MatrixFrame.Width : value;
+                    OnPropertyChanged();
+                    SCDimensionsChanged();
+                }
+            }
+        }
+        public int SCY1
+        {
+            get { return _scY1; }
+            set
+            {
+                if (value != _scY1)
+                {
+                    if (LockDim == true)
+                    {
+                        if (value + ScreenRecorder.CaptureRect.Height > SCYMax)
+                        {
+                            _scY1 = SCYMax - ScreenRecorder.CaptureRect.Height;
+                            SCY2 = SCYMax;
+                        }
+                        else
+                        {
+                            _scY1 = value;
+                            SCY2 = value + ScreenRecorder.CaptureRect.Height;
+                        }
+                    }
+                    else
+                        _scY1 = value > SCY2 - MatrixFrame.Height ? SCY2 - MatrixFrame.Height : value;
+                    OnPropertyChanged();
+                    SCDimensionsChanged();
+                }
+            }
+        }
+        public int SCY2
+        {
+            get { return _scY2; }
+            set
+            {
+                if (value != _scY2)
+                {
+                    _scY2 = value < SCY1 + MatrixFrame.Height ? SCY1 + MatrixFrame.Height : value;
+                    OnPropertyChanged();
+                    SCDimensionsChanged();
+                }
+            }
+        }
+        #endregion
+
+        private void SCDimensionsChanged()
+        {
+            ScreenRecorder.CaptureRect = new System.Drawing.Rectangle(SCX1, SCY1, SCX2 - SCX1, SCY2 - SCY1);
+
+            SCWidth.Text = "Width: " + ScreenRecorder.CaptureRect.Width.ToString();
+            SCHeight.Text = "Height: " + ScreenRecorder.CaptureRect.Height.ToString();
+
+            if ((bool)SCDisplayOutline.IsChecked)
+                ScreenRecorder.EraseRectOnScreen();
+        }
+
+        public event PropertyChangedEventHandler PropertyChanged;
+        private void OnPropertyChanged([CallerMemberName] string propertyName = null)
+        {
+            PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
+        }
         //Window Function
         //===========================================================================================
         private void Window_Closing(object sender, System.ComponentModel.CancelEventArgs e)
@@ -54,7 +219,7 @@ namespace LMCSHD
         //===========================================================================================
         private void MIConnect_Click(object sender, RoutedEventArgs e)
         {
-            MatrixConnection m = new MatrixConnection(this);
+            MatrixConnection m = new MatrixConnection();
             m.Owner = this;
             m.WindowStartupLocation = System.Windows.WindowStartupLocation.CenterOwner;
             m.ShowDialog();
@@ -69,15 +234,16 @@ namespace LMCSHD
 
         //Matrix Frame Functions
         //===========================================================================================
-        public void SetupFrameObject(int width, int height)
+        public void SetMatrixDimensions(int width, int height)
         {
             MatrixFrame.SetDimensions(width, height);
+
             MatrixBitmap = new WriteableBitmap(MatrixFrame.Width, MatrixFrame.Height, 96, 96, PixelFormats.Bgr32, null);
             MatrixImage.Source = MatrixBitmap;
-            MatrixPreviewGroup.Text = " Matrix Preview: " + MatrixFrame.Width.ToString() + "x" + MatrixFrame.Height.ToString();
+            MPCheckBox.Content = " Matrix Preview: " + MatrixFrame.Width.ToString() + "x" + MatrixFrame.Height.ToString();
             SetupSCUI();
-            
-            ap = new AudioProcesser(FFTCallback);
+
+            AudioProcesser.SetupAudioProcessor(FFTCallback);// = new AudioProcesser(FFTCallback);
             RefreshAudioDeviceList();
         }
 
@@ -137,16 +303,16 @@ namespace LMCSHD
         }
         private void BeginAudioCapture()
         {
-            ap.BeginCapture(FFTCallback, SADeviceDrop.SelectedIndex);
+            AudioProcesser.BeginCapture(FFTCallback, SADeviceDrop.SelectedIndex);
         }
         private void StopAudioCapture()
         {
-            ap.StopRecording();
+            AudioProcesser.StopRecording();
         }
 
         void RefreshAudioDeviceList()
         {
-            NAudio.CoreAudioApi.MMDeviceCollection devices = ap.GetActiveDevices();
+            NAudio.CoreAudioApi.MMDeviceCollection devices = AudioProcesser.GetActiveDevices();
 
             ObservableCollection<string> list = new ObservableCollection<string>();
             foreach (NAudio.CoreAudioApi.MMDevice device in devices)
@@ -174,7 +340,7 @@ namespace LMCSHD
 
         private void SADeviceDrop_SelectionChanged(object sender, SelectionChangedEventArgs e)
         {
-            if (ap.isRecording)
+            if (AudioProcesser.isRecording)
             {
                 StopAudioCapture();
                 BeginAudioCapture();
@@ -183,24 +349,18 @@ namespace LMCSHD
 
         private void SARangeS_HigherValueChanged(object sender, RoutedEventArgs e)
         {
-            if (ap != null)
-            {
-                ap.HighFreqClip = (int)((RangeSlider)sender).HigherValue;
-                SAHighClipU.Value = (int)((RangeSlider)sender).HigherValue;
-            }
+            AudioProcesser.HighFreqClip = (int)((RangeSlider)sender).HigherValue;
+            // SAHighClipU.Value = AudioProcesser.HighFreqClip;
         }
 
         private void SARangeS_LowerValueChanged(object sender, RoutedEventArgs e)
         {
-            if (ap != null)
-            {
-                ap.LowFreqClip = (int)((RangeSlider)sender).LowerValue;
-                SALowClipU.Value = (int)((RangeSlider)sender).LowerValue;
-            }
+            AudioProcesser.LowFreqClip = (int)((RangeSlider)sender).LowerValue;
+            SALowClipU.Value = (int)((RangeSlider)sender).LowerValue;
         }
         private void SAIntUpDown_ValueChanged(object sender, RoutedPropertyChangedEventArgs<object> e)
         {
-            if (ap != null)
+            /*
                 switch (((IntegerUpDown)sender).Name)
                 {
                     case "SALowClipU":
@@ -208,16 +368,16 @@ namespace LMCSHD
                         //SALowClipS.Value = (int)((IntegerUpDown)sender).Value;
                         break;
                     case "SAHighClipU":
-                        SARangeS.HigherValue = (int)((IntegerUpDown)sender).Value;
+                        2SARangeS.HigherValue = (int)((IntegerUpDown)sender).Value;
                         //   SAHighClipS.Value = (int)((IntegerUpDown)sender).Value;
                         break;
                 }
+                */
         }
 
         private void SAAmpU_ValueChanged(object sender, RoutedPropertyChangedEventArgs<object> e)
         {
-            if (ap != null)
-                ap.Amplitiude = (int)((IntegerUpDown)sender).Value;
+            AudioProcesser.Amplitiude = (int)((IntegerUpDown)sender).Value;
         }
 
         private void SA_SelectedColorChanged(object sender, RoutedPropertyChangedEventArgs<System.Windows.Media.Color?> e)
@@ -252,20 +412,17 @@ namespace LMCSHD
         }
         void SetupSCUI()
         {
-            SCLockDim.IsChecked = false;
+            LockDim = false;
             int screenWidth = (int)SystemParameters.PrimaryScreenWidth;
             int screenHeight = (int)SystemParameters.PrimaryScreenHeight;
 
 
-            SCEndXU.Maximum = screenWidth;
-            SCEndYU.Maximum = screenHeight;
-
-            SCStartXS.Maximum = SCEndXS.Maximum = screenWidth;
-            SCStartYS.Maximum = SCEndYS.Maximum = screenHeight;
-            SCStartXS.Value = 0;
-            SCStartYS.Value = 0;
-            SCEndXS.Value = screenWidth;
-            SCEndYS.Value = screenHeight;
+            SCXMax = screenWidth;
+            SCYMax = screenHeight;
+            SCX1 = 0;
+            SCY1 = 0;
+            SCX2 = screenWidth;
+            SCY2 = screenHeight;
             ScreenRecorder.CaptureRect = new System.Drawing.Rectangle(0, 0, screenWidth, screenHeight);
         }
         void AbortCaptureThread()
@@ -273,10 +430,7 @@ namespace LMCSHD
             if (captureThread != null)
             {
                 captureThread.Abort();
-                while (captureThread.IsAlive)
-                {
-
-                }
+                while (captureThread.IsAlive) {; }
             }
         }
         #endregion
@@ -303,94 +457,7 @@ namespace LMCSHD
         {
             ScreenRecorder.shouldDrawOutline = false;
         }
-        private void SCSlider_ValueChanged(object sender, RoutedPropertyChangedEventArgs<double> e)
-        {
-            if (!(bool)SCLockDim.IsChecked)
-            {
-                switch (((Slider)sender).Name)
-                {
-                    case "SCStartXS":
-                        SCStartXS.Value = SCStartXS.Value > (SCEndXS.Value - MatrixFrame.Width) ? SCEndXS.Value - MatrixFrame.Width : SCStartXS.Value;
-                        SCStartXU.Value = (int)((Slider)sender).Value;
-                        break;
-                    case "SCStartYS":
-                        SCStartYS.Value = SCStartYS.Value > (SCEndYS.Value - MatrixFrame.Height) ? SCEndYS.Value - MatrixFrame.Height : SCStartYS.Value;
-                        SCStartYU.Value = (int)((Slider)sender).Value;
-                        break;
-                    case "SCEndXS":
-                        SCEndXS.Value = SCEndXS.Value < SCStartXS.Value + MatrixFrame.Width ? SCStartXS.Value + MatrixFrame.Width : SCEndXS.Value;
-                        SCEndXU.Value = (int)((Slider)sender).Value;
-                        break;
-                    case "SCEndYS":
-                        SCEndYS.Value = SCEndYS.Value < SCStartYS.Value + MatrixFrame.Height ? SCStartYS.Value + MatrixFrame.Height : SCEndYS.Value;
-                        SCEndYU.Value = (int)((Slider)sender).Value;
-                        break;
-                }
-            }
-            else
-            {
-                switch (((Slider)sender).Name)
-                {
-                    case "SCStartXS":
-                        if (SCStartXS.Value + captureRect.Width > SCEndXS.Maximum)
-                            SCStartXS.Value = SCEndXS.Maximum - captureRect.Width;
-                        else
-                            SCEndXS.Value = SCStartXS.Value + captureRect.Width;
-                        SCStartXU.Value = (int)((Slider)sender).Value;
-                        break;
-                    case "SCStartYS":
-                        if (SCStartYS.Value + captureRect.Height > SCEndYS.Maximum)
-                            SCStartYS.Value = SCEndYS.Maximum - captureRect.Height;
-                        else
-                            SCEndYS.Value = SCStartYS.Value + captureRect.Height;
-                        SCStartYU.Value = (int)((Slider)sender).Value;
-                        break;
-                    case "SCEndXS":
-                        if (SCEndXS.Value - captureRect.Width < 0)
-                            SCEndXS.Value = captureRect.Width;
-                        else
-                            SCStartXS.Value = SCEndXS.Value - captureRect.Width;
-                        SCEndXU.Value = (int)((Slider)sender).Value;
-                        break;
-                    case "SCEndYS":
-                        if (SCEndYS.Value - captureRect.Height < 0)
-                            SCEndYS.Value = captureRect.Height;
-                        else
-                            SCStartYS.Value = SCEndYS.Value - captureRect.Height;
-                        SCEndYU.Value = (int)((Slider)sender).Value;
-                        break;
-                }
-            }
 
-            captureRect = new System.Drawing.Rectangle((int)SCStartXS.Value, (int)SCStartYS.Value, (int)SCEndXS.Value - (int)SCStartXS.Value, (int)SCEndYS.Value - (int)SCStartYS.Value);
-
-            SCWidth.Text = "Width: " + captureRect.Width.ToString();
-            SCHeight.Text = "Height: " + captureRect.Height.ToString();
-
-                if ((bool)SCDisplayOutline.IsChecked)
-                    ScreenRecorder.EraseRectOnScreen();
-                ScreenRecorder.CaptureRect = captureRect;
-            
-        }
-        private void SC_INT_UPDOWN_Click(object sender, RoutedEventArgs e)
-        {
-            if (MatrixFrame.isSetup)
-                switch (((IntegerUpDown)sender).Name)
-                {
-                    case "SCStartXU":
-                        SCStartXS.Value = (int)((IntegerUpDown)sender).Value;
-                        break;
-                    case "SCStartYU":
-                        SCStartYS.Value = (int)((IntegerUpDown)sender).Value;
-                        break;
-                    case "SCEndXU":
-                        SCEndXS.Value = (int)((IntegerUpDown)sender).Value;
-                        break;
-                    case "SCEndYU":
-                        SCEndYS.Value = (int)((IntegerUpDown)sender).Value;
-                        break;
-                }
-        }
         private void SCInterpModeDrop_SelectionChanged(object sender, SelectionChangedEventArgs e)
         {
             switch (SCInterpModeDrop.SelectedIndex)
