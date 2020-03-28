@@ -142,6 +142,7 @@
       <SubType>Designer</SubType>
     </ApplicationDefinition>
     <Compile Include="AudioProcesser.cs" />
+    <Compile Include="MainWindowScreenCapture.cs" />
     <Compile Include="MatrixConnection.xaml.cs">
       <DependentUpon>MatrixConnection.xaml</DependentUpon>
     </Compile>

@@ -1,16 +1,7 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using System.Threading;
 using System.Drawing;
-using System.IO;
-using System.Diagnostics;
-using System.ComponentModel;
-using System.Drawing.Drawing2D;
 using System.Runtime.InteropServices;
-using System.Windows.Media.Imaging;
+using System.Threading;
 
 //using Xceed.Wpf.Toolkit;
 
@@ -18,20 +9,16 @@ namespace LMCSHD
 {
     public static class ScreenRecorder
     {
-        public static bool shouldDrawOutline;
-        public static Rectangle CaptureRect { get; set; }
-
+        public static Rectangle CaptureRect;
+        public static bool doCapture, doOutline;
 
         public delegate void Callback(Bitmap capturedFrame);
         public static void StartRecording(Callback pixelDataCallback)
         {
-            while (true)
+            doCapture = true;
+            while (doCapture)
                 pixelDataCallback(ScreenToBitmap());
         }
-        
-
-
-
         private static Bitmap ScreenToBitmap()
         {
             IntPtr handle = IntPtr.Zero;
@@ -51,28 +38,20 @@ namespace LMCSHD
             return bitmap;
         }
 
-        public static void StartDrawOutline()
+        public static void ShowOutline()
         {
-            shouldDrawOutline = true;
-            while (shouldDrawOutline)
+            doOutline = true;
+            while (doOutline)
             {
-                DrawRectOnScreen(new Rectangle(CaptureRect.X - 1, CaptureRect.Y - 1, CaptureRect.Width + 2, CaptureRect.Height + 2));
+                IntPtr ptr = GetDC(IntPtr.Zero);
+                using (Graphics g = Graphics.FromHdc(ptr))
+                    g.DrawRectangle(new Pen(Color.DarkMagenta, 1), new Rectangle(CaptureRect.X - 1, CaptureRect.Y - 1, CaptureRect.Width + 2, CaptureRect.Height + 2));
+                ReleaseDC(IntPtr.Zero, ptr);
+
                 Thread.Sleep(6);
             }
-            EraseRectOnScreen();
         }
-
-        private static void DrawRectOnScreen(Rectangle expandedCaptureArea)
-        {
-            IntPtr ptr = GetDC(IntPtr.Zero);
-            using (Graphics g = Graphics.FromHdc(ptr))
-            {
-                g.DrawRectangle(new Pen(Color.DarkMagenta, 1), expandedCaptureArea);
-            }
-            ReleaseDC(IntPtr.Zero, ptr);
-        }
-
-        public static void EraseRectOnScreen()
+        public static void HideOutline()
         {
             InvalidateRect(IntPtr.Zero, IntPtr.Zero, false);
         }
@@ -106,9 +85,6 @@ namespace LMCSHD
 
         [DllImport("gdi32.dll")]
         public static extern bool DeleteObject(IntPtr hObject);
-
-      //  [DllImport("user32.dll")]
-      //  public static extern bool 
         #endregion
     }
 }

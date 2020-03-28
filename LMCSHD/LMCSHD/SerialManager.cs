@@ -13,49 +13,101 @@ namespace LMCSHD
 {
     public static class SerialManager
     {
-        //public PixelOrder pixelOrder { get; set; } = new PixelOrder();
+        public enum CMode { BPP24, BPP16, BPP6 };
+
+        public static CMode ColorMode = CMode.BPP24;
 
         private static SerialPort _sp = null;
         private static bool _serialReady = false;
-
-
         private static void sp_DataReceived(object sender, SerialDataReceivedEventArgs e)
         {
             try
             {
-                _serialReady = _sp.ReadByte() == 0x06 ? true : false;
+                _serialReady = _sp.BaseStream.ReadByte() == 0x06 ? true : false;
             }
             catch (Exception)
             {
 
             }
-
         }
-        public static void SerialSendFrame()
+        public static void PushFrame()
         {
             if (_serialReady)
             {
                 byte[] orderedFrame = GetOrderedSerialFrame();
-
-                try
+                
+                if (ColorMode == CMode.BPP24)
                 {
-                    byte[] header = { 0x0F };
-                    _sp.Write(header, 0, 1);
-                    _sp.Write(orderedFrame, 0, orderedFrame.Length);
-                    _serialReady = false;
+                    try
+                    {
+                        byte[] header = { 0x11 };
+                        _sp.BaseStream.WriteAsync(header, 0, 1);
+                        _sp.BaseStream.WriteAsync(orderedFrame, 0, orderedFrame.Length);
+                        _serialReady = false;
+                    }
+                    catch (Exception e)
+                    {
+                        _serialReady = false;
+                        MessageBox.Show(e.Message);
+                    }
                 }
-                catch (Exception e)
+                else if (ColorMode == CMode.BPP16)
                 {
-                    _serialReady = false;
-                    MessageBox.Show(e.Message);
+                    try
+                    {
+                        byte[] header = { 0x12 };
+                        byte[] newOrderedFrame = new byte[MatrixFrame.Width * MatrixFrame.Height * 2];
+                        for (int i = 0; i < MatrixFrame.Width * MatrixFrame.Height; i++)
+                        {
+
+                            byte r = (byte)(orderedFrame[i * 3] & 0xF8);
+                            byte g = (byte)(orderedFrame[(i * 3) + 1] & 0xFC);
+                            byte b = (byte)(orderedFrame[(i * 3) + 2] & 0xF8);
+
+                            newOrderedFrame[i * 2] = (byte)(r | (g >> 5));
+                            newOrderedFrame[(i * 2) + 1] = (byte)((g << 3) | (b >> 3));
+                        }
+                        _sp.BaseStream.WriteAsync(header, 0, 1);
+                        _sp.BaseStream.WriteAsync(newOrderedFrame, 0, newOrderedFrame.Length);
+                        _serialReady = false;
+                    }
+                    catch (Exception e)
+                    {
+                        _serialReady = false;
+                        MessageBox.Show(e.Message);
+                    }
+
+                }
+                else if (ColorMode == CMode.BPP6)
+                {
+                    try
+                    {
+                        byte[] header = { 0x13 };
+                        byte[] newOrderedFrame = new byte[MatrixFrame.Width * MatrixFrame.Height];
+                        for (int i = 0; i < MatrixFrame.Width * MatrixFrame.Height; i++)
+                        {
+
+                            byte r = (byte)(orderedFrame[i * 3] & 0xC0);
+                            byte g = (byte)(orderedFrame[(i * 3) + 1] & 0xC0);
+                            byte b = (byte)(orderedFrame[(i * 3) + 2] & 0xC0);
+
+                            newOrderedFrame[i] = (byte)(r | (g >> 2) | (b >> 4));
+                        }
+                        _sp.BaseStream.WriteAsync(header, 0, 1);
+                        _sp.BaseStream.WriteAsync(newOrderedFrame, 0, newOrderedFrame.Length);
+                        _serialReady = false;
+                    }
+                    catch (Exception e)
+                    {
+                        _serialReady = false;
+                        MessageBox.Show(e.Message);
+                    }
                 }
             }
-
         }
-
         static byte[] GetOrderedSerialFrame()
         {
-            MatrixFrame.Pixel[,] pixelArray = MatrixFrame.GetFrame();
+            var pixelArray = MatrixFrame.Frame;
             byte[] orderedFrame = new byte[MatrixFrame.Width * MatrixFrame.Height * 3];
 
             int index = 0;
@@ -102,8 +154,8 @@ namespace LMCSHD
                 try
                 {
                     byte[] blankFrameData = new byte[(MatrixFrame.Width * MatrixFrame.Height * 3) + 1];
-                    blankFrameData[0] = 0x0F;
-                    _sp.Write(blankFrameData, 0, MatrixFrame.GetFrameLength());
+                    blankFrameData[0] = 0x11;
+                    _sp.BaseStream.WriteAsync(blankFrameData, 0, MatrixFrame.FrameLength + 1);
                     _serialReady = false;
                 }
                 catch (Exception e)
@@ -141,7 +193,7 @@ namespace LMCSHD
             try
             {
                 _sp = new SerialPort(portName, baudRate);
-                _sp.ReadTimeout = 100;
+                _sp.ReadTimeout = 1000;
                 _sp.Open();
 
                 var def = GetMatrixDefinition();

@@ -7,19 +7,17 @@ namespace LMCSHD
 {
     public static class MatrixFrame
     {
-        private static Pixel[,] pixelArray;
-
-        public static bool isSetup = false;
-
         //Data Properties
         public static int Width = 16, Height = 16;
         public static BitmapSource ContentImage { get; set; }
-
-        public static InterpolationMode InterpMode { get; set; } = InterpolationMode.HighQualityBilinear;
-
+        public static InterpolationMode InterpMode { get; set; } = InterpolationMode.HighQualityBicubic;
         public static bool RenderContentPreview { get; set; } = true;
 
         private static Pixel[] gradient;
+
+        public static Pixel[,] Frame;
+        public static int FrameLength { get { return (Width * Height * 3); } }
+
         //End Data Properties
 
         public struct Pixel
@@ -30,23 +28,22 @@ namespace LMCSHD
                 R = r; G = g; B = b;
             }
         }
+
+
+
         public static void SetDimensions(int w, int h)
         {
             Width = w;
             Height = h;
-            pixelArray = null;
-            pixelArray = new Pixel[Width, Height];
+            Frame = null;
+            Frame = new Pixel[Width, Height];
             //SetSpectrumGradient(new Pixel(255, 0, 0), new Pixel(0, 0, 255));
-            isSetup = true;
         }
         public static void SetPixel(int x, int y, Pixel color)
         {
-            pixelArray[x, y] = color;
+            Frame[x, y] = color;
         }
-        public static void SetFrame(Pixel[,] givenFrame)
-        {
-            pixelArray = givenFrame;
-        }
+
         public static void InjestGDIBitmap(Bitmap b)
         {
             if (RenderContentPreview)
@@ -54,9 +51,9 @@ namespace LMCSHD
             else
                 ContentImage = null;
             if (b.Width == Width && b.Height == Height)
-                pixelArray = BitmapToPixelArray(b);
+                Frame = BitmapToPixelArray(b);
             else
-                pixelArray = BitmapToPixelArray(DownsampleBitmap(b, Width, Height, InterpMode));
+                Frame = BitmapToPixelArray(DownsampleBitmap(b, Width, Height, InterpMode));
         }
         public static void InjestFFT(float[] fftData)
         {
@@ -107,7 +104,7 @@ namespace LMCSHD
             {
                 for (int y = 0; y < Height; y++)
                 {
-                    pixelArray[x, y] = color;
+                    Frame[x, y] = color;
                 }
             }
         }
@@ -117,7 +114,7 @@ namespace LMCSHD
             {
                 if (y < 0)
                     break;
-                pixelArray[x, y] = new Pixel(0, 0, 139);
+                Frame[x, y] = new Pixel(0, 0, 139);
             }
         }
         public static void SetSpectrumGradient(Pixel color1, Pixel color2)
@@ -139,29 +136,27 @@ namespace LMCSHD
         public static void DrawColumnMirrored(int x, int height)
         {
             int gradientIndex = 0;
-            pixelArray[x, ((Height / 2) - 1)] = gradient[0];
+            Frame[x, ((Height / 2) - 1)] = gradient[0];
             for (int y = (Height / 2) - 2; y > (Height / 2) - 2 - height; y--)
             {
                 if (y < 0)
                     break;
-                pixelArray[x, y] = gradient[gradientIndex];
+                Frame[x, y] = gradient[gradientIndex];
                 gradientIndex++;
             }
             gradientIndex = 0;
-            pixelArray[x, Height / 2] = gradient[0];
+            Frame[x, Height / 2] = gradient[0];
             for (int y = (Height / 2) + 1; y < (Height / 2) + 1 + height; y++)
             {
                 if (y > Height - 1)
                     break;
-                pixelArray[x, y] = gradient[gradientIndex];
+                Frame[x, y] = gradient[gradientIndex];
                 gradientIndex++;
             }
         }
 
 
 
-        public static Pixel[,] GetFrame() { return pixelArray; }
 
-        public static int GetFrameLength() { return (Width * Height * 3) + 1; }
     }
 }

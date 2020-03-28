@@ -26,6 +26,9 @@ unsigned char inc = 0;
 long mil[256] = {0};
 long prevMillis = 0;
 
+unsigned char pix[3] = { 0 };
+rgb24 *buffer;
+
 void loop() {}
 #define BLK 28
 
@@ -43,17 +46,43 @@ void serialEvent()
       Serial.printf("%08d\n", kMatrixHeight);
       break;
 
-    case 0x0F: //frame data
-
+    case 0x11: //24bpp frame data
       mil[inc] = micros() - prevMillis;
       prevMillis = micros();
       inc++;
-      unsigned char pix[3] = { 0 };
       while (backgroundLayer.isSwapPending());
-      rgb24 *buffer = backgroundLayer.backBuffer();
+      buffer = backgroundLayer.backBuffer();
       for (int i = 0; i < kMatrixWidth * kMatrixHeight; i++) {
         Serial.readBytes(pix, 3);
-        *buffer++ = rgb24{constrain(pix[0], BLK, 255), constrain(pix[1], BLK, 255), constrain(pix[2], BLK, 255)};
+        *buffer++ = rgb24{map(pix[0], 0, 255, BLK, 255), map(pix[1], 0, 255, BLK, 255), map(pix[2], 0, 255, BLK, 255)};
+      }
+      backgroundLayer.swapBuffers(false);
+      Serial.write(0x06); //acknowledge
+      break;
+
+    case 0x12: //16bpp frame data
+      mil[inc] = micros() - prevMillis;
+      prevMillis = micros();
+      inc++;
+      while (backgroundLayer.isSwapPending());
+      buffer = backgroundLayer.backBuffer();
+      for (int i = 0; i < kMatrixWidth * kMatrixHeight; i++) {
+        Serial.readBytes(pix, 2);
+        *buffer++ = rgb24{map(((pix[0] & B11111000) >> 3), 0, 31, BLK, 255), map((((pix[0] & B00000111) << 3) | ((pix[1] & B11100000) >> 5)), 0, 63, BLK, 255), map((pix[1] & B00011111), 0, 31, BLK, 255)}; //,
+      }
+      backgroundLayer.swapBuffers(false);
+      Serial.write(0x06); //acknowledge
+      break;
+
+    case 0x13: //8bpp frame data
+      mil[inc] = micros() - prevMillis;
+      prevMillis = micros();
+      inc++;
+      while (backgroundLayer.isSwapPending());
+      buffer = backgroundLayer.backBuffer();
+      for (int i = 0; i < kMatrixWidth * kMatrixHeight; i++) {
+        Serial.readBytes(pix, 1);
+        *buffer++ = rgb24{map(((pix[0] & B11000000) >> 6), 0, 3, BLK, 255), map(((pix[0] & B00110000) >> 4), 0, 3, BLK, 255), map(((pix[0] & B00001100) >> 2), 0, 3, BLK, 255)}; //,
       }
       backgroundLayer.swapBuffers(false);
       Serial.write(0x06); //acknowledge

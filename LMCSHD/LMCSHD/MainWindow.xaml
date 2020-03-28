@@ -77,6 +77,11 @@
 
                 <MenuItem Header="Edit">
                     <MenuItem Header="PixelOrder" Click="NewPixelOrder_Click"/>
+                    <MenuItem Header="Color Mode">
+                        <MenuItem Header="24BPP" Click="BPP24_Click"/>
+                        <MenuItem Header="16BPP" Click="BPP16_Click"/>
+                        <MenuItem Header="6BPP" Click="BPP6_Click"/>
+                    </MenuItem>
                 </MenuItem>
             </Menu>
 
@@ -127,7 +132,7 @@
 
                             <TextBlock Grid.Row="1" Margin="2" Text="Interpolation Mode" HorizontalAlignment="Right" VerticalAlignment="Center"/>
 
-                            <ComboBox x:Name="SCInterpModeDrop" Grid.Column="1" Grid.Row="1" Margin="2" SelectedIndex="4" SelectionChanged="SCInterpModeDrop_SelectionChanged">
+                            <ComboBox x:Name="SCInterpModeDrop" Grid.Column="1" Grid.Row="1" Margin="2" SelectedIndex="3" SelectionChanged="SCInterpModeDrop_SelectionChanged">
                                 <ComboBoxItem Content="Nearest Neighbor"/>
                                 <ComboBoxItem Content="Bicubic"/>
                                 <ComboBoxItem Content="Bilinear"/>

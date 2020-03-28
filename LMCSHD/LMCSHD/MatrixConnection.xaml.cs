@@ -28,6 +28,7 @@ namespace LMCSHD
             if (matrixDef != null)
             {
                 ((MainWindow)Application.Current.MainWindow).SetMatrixDimensions(matrixDef[0], matrixDef[1]);
+                ((MainWindow)Application.Current.MainWindow).MIConnect.IsEnabled = false;
                 Close();
             }
             else
