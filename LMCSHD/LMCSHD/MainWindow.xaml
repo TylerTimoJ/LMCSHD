@@ -232,7 +232,7 @@
                                 </Grid>
                             </Border>
 
-                            <TextBlock Grid.Row="6" Margin="2" Text="{Binding StringFormat=Local FPS: {0}, Path=LocalFPS, Mode=OneWay}"/>
+                            <TextBlock Grid.Row="6" Margin="2" Text="{Binding StringFormat=Capture FPS: {0}, Path=LocalFPS, Mode=OneWay}"/>
                             <TextBlock Grid.Row="6" Grid.Column="1" Margin="2" Text="{Binding StringFormat=Serial FPS: {0}, Path=SerialFPS, Mode=OneWay}"/>
                         </Grid>
 
@@ -244,7 +244,7 @@
 
                 </TabItem>
 
-                <TabItem Header="Audio">
+                <TabItem Header="Audio" IsEnabled="False">
                     <GroupBox Width="300">
                         <GroupBox.Header>
                             <StackPanel Orientation="Horizontal">

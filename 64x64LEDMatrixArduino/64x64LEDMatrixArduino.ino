@@ -56,8 +56,8 @@ void serialEvent()
         Serial.readBytes(pix, 3);
         *buffer++ = rgb24{map(pix[0], 0, 255, BLK, 255), map(pix[1], 0, 255, BLK, 255), map(pix[2], 0, 255, BLK, 255)};
       }
-      backgroundLayer.swapBuffers(false);
       Serial.write(0x06); //acknowledge
+      backgroundLayer.swapBuffers(false);
       break;
 
     case 0x12: //16bpp frame data
@@ -70,8 +70,8 @@ void serialEvent()
         Serial.readBytes(pix, 2);
         *buffer++ = rgb24{map(((pix[0] & B11111000) >> 3), 0, 31, BLK, 255), map((((pix[0] & B00000111) << 3) | ((pix[1] & B11100000) >> 5)), 0, 63, BLK, 255), map((pix[1] & B00011111), 0, 31, BLK, 255)}; //,
       }
-      backgroundLayer.swapBuffers(false);
       Serial.write(0x06); //acknowledge
+      backgroundLayer.swapBuffers(false);
       break;
 
     case 0x13: //8bpp frame data
@@ -84,8 +84,8 @@ void serialEvent()
         Serial.readBytes(pix, 1);
         *buffer++ = rgb24{map(((pix[0] & B11000000) >> 6), 0, 3, BLK, 255), map(((pix[0] & B00110000) >> 4), 0, 3, BLK, 255), map(((pix[0] & B00001100) >> 2), 0, 3, BLK, 255)}; //,
       }
-      backgroundLayer.swapBuffers(false);
       Serial.write(0x06); //acknowledge
+      backgroundLayer.swapBuffers(false);
       break;
   }
 }

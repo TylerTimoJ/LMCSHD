@@ -21,21 +21,12 @@ namespace LMCSHD
         //Frame & Preview
         public static WriteableBitmap MatrixBitmap;
 
-        //screen capture
-
-
-
-        //serial
-
-        //audio
         public MainWindow()
         {
             DataContext = this;
             InitializeComponent();
             SetMatrixDimensions(MatrixFrame.Width, MatrixFrame.Height);
         }
-
-
 
         private int _audioHighSliderValue = 20000;
         public int AudioHighSliderValue
@@ -86,7 +77,7 @@ namespace LMCSHD
         private void MIDisconnect_Click(object sender, RoutedEventArgs e)
         {
             SerialManager.Disconnect();
-            MIConnect.IsEnabled = true;
+            //MIConnect.IsEnabled = true;
         }
         //===========================================================================================
 

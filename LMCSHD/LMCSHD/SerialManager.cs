@@ -8,7 +8,7 @@ using System.Windows;
 using System.IO;
 using System.Diagnostics;
 using static LMCSHD.PixelOrder;
-
+using System.Text.RegularExpressions;
 
 namespace LMCSHD
 {
@@ -19,9 +19,9 @@ namespace LMCSHD
         public static CMode ColorMode = CMode.BPP24;
 
 
-        private static SerialPort _sp = null;
+        private static SerialPort _sp = new SerialPort();
         private static bool _serialReady = false;
-       
+
         private static void sp_DataReceived(object sender, SerialDataReceivedEventArgs e)
         {
             try
@@ -187,59 +187,72 @@ namespace LMCSHD
         private static int[] GetMatrixDefinition()
         {
             byte[] b = { 0x05 };
-            _sp.Write(b, 0, 1);
             string width = "", height = "";
-
+            int[] data = new int[2];
             try
             {
+                _sp.Write(b, 0, 1);
                 width = _sp.ReadLine();
                 height = _sp.ReadLine();
+
+                width = Regex.Replace(width, "[^0-9]", "");
+                height = Regex.Replace(height, "[^0-9]", "");
             }
             catch (Exception e)
             {
                 MessageBox.Show("Application cannot parse matrix width/height definition\n" + width + height + "\n" + e.Message);
                 return null;
             }
-            int[] data = { int.Parse(width), int.Parse(height) };
+            try
+            {
+                data[0] = int.Parse(width);
+                data[1] = int.Parse(height);
+            }
+            catch(Exception e)
+            {
+                MessageBox.Show(e.Message +" "+ width +" "+ height);
+                return null;
+            }
             return data;
         }
         public static int[] Connect(string portName, int baudRate)
         {
+            Disconnect();
+            _sp.PortName = portName;
+            _sp.BaudRate = baudRate;
+            _sp.ReadTimeout = 1000;
             try
             {
-                _sp = new SerialPort(portName, baudRate);
-                _sp.ReadTimeout = 1000;
                 _sp.Open();
-
-                var def = GetMatrixDefinition();
-                if (def != null)
-                {
-                    _sp.DataReceived += sp_DataReceived;
-                    _serialReady = true;
-                    return def;
-                }
-                else
-                {
-                    Disconnect();
-                    return null;
-                }
             }
             catch (Exception e)
             {
-                MessageBox.Show(e.Message);
+                MessageBox.Show(e.Message + "\tTHIS MESSAGE LINE 232");
                 return null;
             }
+
+            var def = GetMatrixDefinition();
+            if (def != null)
+            {
+                _sp.DataReceived += sp_DataReceived;
+                _serialReady = true;
+                return def;
+            }
+            else
+            {
+                Disconnect();
+                return null;
+            }
+
         }
         public static void Disconnect()
         {
-            if (_sp != null)
-            {
-                _serialReady = false;
-                _sp.DataReceived -= sp_DataReceived;
-                _sp.Close();
-                _sp.Dispose();
-                //_sp = null;
-            }
+            _sp.Close();
+            _serialReady = false;
+            _sp.DataReceived -= sp_DataReceived;
+
+            //_sp.Dispose();
+            //_sp = null;
         }
     }
 }
