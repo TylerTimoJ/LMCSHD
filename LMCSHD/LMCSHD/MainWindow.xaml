@@ -9,7 +9,7 @@
         mc:Ignorable="d"
         Title="LED Matrix Control Software HD"
         Height="694"
-        MinHeight="694"
+        MinHeight="714"
         Width="1348"
         MinWidth="512"
         Closing="Window_Closing"
@@ -73,15 +73,16 @@
                 <MenuItem Header="_Serial">
                     <MenuItem x:Name="MIConnect" Header="Connect" Click="MIConnect_Click"/>
                     <MenuItem Header="Disconnect" Click="MIDisconnect_Click"/>
-                </MenuItem>
-
-                <MenuItem Header="Edit">
-                    <MenuItem Header="PixelOrder" Click="NewPixelOrder_Click"/>
                     <MenuItem Header="Color Mode">
                         <MenuItem Header="24BPP" Click="BPP24_Click"/>
                         <MenuItem Header="16BPP" Click="BPP16_Click"/>
                         <MenuItem Header="6BPP" Click="BPP6_Click"/>
                     </MenuItem>
+                </MenuItem>
+
+                <MenuItem Header="Edit">
+                    <MenuItem Header="PixelOrder" Click="NewPixelOrder_Click"/>
+
                 </MenuItem>
             </Menu>
 
@@ -231,6 +232,8 @@
                                 </Grid>
                             </Border>
 
+                            <TextBlock Grid.Row="6" Margin="2" Text="{Binding StringFormat=Local FPS: {0}, Path=LocalFPS, Mode=OneWay}"/>
+                            <TextBlock Grid.Row="6" Grid.Column="1" Margin="2" Text="{Binding StringFormat=Serial FPS: {0}, Path=SerialFPS, Mode=OneWay}"/>
                         </Grid>
 
 

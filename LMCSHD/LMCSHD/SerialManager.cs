@@ -6,6 +6,7 @@ using System.Threading.Tasks;
 using System.IO.Ports;
 using System.Windows;
 using System.IO;
+using System.Diagnostics;
 using static LMCSHD.PixelOrder;
 
 
@@ -17,8 +18,10 @@ namespace LMCSHD
 
         public static CMode ColorMode = CMode.BPP24;
 
+
         private static SerialPort _sp = null;
         private static bool _serialReady = false;
+       
         private static void sp_DataReceived(object sender, SerialDataReceivedEventArgs e)
         {
             try
@@ -30,12 +33,12 @@ namespace LMCSHD
 
             }
         }
-        public static void PushFrame()
+        public static bool PushFrame()
         {
             if (_serialReady)
             {
                 byte[] orderedFrame = GetOrderedSerialFrame();
-                
+
                 if (ColorMode == CMode.BPP24)
                 {
                     try
@@ -44,11 +47,13 @@ namespace LMCSHD
                         _sp.BaseStream.WriteAsync(header, 0, 1);
                         _sp.BaseStream.WriteAsync(orderedFrame, 0, orderedFrame.Length);
                         _serialReady = false;
+                        return true;
                     }
                     catch (Exception e)
                     {
                         _serialReady = false;
                         MessageBox.Show(e.Message);
+                        return false;
                     }
                 }
                 else if (ColorMode == CMode.BPP16)
@@ -70,11 +75,13 @@ namespace LMCSHD
                         _sp.BaseStream.WriteAsync(header, 0, 1);
                         _sp.BaseStream.WriteAsync(newOrderedFrame, 0, newOrderedFrame.Length);
                         _serialReady = false;
+                        return true;
                     }
                     catch (Exception e)
                     {
                         _serialReady = false;
                         MessageBox.Show(e.Message);
+                        return false;
                     }
 
                 }
@@ -96,14 +103,22 @@ namespace LMCSHD
                         _sp.BaseStream.WriteAsync(header, 0, 1);
                         _sp.BaseStream.WriteAsync(newOrderedFrame, 0, newOrderedFrame.Length);
                         _serialReady = false;
+                        return true;
                     }
                     catch (Exception e)
                     {
                         _serialReady = false;
                         MessageBox.Show(e.Message);
+                        return false;
                     }
                 }
+                else
+                {
+                    return false;
+                }
             }
+            else
+                return false;
         }
         static byte[] GetOrderedSerialFrame()
         {

@@ -35,6 +35,8 @@ namespace LMCSHD
             SetMatrixDimensions(MatrixFrame.Width, MatrixFrame.Height);
         }
 
+
+
         private int _audioHighSliderValue = 20000;
         public int AudioHighSliderValue
         {
@@ -67,7 +69,7 @@ namespace LMCSHD
 
         private void NewPixelOrder_Click(object sender, RoutedEventArgs e)
         {
-            PixelOrderEditor editor = new PixelOrderEditor(this);
+            PixelOrderEditor editor = new PixelOrderEditor();
             editor.ShowDialog();
         }
         //===========================================================================================

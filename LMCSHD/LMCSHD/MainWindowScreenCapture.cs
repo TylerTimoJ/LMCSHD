@@ -10,6 +10,7 @@ using System.Windows.Media;
 using System.Windows.Media.Imaging;
 using System.Windows.Threading;
 using Xceed.Wpf.Toolkit;
+using System.Diagnostics;
 
 namespace LMCSHD
 {
@@ -17,6 +18,8 @@ namespace LMCSHD
     {
         Thread captureThread;
         Thread outlineThread;
+
+        private Stopwatch _fpsStopWatch;
 
         #region Properties & Data Bindings
         private int _scX1;
@@ -152,7 +155,7 @@ namespace LMCSHD
                 }
             }
         }
-        
+
         private void SCDimensionsChanged()
         {
             ScreenRecorder.CaptureRect = new System.Drawing.Rectangle(SCX1, SCY1, SCX2 - SCX1, SCY2 - SCY1);
@@ -205,8 +208,62 @@ namespace LMCSHD
         }
         #endregion
         #region Screen_Capture
+
+        private long[] _serialElapsedMillis = new long[64];
+        private long _serialPreviousMillis;
+
+        private long[] _localElapsedMillis = new long[64];
+        private long _localPreviousMillis;
+        public long SerialFPS
+        {
+            get
+            {
+                long avg = 0;
+                for (int i = 0; i < 64; i++)
+                {
+                    avg += _serialElapsedMillis[i];
+                }
+                avg /= 64;
+                return 1000L / avg;
+            }
+            set
+            {
+                for (int i = 1; i < 64; i++)
+                {
+                    _serialElapsedMillis[i] = _serialElapsedMillis[i - 1];
+                }
+                _serialElapsedMillis[0] = value;
+
+                OnPropertyChanged();
+
+            }
+        }
+        public long LocalFPS
+        {
+            get
+            {
+                long avg = 0;
+                for (int i = 0; i < 64; i++)
+                {
+                    avg += _localElapsedMillis[i];
+                }
+                avg /= 64;
+                return 1000L / avg;
+            }
+            set
+            {
+                for (int i = 1; i < 64; i++)
+                {
+                    _localElapsedMillis[i] = _localElapsedMillis[i - 1];
+                }
+                _localElapsedMillis[0] = value;
+                OnPropertyChanged();
+            }
+        }
         void PixelDataCallback(Bitmap capturedBitmap)
         {
+            LocalFPS = _fpsStopWatch.ElapsedMilliseconds - _localPreviousMillis;
+            _localPreviousMillis = _fpsStopWatch.ElapsedMilliseconds;
             MatrixFrame.InjestGDIBitmap(capturedBitmap);
             if (MatrixFrame.ContentImage != null)
             {
@@ -214,7 +271,11 @@ namespace LMCSHD
                 Dispatcher.Invoke(() => { UpdateContentImage(); });
             }
             Dispatcher.Invoke(() => { UpdatePreview(); });
-            SerialManager.PushFrame();
+            if (SerialManager.PushFrame())
+            {
+                SerialFPS = _fpsStopWatch.ElapsedMilliseconds - _serialPreviousMillis;
+                _serialPreviousMillis = _fpsStopWatch.ElapsedMilliseconds;
+            }
             GC.Collect();
         }
 
@@ -233,6 +294,7 @@ namespace LMCSHD
         }
         void StartCaptureThread()
         {
+            _fpsStopWatch = Stopwatch.StartNew();
             captureThread = new Thread(() => ScreenRecorder.StartRecording(PixelDataCallback));
             captureThread.Start();
         }

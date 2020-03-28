@@ -20,12 +20,8 @@ namespace LMCSHD
     /// </summary>
     public partial class PixelOrderEditor : Window
     {
-
-        private MainWindow w;
-
-        public PixelOrderEditor(MainWindow window)
+        public PixelOrderEditor()
         {
-            w = window;
             InitializeComponent();
             PixelOrder.newLine = PixelOrder.newLine;
             PixelOrder.orientation = PixelOrder.orientation;
@@ -55,7 +51,6 @@ namespace LMCSHD
 
         private void Button_Click(object sender, RoutedEventArgs e)
         {
-            
             Close();
         }
         public void OrderUpdated()
