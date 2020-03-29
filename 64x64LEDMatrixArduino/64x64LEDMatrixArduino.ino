@@ -1,6 +1,4 @@
-
 #include <SmartMatrix3.h>
-
 
 #define COLOR_DEPTH 24                  // known working: 24, 48 - If the sketch uses type `rgb24` directly, COLOR_DEPTH must be 24
 const uint8_t kMatrixWidth = 128;        // known working: 16, 32, 48, 64
@@ -19,12 +17,8 @@ void setup() {
   matrix.setBrightness(254);
   matrix.begin();
 
-  Serial.begin(2000000);
+  Serial.begin(4608000);
 }
-
-unsigned char inc = 0;
-long mil[256] = {0};
-long prevMillis = 0;
 
 unsigned char pix[3] = { 0 };
 rgb24 *buffer;
@@ -36,20 +30,12 @@ void serialEvent()
 {
   switch (Serial.read())
   {
-    case 'A':
-      for (int i = 0; i < 256; i++) {
-        Serial.println((String)mil[i]);
-      }
-      break;
     case 0x05: //request for matrix definition
-      Serial.printf("%08d\n", kMatrixWidth);
-      Serial.printf("%08d\n", kMatrixHeight);
+      Serial.println(kMatrixWidth);
+      Serial.println(kMatrixHeight);
       break;
 
     case 0x11: //24bpp frame data
-      mil[inc] = micros() - prevMillis;
-      prevMillis = micros();
-      inc++;
       while (backgroundLayer.isSwapPending());
       buffer = backgroundLayer.backBuffer();
       for (int i = 0; i < kMatrixWidth * kMatrixHeight; i++) {
@@ -61,9 +47,6 @@ void serialEvent()
       break;
 
     case 0x12: //16bpp frame data
-      mil[inc] = micros() - prevMillis;
-      prevMillis = micros();
-      inc++;
       while (backgroundLayer.isSwapPending());
       buffer = backgroundLayer.backBuffer();
       for (int i = 0; i < kMatrixWidth * kMatrixHeight; i++) {
@@ -75,9 +58,6 @@ void serialEvent()
       break;
 
     case 0x13: //8bpp frame data
-      mil[inc] = micros() - prevMillis;
-      prevMillis = micros();
-      inc++;
       while (backgroundLayer.isSwapPending());
       buffer = backgroundLayer.backBuffer();
       for (int i = 0; i < kMatrixWidth * kMatrixHeight; i++) {

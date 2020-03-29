@@ -26,7 +26,8 @@
                                            VerticalAlignment="Center"
                                            Text="Serial Port"/>
 
-                <ComboBox x:Name="SSerialPortList"
+                <ComboBox x:Name="SSerialPortList" 
+                         
                                           Margin="2"
                                           Grid.Column="1"/>
 
@@ -52,6 +53,7 @@
                                         Content="Connect"
                                         Margin="2"
                                         Click="SSerialConnect_Click"/>
+                
                 <Button x:Name="SSerialRefreshPorts"
                                         Grid.Row="3"
                                         Grid.ColumnSpan="2"

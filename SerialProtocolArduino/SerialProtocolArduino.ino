@@ -4,8 +4,7 @@
 #define WIDTH 1920
 #define HEIGHT 1080
 
-//byte frameData[WIDTH * HEIGHT * 3];
-byte frameData[3];
+char frameData[3];
 void setup() {
   Serial.begin(1);
 }

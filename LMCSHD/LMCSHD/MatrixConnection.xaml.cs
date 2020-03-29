@@ -20,15 +20,24 @@ namespace LMCSHD
             string[] ports = SerialManager.GetPortNames();
             SSerialPortList.ItemsSource = ports;
             if (ports.Length > 0)
+            {
                 SSerialPortList.SelectedIndex = 0;
+                SSerialConnect.IsEnabled = true;
+            }
+            else
+            {
+                SSerialConnect.IsEnabled = false;
+            }
         }
         private void SSerialConnect_Click(object sender, RoutedEventArgs e)
         {
-            int[] matrixDef = SerialManager.Connect(SSerialPortList.SelectedValue.ToString(), int.Parse(SBaudRate.Text));
+            int[] matrixDef = null;
+
+                matrixDef = SerialManager.Connect(SSerialPortList.SelectedValue.ToString(), int.Parse(SBaudRate.Text));
+
             if (matrixDef != null)
             {
                 ((MainWindow)Application.Current.MainWindow).SetMatrixDimensions(matrixDef[0], matrixDef[1]);
-                //((MainWindow)Application.Current.MainWindow).MIConnect.IsEnabled = false;
                 Close();
             }
             else

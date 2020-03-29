@@ -55,7 +55,7 @@ namespace LMCSHD
             if (b.Width == Width && b.Height == Height)
                 Frame = BitmapToPixelArray(b);
             else
-                Frame = BitmapToPixelArray(DownsampleBitmap(b, Width, Height, InterpMode));
+                Frame = BitmapToPixelArray(DownsampleBitmap(b, Width, Height));
         }
         public static void InjestFFT(float[] fftData)
         {
@@ -164,7 +164,7 @@ namespace LMCSHD
         {
             BitmapData imageData = bitmap.LockBits(new Rectangle(0, 0, bitmap.Width, bitmap.Height), ImageLockMode.ReadOnly, System.Drawing.Imaging.PixelFormat.Format24bppRgb);
 
-            MatrixFrame.Pixel[,] frame = new MatrixFrame.Pixel[bitmap.Width, bitmap.Height];
+            Pixel[,] frame = new Pixel[bitmap.Width, bitmap.Height];
 
             byte* scan0 = (byte*)imageData.Scan0.ToPointer();
             int stride = imageData.Stride;
@@ -185,12 +185,12 @@ namespace LMCSHD
             bitmap.Dispose();
             return frame;
         }
-        public static Bitmap DownsampleBitmap(System.Drawing.Bitmap b, int width, int height, InterpolationMode mode)
+        public static Bitmap DownsampleBitmap(Bitmap b, int width, int height)
         {
             Bitmap result = new Bitmap(width, height);
             using (Graphics g = Graphics.FromImage(result))
             {
-                g.InterpolationMode = mode;
+                g.InterpolationMode = InterpMode;
                 g.DrawImage(b, 0, 0, width, height);
             }
             b.Dispose();

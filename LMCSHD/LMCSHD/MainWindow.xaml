@@ -67,16 +67,16 @@
                     <MenuItem Header="_Open" />
                     <MenuItem Header="_Save" />
                     <Separator />
-                    <MenuItem Header="_Exit" Click="MenuItem_Click"/>
+                    <MenuItem Header="_Exit" Click="MenuItem_File_Exit_Click"/>
                 </MenuItem>
 
                 <MenuItem Header="_Serial">
-                    <MenuItem x:Name="MIConnect" Header="Connect" Click="MIConnect_Click"/>
-                    <MenuItem Header="Disconnect" Click="MIDisconnect_Click"/>
+                    <MenuItem x:Name="MIConnect" Header="Connect" Click="MenuItem_Serial_Connect_Click"/>
+                    <MenuItem Header="Disconnect" Click="MenuItem_Serial_Disconnect_Click"/>
                     <MenuItem Header="Color Mode">
-                        <MenuItem Header="24BPP" Click="BPP24_Click"/>
-                        <MenuItem Header="16BPP" Click="BPP16_Click"/>
-                        <MenuItem Header="6BPP" Click="BPP6_Click"/>
+                        <MenuItem Header="24BPP" Click="MenuItem_Serial_ColorMode_BPP24_Click"/>
+                        <MenuItem Header="16BPP" Click="MenuItem_Serial_ColorMode_BPP16_Click"/>
+                        <MenuItem Header="6BPP" Click="MenuItem_Serial_ColorMode_BPP6_Click"/>
                     </MenuItem>
                 </MenuItem>
 
@@ -85,20 +85,11 @@
 
                 </MenuItem>
             </Menu>
-
-            <GroupBox Grid.Row="1" Grid.Column="1" Margin="4">
-                <GroupBox.Header>
-                    <StackPanel Orientation="Horizontal">
-                        <CheckBox x:Name="MPCheckBox" IsChecked="True" Content="Matrix Preview"/>
-                    </StackPanel>
-                </GroupBox.Header>
-
-                <Image x:Name="MatrixImage"
-                       Margin="2"
-                       RenderOptions.BitmapScalingMode="NearestNeighbor" Cursor="Cross"/>
-            </GroupBox>
-
-
+            
+            <Border Grid.Row="1" Grid.Column="1" Margin="4">
+                <Image x:Name="MatrixImage" Margin="1" RenderOptions.BitmapScalingMode="NearestNeighbor" Cursor="Cross"/>
+            </Border>
+            
             <TabControl Grid.Row="1" Width="300" Margin="4">
                 <TabItem Header="Screen Recorder">
                     <StackPanel Orientation="Vertical">
@@ -244,46 +235,39 @@
 
                 </TabItem>
 
-                <TabItem Header="Audio" IsEnabled="False">
-                    <GroupBox Width="300">
-                        <GroupBox.Header>
-                            <StackPanel Orientation="Horizontal">
-                                <RadioButton />
-                                <TextBlock Text=" Spectrum Analyzer"/>
-                            </StackPanel>
-                        </GroupBox.Header>
+                <TabItem Header="Audio">
 
-                        <Grid>
+                    <Grid>
 
-                            <Grid.ColumnDefinitions>
-                                <ColumnDefinition Width="*"/>
-                                <ColumnDefinition Width="*"/>
-                            </Grid.ColumnDefinitions>
-                            <Grid.RowDefinitions>
-                                <RowDefinition Height="auto"/>
-                                <RowDefinition Height="auto"/>
-                                <RowDefinition Height="auto"/>
-                                <RowDefinition Height="auto"/>
-                                <RowDefinition Height="auto"/>
-                                <RowDefinition Height="auto"/>
-                                <RowDefinition Height="auto"/>
-                            </Grid.RowDefinitions>
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*"/>
+                            <ColumnDefinition Width="*"/>
+                        </Grid.ColumnDefinitions>
+                        <Grid.RowDefinitions>
+                            <RowDefinition Height="auto"/>
+                            <RowDefinition Height="auto"/>
+                            <RowDefinition Height="auto"/>
+                            <RowDefinition Height="auto"/>
+                            <RowDefinition Height="auto"/>
+                            <RowDefinition Height="auto"/>
+                            <RowDefinition Height="auto"/>
+                        </Grid.RowDefinitions>
 
-                            <Button x:Name="SAStart"
+                        <Button x:Name="SAStart"
                                 Content="Start Capture"
                                 Click="SAStart_Click"/>
-                            <Button x:Name="SAStop"
+                        <Button x:Name="SAStop"
                                 Grid.Column="1"
                                 Content="Stop Capture"
                                 Click="SAStop_Click"/>
 
-                            <TextBlock Grid.Row="1"
+                        <TextBlock Grid.Row="1"
                                    Margin="2"
                                    Text="Audio Device"
                                    HorizontalAlignment="Right"
                                    VerticalAlignment="Center"/>
 
-                            <ComboBox x:Name="SADeviceDrop"
+                        <ComboBox x:Name="SADeviceDrop"
                                   Grid.Column="1"
                                   Grid.Row="1"
                                   Margin="2"
@@ -291,28 +275,28 @@
                                   SelectionChanged="SADeviceDrop_SelectionChanged"/>
 
 
-                            <Button x:Name="SARefreshDevices"
+                        <Button x:Name="SARefreshDevices"
                                 Grid.Column="1"
                                 Grid.Row="2"
                                 Content="Refresh Devices"
                                 Click="SARefreshDevices_Click"/>
 
-                            <StackPanel Grid.ColumnSpan="2" Grid.Row="3">
-                                <GroupBox>
-                                    <GroupBox.Header>
-                                        <TextBlock Text="Frequency Range (Hz)" Margin="2"/>
-                                    </GroupBox.Header>
-                                    <Grid>
-                                        <Grid.RowDefinitions>
-                                            <RowDefinition Height="auto"/>
-                                            <RowDefinition Height="auto"/>
-                                        </Grid.RowDefinitions>
-                                        <Grid.ColumnDefinitions>
-                                            <ColumnDefinition Width="*"/>
-                                            <ColumnDefinition Width="*"/>
-                                        </Grid.ColumnDefinitions>
+                        <StackPanel Grid.ColumnSpan="2" Grid.Row="3">
+                            <GroupBox>
+                                <GroupBox.Header>
+                                    <TextBlock Text="Frequency Range (Hz)" Margin="2"/>
+                                </GroupBox.Header>
+                                <Grid>
+                                    <Grid.RowDefinitions>
+                                        <RowDefinition Height="auto"/>
+                                        <RowDefinition Height="auto"/>
+                                    </Grid.RowDefinitions>
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="*"/>
+                                        <ColumnDefinition Width="*"/>
+                                    </Grid.ColumnDefinitions>
 
-                                        <xctk:RangeSlider x:Name="SARangeS"
+                                    <xctk:RangeSlider x:Name="SARangeS"
                                                       Grid.ColumnSpan="2"
                                                       Minimum="100"
                                                       Maximum="22050"
@@ -321,13 +305,13 @@
                                                       IsSnapToTickEnabled="True"
                                                       HigherValueChanged="SARangeS_HigherValueChanged"
                                                       LowerValueChanged="SARangeS_LowerValueChanged"/>
-                                        <xctk:IntegerUpDown x:Name="SALowClipU"
+                                    <xctk:IntegerUpDown x:Name="SALowClipU"
                                                         Grid.Row="1"
                                                         ValueChanged="SAIntUpDown_ValueChanged"
                                                         Maximum="22050"
                                                         Minimum="100"
                                                         HorizontalAlignment="Left"/>
-                                        <xctk:IntegerUpDown x:Name="SAHighClipU"
+                                    <xctk:IntegerUpDown x:Name="SAHighClipU"
                                                         Grid.Row="1"
                                                         Grid.Column="1"
                                                         ValueChanged="SAIntUpDown_ValueChanged"
@@ -336,16 +320,16 @@
                                                         Minimum="100"
                                                         HorizontalAlignment="Right"/>
 
-                                    </Grid>
-                                </GroupBox>
-                            </StackPanel>
-                            <TextBlock Grid.Row="4"
+                                </Grid>
+                            </GroupBox>
+                        </StackPanel>
+                        <TextBlock Grid.Row="4"
                                    Margin="2"
                                    Text="Amplitude"
                                    HorizontalAlignment="Right"
                                    VerticalAlignment="Center"/>
 
-                            <xctk:IntegerUpDown x:Name="SAAmpU"
+                        <xctk:IntegerUpDown x:Name="SAAmpU"
                                             Grid.Row="4"
                                             Grid.Column="1"
                                             Width="auto"
@@ -354,48 +338,47 @@
                                             Maximum="8192"
                                             Minimum="1"/>
 
-                            <GroupBox Grid.Row="5" Grid.ColumnSpan="2">
-                                <GroupBox.Header>
-                                    <TextBlock Text="Gradient Colors" Margin="2"/>
-                                </GroupBox.Header>
-                                <StackPanel Orientation="Horizontal">
-                                    <TextBlock Text="Color 1 " VerticalAlignment="Center" HorizontalAlignment="Right" Margin="2"/>
-                                    <xctk:ColorPicker x:Name="SAColor1"
+                        <GroupBox Grid.Row="5" Grid.ColumnSpan="2">
+                            <GroupBox.Header>
+                                <TextBlock Text="Gradient Colors" Margin="2"/>
+                            </GroupBox.Header>
+                            <StackPanel Orientation="Horizontal">
+                                <TextBlock Text="Color 1 " VerticalAlignment="Center" HorizontalAlignment="Right" Margin="2"/>
+                                <xctk:ColorPicker x:Name="SAColor1"
                                                   SelectedColor="Red"
                                                   MaxDropDownWidth="290"
                                                   ColorMode="ColorCanvas"
                                                   UsingAlphaChannel="False"
                                                   Margin="2"
                                                   SelectedColorChanged="SA_SelectedColorChanged"/>
-                                    <TextBlock Text="Color 2 " VerticalAlignment="Center" HorizontalAlignment="Right" Margin="2"/>
-                                    <xctk:ColorPicker x:Name="SAColor2"
+                                <TextBlock Text="Color 2 " VerticalAlignment="Center" HorizontalAlignment="Right" Margin="2"/>
+                                <xctk:ColorPicker x:Name="SAColor2"
                                                   SelectedColor="Blue"
                                                   MaxDropDownWidth="290"
                                                   ColorMode="ColorCanvas"
                                                   UsingAlphaChannel="False"
                                                   Margin="2"
                                                   SelectedColorChanged="SA_SelectedColorChanged"/>
-                                </StackPanel>
-                            </GroupBox>
+                            </StackPanel>
+                        </GroupBox>
 
-                            <TextBlock Grid.Row="6"
+                        <TextBlock Grid.Row="6"
                                    Margin="2"
                                    Text="Display Mode"
                                    HorizontalAlignment="Right"
                                    VerticalAlignment="Center"/>
 
-                            <ComboBox x:Name="SADisplayMode"
+                        <ComboBox x:Name="SADisplayMode"
                                   Grid.Column="1"
                                   Grid.Row="6"
                                   Margin="2"
                                   SelectedIndex="0">
 
-                                <ComboBoxItem Content="Mirrored"/>
-                                <ComboBoxItem Content="Standard"/>
-                            </ComboBox>
+                            <ComboBoxItem Content="Mirrored"/>
+                            <ComboBoxItem Content="Standard"/>
+                        </ComboBox>
 
-                        </Grid>
-                    </GroupBox>
+                    </Grid>
                 </TabItem>
 
             </TabControl>

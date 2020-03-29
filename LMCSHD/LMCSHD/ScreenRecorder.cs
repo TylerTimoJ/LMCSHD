@@ -45,7 +45,7 @@ namespace LMCSHD
             {
                 IntPtr ptr = GetDC(IntPtr.Zero);
                 using (Graphics g = Graphics.FromHdc(ptr))
-                    g.DrawRectangle(new Pen(Color.DarkMagenta, 1), new Rectangle(CaptureRect.X - 1, CaptureRect.Y - 1, CaptureRect.Width + 2, CaptureRect.Height + 2));
+                    g.DrawRectangle(new Pen(Color.DarkMagenta, 1), new Rectangle(CaptureRect.X - 1, CaptureRect.Y - 1, CaptureRect.Width + 1, CaptureRect.Height + 1));
                 ReleaseDC(IntPtr.Zero, ptr);
 
                 Thread.Sleep(6);

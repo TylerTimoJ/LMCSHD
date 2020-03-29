@@ -208,18 +208,21 @@ namespace LMCSHD
                 data[0] = int.Parse(width);
                 data[1] = int.Parse(height);
             }
-            catch(Exception e)
+            catch (Exception e)
             {
-                MessageBox.Show(e.Message +" "+ width +" "+ height);
+                MessageBox.Show(e.Message + " " + width + " " + height);
                 return null;
             }
             return data;
         }
         public static int[] Connect(string portName, int baudRate)
         {
+            if (portName == null || portName == "" || baudRate == 0)
+                return null;
             Disconnect();
             _sp.PortName = portName;
             _sp.BaudRate = baudRate;
+
             _sp.ReadTimeout = 1000;
             try
             {
@@ -227,7 +230,6 @@ namespace LMCSHD
             }
             catch (Exception e)
             {
-                MessageBox.Show(e.Message + "\tTHIS MESSAGE LINE 232");
                 return null;
             }
 
