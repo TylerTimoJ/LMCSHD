@@ -10,6 +10,7 @@ using System.Windows.Media;
 using System.Windows.Media.Imaging;
 using System.Windows.Threading;
 using Xceed.Wpf.Toolkit;
+using System.Runtime.InteropServices;
 
 namespace LMCSHD
 {
@@ -69,9 +70,9 @@ namespace LMCSHD
         {
             SerialManager.ColorMode = SerialManager.CMode.BPP16;
         }
-        private void MenuItem_Serial_ColorMode_BPP6_Click(object sender, RoutedEventArgs e)
+        private void MenuItem_Serial_ColorMode_BPP8_Click(object sender, RoutedEventArgs e)
         {
-            SerialManager.ColorMode = SerialManager.CMode.BPP6;
+            SerialManager.ColorMode = SerialManager.CMode.BPP8;
         }
         #endregion
 
@@ -95,46 +96,29 @@ namespace LMCSHD
             //MPCheckBox.Content = " Matrix Preview: " + MatrixFrame.Width.ToString() + "x" + MatrixFrame.Height.ToString();
             SetupSCUI();
 
-            AudioProcesser.SetupAudioProcessor(FFTCallback);// = new AudioProcesser(FFTCallback);
-            RefreshAudioDeviceList();
+            //AudioProcesser.SetupAudioProcessor(FFTCallback);// = new AudioProcesser(FFTCallback);
+            //RefreshAudioDeviceList();
         }
 
-        private unsafe void UpdatePreview()
+        private void UpdatePreview()
         {
+            MatrixBitmap.Lock();
+            IntPtr pixelAddress = MatrixBitmap.BackBuffer;
 
-            try
-            {
-                MatrixBitmap.Lock();
-                int stride = MatrixBitmap.BackBufferStride;
-                IntPtr pixelAddress;
-                for (int x = 0; x < MatrixFrame.Width; x++)
-                {
-                    int xOffset = x * 4;
-                    for (int y = 0; y < MatrixFrame.Height; y++)
-                    {
-                        pixelAddress = MatrixBitmap.BackBuffer + (y * stride) + xOffset;
+            Marshal.Copy(MatrixFrame.GetFrame(), 0, pixelAddress, (MatrixFrame.Width * MatrixFrame.Height));
 
-                        int color_data = MatrixFrame.Frame[x, y].R << 16 | MatrixFrame.Frame[x, y].G << 8 | MatrixFrame.Frame[x, y].B; // R
-                        *(int*)pixelAddress = color_data;
-                    }
-                }
-                MatrixBitmap.AddDirtyRect(new Int32Rect(0, 0, MatrixFrame.Width, MatrixFrame.Height));
-            }
-            finally
-            {
-                MatrixBitmap.Unlock();
-            }
-
+            MatrixBitmap.AddDirtyRect(new Int32Rect(0, 0, MatrixFrame.Width, MatrixFrame.Height));
+            MatrixBitmap.Unlock();
         }
         public void UpdateContentImage()
         {
-            if ((bool)CPCheckBox.IsChecked)
-                ContentImage.Source = MatrixFrame.ContentImage;
+          //  if ((bool)CPCheckBox.IsChecked)
+            //    ContentImage.Source = MatrixFrame.ContentImage;
         }
 
         private void CPCheckBox_CheckedChanged(object sender, RoutedEventArgs e)
         {
-            MatrixFrame.RenderContentPreview = (bool)CPCheckBox.IsChecked;
+          //  MatrixFrame.RenderContentPreview = (bool)CPCheckBox.IsChecked;
         }
         //===========================================================================================
 

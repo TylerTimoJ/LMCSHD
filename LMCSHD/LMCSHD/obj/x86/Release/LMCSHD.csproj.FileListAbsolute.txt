@@ -4,7 +4,6 @@ C:\Users\tyler\OneDrive\LMCSHD\LMCSHD\LMCSHD\bin\x86\Release\LMCSHD.pdb
 C:\Users\tyler\OneDrive\LMCSHD\LMCSHD\LMCSHD\bin\x86\Release\NAudio.dll
 C:\Users\tyler\OneDrive\LMCSHD\LMCSHD\LMCSHD\bin\x86\Release\Xceed.Wpf.Toolkit.dll
 C:\Users\tyler\OneDrive\LMCSHD\LMCSHD\LMCSHD\bin\x86\Release\NAudio.xml
-C:\Users\tyler\OneDrive\LMCSHD\LMCSHD\LMCSHD\obj\x86\Release\LMCSHD.csprojAssemblyReference.cache
 C:\Users\tyler\OneDrive\LMCSHD\LMCSHD\LMCSHD\obj\x86\Release\MainWindow.g.cs
 C:\Users\tyler\OneDrive\LMCSHD\LMCSHD\LMCSHD\obj\x86\Release\MatrixConnection.g.cs
 C:\Users\tyler\OneDrive\LMCSHD\LMCSHD\LMCSHD\obj\x86\Release\PixelOrderEditor.g.cs

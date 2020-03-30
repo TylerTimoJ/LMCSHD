@@ -62,7 +62,7 @@ void serialEvent()
       buffer = backgroundLayer.backBuffer();
       for (int i = 0; i < kMatrixWidth * kMatrixHeight; i++) {
         Serial.readBytes(pix, 1);
-        *buffer++ = rgb24{map(((pix[0] & B11000000) >> 6), 0, 3, BLK, 255), map(((pix[0] & B00110000) >> 4), 0, 3, BLK, 255), map(((pix[0] & B00001100) >> 2), 0, 3, BLK, 255)}; //,
+        *buffer++ = rgb24{map(((pix[0] & B11100000) >> 5), 0, 7, BLK, 255), map(((pix[0] & B00011100) >> 2), 0, 7, BLK, 255), map(pix[0] & B00000011, 0, 3, BLK, 255)}; //,
       }
       Serial.write(0x06); //acknowledge
       backgroundLayer.swapBuffers(false);

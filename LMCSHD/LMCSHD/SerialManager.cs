@@ -14,11 +14,8 @@ namespace LMCSHD
 {
     public static class SerialManager
     {
-        public enum CMode { BPP24, BPP16, BPP6 };
-
+        public enum CMode { BPP24, BPP16, BPP8 };
         public static CMode ColorMode = CMode.BPP24;
-
-
         private static SerialPort _sp = new SerialPort();
         private static bool _serialReady = false;
 
@@ -33,6 +30,7 @@ namespace LMCSHD
 
             }
         }
+        //NOTE Rework to work more efficiently with single dimensional pixel array
         public static bool PushFrame()
         {
             if (_serialReady)
@@ -85,7 +83,7 @@ namespace LMCSHD
                     }
 
                 }
-                else if (ColorMode == CMode.BPP6)
+                else if (ColorMode == CMode.BPP8)
                 {
                     try
                     {
@@ -94,11 +92,11 @@ namespace LMCSHD
                         for (int i = 0; i < MatrixFrame.Width * MatrixFrame.Height; i++)
                         {
 
-                            byte r = (byte)(orderedFrame[i * 3] & 0xC0);
-                            byte g = (byte)(orderedFrame[(i * 3) + 1] & 0xC0);
+                            byte r = (byte)(orderedFrame[i * 3] & 0xE0);
+                            byte g = (byte)(orderedFrame[(i * 3) + 1] & 0xE0);
                             byte b = (byte)(orderedFrame[(i * 3) + 2] & 0xC0);
 
-                            newOrderedFrame[i] = (byte)(r | (g >> 2) | (b >> 4));
+                            newOrderedFrame[i] = (byte)(r | (g >> 3) | (b >> 6));
                         }
                         _sp.BaseStream.WriteAsync(header, 0, 1);
                         _sp.BaseStream.WriteAsync(newOrderedFrame, 0, newOrderedFrame.Length);
@@ -120,9 +118,10 @@ namespace LMCSHD
             else
                 return false;
         }
+
+        //NOTE Rework to work more efficiently with single dimensional pixel array
         static byte[] GetOrderedSerialFrame()
         {
-            var pixelArray = MatrixFrame.Frame;
             byte[] orderedFrame = new byte[MatrixFrame.Width * MatrixFrame.Height * 3];
 
             int index = 0;
@@ -135,15 +134,17 @@ namespace LMCSHD
             int termY = PixelOrder.startCorner == StartCorner.BL || PixelOrder.startCorner == StartCorner.BR ? -1 : MatrixFrame.Height;
             int incY = PixelOrder.startCorner == StartCorner.BL || PixelOrder.startCorner == StartCorner.BR ? -1 : 1;
 
+
             if (PixelOrder.orientation == Orientation.HZ)
                 for (int y = startY; y != termY; y += incY)
                 {
                     for (int x = startX; x != termX; x += incX)
                     {
-                        int xPos = PixelOrder.newLine == NewLine.SC || y % 2 == 0 ? x : MatrixFrame.Width - 1 - x;
-                        orderedFrame[index * 3] = pixelArray[xPos, y].R;
-                        orderedFrame[index * 3 + 1] = pixelArray[xPos, y].G;
-                        orderedFrame[index * 3 + 2] = pixelArray[xPos, y].B;
+                        int i = PixelOrder.newLine == NewLine.SC || y % 2 == 0 ? x : MatrixFrame.Width - 1 - x;
+                        i += (y * MatrixFrame.Width);
+                        orderedFrame[index * 3] = MatrixFrame.Frame[i].R;
+                        orderedFrame[index * 3 + 1] = MatrixFrame.Frame[i].G;
+                        orderedFrame[index * 3 + 2] = MatrixFrame.Frame[i].B;
                         index++;
                     }
                 }
@@ -153,9 +154,10 @@ namespace LMCSHD
                     for (int y = startY; y != termY; y += incY)
                     {
                         int yPos = PixelOrder.newLine == NewLine.SC || x % 2 == 0 ? y : MatrixFrame.Height - 1 - y;
-                        orderedFrame[index * 3] = pixelArray[x, yPos].R;
-                        orderedFrame[index * 3 + 1] = pixelArray[x, yPos].G;
-                        orderedFrame[index * 3 + 2] = pixelArray[x, yPos].B;
+                        yPos += (x * MatrixFrame.Height);
+                        orderedFrame[index * 3] = MatrixFrame.Frame[yPos].R;
+                        orderedFrame[index * 3 + 1] = MatrixFrame.Frame[yPos].G;
+                        orderedFrame[index * 3 + 2] = MatrixFrame.Frame[yPos].B;
                         index++;
                     }
                 }

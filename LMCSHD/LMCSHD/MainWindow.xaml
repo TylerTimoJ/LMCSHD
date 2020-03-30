@@ -74,9 +74,9 @@
                     <MenuItem x:Name="MIConnect" Header="Connect" Click="MenuItem_Serial_Connect_Click"/>
                     <MenuItem Header="Disconnect" Click="MenuItem_Serial_Disconnect_Click"/>
                     <MenuItem Header="Color Mode">
-                        <MenuItem Header="24BPP" Click="MenuItem_Serial_ColorMode_BPP24_Click"/>
-                        <MenuItem Header="16BPP" Click="MenuItem_Serial_ColorMode_BPP16_Click"/>
-                        <MenuItem Header="6BPP" Click="MenuItem_Serial_ColorMode_BPP6_Click"/>
+                        <MenuItem Header="24bpp RGB True Color" Click="MenuItem_Serial_ColorMode_BPP24_Click"/>
+                        <MenuItem Header="16bpp RGB High Color" Click="MenuItem_Serial_ColorMode_BPP16_Click"/>
+                        <MenuItem Header="  8bpp RGB 256 Color" Click="MenuItem_Serial_ColorMode_BPP8_Click"/>
                     </MenuItem>
                 </MenuItem>
 
@@ -89,7 +89,7 @@
             <Border Grid.Row="1" Grid.Column="1" Margin="4">
                 <Image x:Name="MatrixImage" Margin="1" RenderOptions.BitmapScalingMode="NearestNeighbor" Cursor="Cross"/>
             </Border>
-            
+
             <TabControl Grid.Row="1" Width="300" Margin="4">
                 <TabItem Header="Screen Recorder">
                     <StackPanel Orientation="Vertical">
@@ -100,7 +100,6 @@
                                 <ColumnDefinition Width="*"/>
                             </Grid.ColumnDefinitions>
                             <Grid.RowDefinitions>
-                                <RowDefinition Height="auto"/>
                                 <RowDefinition Height="auto"/>
                                 <RowDefinition Height="auto"/>
                                 <RowDefinition Height="auto"/>
@@ -211,17 +210,7 @@
                             </WrapPanel>
 
 
-
-                            <Border Grid.Row="5" Grid.ColumnSpan="2" Margin="2" Height="310"  BorderBrush="Gray" BorderThickness="1" Background="#FFFDFDFD">
-                                <Grid>
-                                    <Grid.RowDefinitions>
-                                        <RowDefinition Height="auto"/>
-                                        <RowDefinition Height="*"/>
-                                    </Grid.RowDefinitions>
-                                    <CheckBox x:Name="CPCheckBox" HorizontalAlignment="Center" Margin="2" IsChecked="True" Checked="CPCheckBox_CheckedChanged" Unchecked="CPCheckBox_CheckedChanged" Content="Content Preview"/>
-                                    <Image x:Name="ContentImage" Grid.Row="1" Margin="1" RenderOptions.BitmapScalingMode="NearestNeighbor" Cursor="Cross"/>
-                                </Grid>
-                            </Border>
+                            <Separator Grid.Row="5" Grid.ColumnSpan="2" Margin="2"/>
 
                             <TextBlock Grid.Row="6" Margin="2" Text="{Binding StringFormat=Capture FPS: {0}, Path=LocalFPS, Mode=OneWay}"/>
                             <TextBlock Grid.Row="6" Grid.Column="1" Margin="2" Text="{Binding StringFormat=Serial FPS: {0}, Path=SerialFPS, Mode=OneWay}"/>
@@ -381,8 +370,25 @@
                     </Grid>
                 </TabItem>
 
-            </TabControl>
+                <TabItem Header="Imaging" IsEnabled="False">
+                    <Grid>
+                        <Border Grid.Row="5" Grid.ColumnSpan="2" Margin="2" Height="310"  BorderBrush="Gray" BorderThickness="1" Background="#FFFDFDFD">
+                            <Grid>
+                                <Grid.RowDefinitions>
+                                    <RowDefinition Height="auto"/>
+                                    <RowDefinition Height="*"/>
+                                </Grid.RowDefinitions>
+                                <CheckBox x:Name="CPCheckBox" HorizontalAlignment="Center" Margin="2" IsChecked="True" Checked="CPCheckBox_CheckedChanged" Unchecked="CPCheckBox_CheckedChanged" Content="Content Preview"/>
+                                <Image x:Name="ContentImage" Grid.Row="1" Margin="1" RenderOptions.BitmapScalingMode="NearestNeighbor" Cursor="Cross"/>
+                            </Grid>
+                        </Border>
+                    </Grid>
+                </TabItem>
+                
+                <TabItem Header="Drawing" IsEnabled="False">
 
+                </TabItem>
+            </TabControl>
         </Grid>
     </Grid>
 </Window>

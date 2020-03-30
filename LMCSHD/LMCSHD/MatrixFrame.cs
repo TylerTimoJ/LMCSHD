@@ -13,13 +13,11 @@ namespace LMCSHD
     {
         //Data Properties
         public static int Width = 16, Height = 16;
-        public static BitmapSource ContentImage { get; set; }
         public static InterpolationMode InterpMode { get; set; } = InterpolationMode.HighQualityBicubic;
-        public static bool RenderContentPreview { get; set; } = true;
 
         private static Pixel[] gradient;
 
-        public static Pixel[,] Frame;
+        public static Pixel[] Frame;
         public static int FrameLength { get { return (Width * Height * 3); } }
 
         //End Data Properties
@@ -38,24 +36,31 @@ namespace LMCSHD
             Width = w;
             Height = h;
             Frame = null;
-            Frame = new Pixel[Width, Height];
+            Frame = new Pixel[Width * Height];
             //SetSpectrumGradient(new Pixel(255, 0, 0), new Pixel(0, 0, 255));
         }
         public static void SetPixel(int x, int y, Pixel color)
         {
-            Frame[x, y] = color;
+            //  Frame[x, y] = color;
+        }
+
+        public static unsafe int[] GetFrame()
+        {
+            int[] data = new int[Width * Height];
+            for (int i = 0; i < Width * Height; i++)
+            {
+                data[i] = MatrixFrame.Frame[i].R << 16 | MatrixFrame.Frame[i].G << 8 | MatrixFrame.Frame[i].B;
+            }
+            return data;
         }
 
         public static void InjestGDIBitmap(Bitmap b)
         {
-            if (RenderContentPreview)
-                ContentImage = CreateBitmapSourceFromBitmap(b);
-            else
-                ContentImage = null;
             if (b.Width == Width && b.Height == Height)
-                Frame = BitmapToPixelArray(b);
+                BitmapToFrame(b);
             else
-                Frame = BitmapToPixelArray(DownsampleBitmap(b, Width, Height));
+                BitmapToFrame(DownsampleBitmap(b, Width, Height));
+            b.Dispose();
         }
         public static void InjestFFT(float[] fftData)
         {
@@ -102,22 +107,21 @@ namespace LMCSHD
         }
         public static void SetFrameColor(Pixel color)
         {
-            for (int x = 0; x < Width; x++)
+            for (int i = 0; i < Width * Height; i++)
             {
-                for (int y = 0; y < Height; y++)
-                {
-                    Frame[x, y] = color;
-                }
+                Frame[i] = color;
             }
         }
         public static void DrawColumn(int x, int height)
         {
+            /*
             for (int y = Height - 1; y > Height - height; y--)
             {
                 if (y < 0)
                     break;
                 Frame[x, y] = new Pixel(0, 0, 139);
             }
+            */
         }
         public static void SetSpectrumGradient(Pixel color1, Pixel color2)
         {
@@ -137,6 +141,8 @@ namespace LMCSHD
         }
         public static void DrawColumnMirrored(int x, int height)
         {
+            //REIMPLEMENT
+            /*
             int gradientIndex = 0;
             Frame[x, ((Height / 2) - 1)] = gradient[0];
             for (int y = (Height / 2) - 2; y > (Height / 2) - 2 - height; y--)
@@ -155,35 +161,26 @@ namespace LMCSHD
                 Frame[x, y] = gradient[gradientIndex];
                 gradientIndex++;
             }
+            */
         }
 
         //****************************************************************************************************************************************************
         //************************************ OLD BITMAP PROCESSER CLASS MEMBERS ****************************************************************************
         //****************************************************************************************************************************************************
-        public static unsafe Pixel[,] BitmapToPixelArray(Bitmap bitmap)
+        public static unsafe void BitmapToFrame(Bitmap bitmap)
         {
             BitmapData imageData = bitmap.LockBits(new Rectangle(0, 0, bitmap.Width, bitmap.Height), ImageLockMode.ReadOnly, System.Drawing.Imaging.PixelFormat.Format24bppRgb);
 
-            Pixel[,] frame = new Pixel[bitmap.Width, bitmap.Height];
-
             byte* scan0 = (byte*)imageData.Scan0.ToPointer();
-            int stride = imageData.Stride;
-            byte* row;
 
-            for (int y = 0; y < imageData.Height; y++)
+            for (int i = 0; i < Width * Height; i++)
             {
-                row = scan0 + (y * stride);
-                for (int x = 0; x < imageData.Width; x++)
-                {
-                    int index = x * 3;
-                    frame[x, y].R = row[index + 2];
-                    frame[x, y].G = row[index + 1];
-                    frame[x, y].B = row[index];
-                }
+                Frame[i].B = *(scan0 + (i * 3));
+                Frame[i].G = *(scan0 + (i * 3) + 1);
+                Frame[i].R = *(scan0 + (i * 3) + 2);
             }
             bitmap.UnlockBits(imageData);
             bitmap.Dispose();
-            return frame;
         }
         public static Bitmap DownsampleBitmap(Bitmap b, int width, int height)
         {
@@ -192,6 +189,7 @@ namespace LMCSHD
             {
                 g.InterpolationMode = InterpMode;
                 g.DrawImage(b, 0, 0, width, height);
+                g.Save();
             }
             b.Dispose();
             return result;
@@ -204,15 +202,9 @@ namespace LMCSHD
 
         public static BitmapSource CreateBitmapSourceFromBitmap(Bitmap bitmap)
         {
-            var bitmapData = bitmap.LockBits(
-                new Rectangle(0, 0, bitmap.Width, bitmap.Height),
-                ImageLockMode.ReadOnly, System.Drawing.Imaging.PixelFormat.Format32bppArgb);
+            var bitmapData = bitmap.LockBits(new Rectangle(0, 0, bitmap.Width, bitmap.Height), ImageLockMode.ReadOnly, System.Drawing.Imaging.PixelFormat.Format32bppArgb);
 
-            var bitmapSource = BitmapSource.Create(
-                bitmapData.Width, bitmapData.Height,
-                bitmap.HorizontalResolution, bitmap.VerticalResolution,
-                PixelFormats.Bgra32, null,
-                bitmapData.Scan0, bitmapData.Stride * bitmapData.Height, bitmapData.Stride);
+            var bitmapSource = BitmapSource.Create(bitmapData.Width, bitmapData.Height, bitmap.HorizontalResolution, bitmap.VerticalResolution, PixelFormats.Bgra32, null, bitmapData.Scan0, bitmapData.Stride * bitmapData.Height, bitmapData.Stride);
 
             bitmap.UnlockBits(bitmapData);
             return bitmapSource;

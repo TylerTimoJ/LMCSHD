@@ -264,19 +264,17 @@ namespace LMCSHD
         {
             LocalFPS = _fpsStopWatch.ElapsedMilliseconds - _localPreviousMillis;
             _localPreviousMillis = _fpsStopWatch.ElapsedMilliseconds;
+
             MatrixFrame.InjestGDIBitmap(capturedBitmap);
-            if (MatrixFrame.ContentImage != null)
-            {
-                MatrixFrame.ContentImage.Freeze();
-                Dispatcher.Invoke(() => { UpdateContentImage(); });
-            }
+
             Dispatcher.Invoke(() => { UpdatePreview(); });
+
             if (SerialManager.PushFrame())
             {
                 SerialFPS = _fpsStopWatch.ElapsedMilliseconds - _serialPreviousMillis;
                 _serialPreviousMillis = _fpsStopWatch.ElapsedMilliseconds;
             }
-            GC.Collect();
+            //GC.Collect();
         }
 
         void SetupSCUI()
