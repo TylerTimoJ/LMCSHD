@@ -15,8 +15,6 @@ namespace LMCSHD
         public static int Width = 16, Height = 16;
         public static InterpolationMode InterpMode { get; set; } = InterpolationMode.HighQualityBicubic;
 
-        private static Pixel[] gradient;
-
         public static Pixel[] Frame;
         public static int FrameLength { get { return (Width * Height * 3); } }
 
@@ -37,11 +35,10 @@ namespace LMCSHD
             Height = h;
             Frame = null;
             Frame = new Pixel[Width * Height];
-            //SetSpectrumGradient(new Pixel(255, 0, 0), new Pixel(0, 0, 255));
         }
         public static void SetPixel(int x, int y, Pixel color)
         {
-            //  Frame[x, y] = color;
+            Frame[y * Width + x] = color;
         }
 
         public static unsafe int[] GetFrame()
@@ -169,16 +166,38 @@ namespace LMCSHD
         //****************************************************************************************************************************************************
         public static unsafe void BitmapToFrame(Bitmap bitmap)
         {
-            BitmapData imageData = bitmap.LockBits(new Rectangle(0, 0, bitmap.Width, bitmap.Height), ImageLockMode.ReadOnly, System.Drawing.Imaging.PixelFormat.Format24bppRgb);
+            BitmapData imageData = bitmap.LockBits(
+                new Rectangle(0, 0, bitmap.Width, bitmap.Height),
+                ImageLockMode.ReadOnly,
+                System.Drawing.Imaging.PixelFormat.Format24bppRgb);
 
-            byte* scan0 = (byte*)imageData.Scan0.ToPointer();
+            int numBytes = imageData.Stride;
 
+            byte* scan0 = (byte*)imageData.Scan0;
+            int index = 0;
+            for(int i = 0; i < Height; i++)
+            {
+                for (int e = 0; e < Width; e++)
+                {
+                    Frame[index].B = *(scan0 + (e * 3));
+                    Frame[index].G = *(scan0 + (e * 3)+1);
+                    Frame[index].R = *(scan0 + (e * 3)+2);
+                    index++;
+                }
+                scan0 += numBytes;
+            }
+
+            //MessageBox.Show(numBytes.ToString());
+            
+            /*
             for (int i = 0; i < Width * Height; i++)
             {
                 Frame[i].B = *(scan0 + (i * 3));
                 Frame[i].G = *(scan0 + (i * 3) + 1);
                 Frame[i].R = *(scan0 + (i * 3) + 2);
             }
+            */
+
             bitmap.UnlockBits(imageData);
             bitmap.Dispose();
         }
@@ -202,41 +221,26 @@ namespace LMCSHD
 
         public static BitmapSource CreateBitmapSourceFromBitmap(Bitmap bitmap)
         {
-            var bitmapData = bitmap.LockBits(new Rectangle(0, 0, bitmap.Width, bitmap.Height), ImageLockMode.ReadOnly, System.Drawing.Imaging.PixelFormat.Format32bppArgb);
+            var bitmapData = bitmap.LockBits(
+                new Rectangle(0, 0, bitmap.Width, bitmap.Height),
+                ImageLockMode.ReadOnly,
+                System.Drawing.Imaging.PixelFormat.Format32bppArgb);
 
-            var bitmapSource = BitmapSource.Create(bitmapData.Width, bitmapData.Height, bitmap.HorizontalResolution, bitmap.VerticalResolution, PixelFormats.Bgra32, null, bitmapData.Scan0, bitmapData.Stride * bitmapData.Height, bitmapData.Stride);
+            var bitmapSource = BitmapSource.Create(bitmapData.Width,
+                bitmapData.Height,
+                bitmap.HorizontalResolution,
+                bitmap.VerticalResolution,
+                PixelFormats.Bgra32,
+                null,
+                bitmapData.Scan0,
+                bitmapData.Stride * bitmapData.Height,
+                bitmapData.Stride);
 
             bitmap.UnlockBits(bitmapData);
             return bitmapSource;
         }
-
-
-        [System.Runtime.InteropServices.DllImport("gdi32.dll")]
-        public static extern bool DeleteObject(IntPtr hObject);
-
-        public static BitmapSource _CreateBitmapSourceFromBitmap(Bitmap bitmap)
-        {
-            IntPtr hBitmap = bitmap.GetHbitmap();
-            BitmapSource retval;
-
-            try
-            {
-                retval = Imaging.CreateBitmapSourceFromHBitmap(
-                             hBitmap,
-                             IntPtr.Zero,
-                             Int32Rect.Empty,
-                             BitmapSizeOptions.FromEmptyOptions());
-            }
-            finally
-            {
-                DeleteObject(hBitmap);
-            }
-
-            return retval;
-        }
         //****************************************************************************************************************************************************
         //************************************ OLD BITMAP PROCESSER CLASS MEMBERS ****************************************************************************
         //****************************************************************************************************************************************************
-
     }
 }

@@ -9,8 +9,9 @@ using System.Windows.Controls;
 using System.Windows.Media;
 using System.Windows.Media.Imaging;
 using System.Windows.Threading;
-using Xceed.Wpf.Toolkit;
+//using Xceed.Wpf.Toolkit;
 using System.Runtime.InteropServices;
+using System.Windows.Input;
 
 namespace LMCSHD
 {
@@ -28,6 +29,7 @@ namespace LMCSHD
             DataContext = this;
             InitializeComponent();
             SetMatrixDimensions(MatrixFrame.Width, MatrixFrame.Height);
+            InitializeScreenCaptureUI();
         }
 
         public event PropertyChangedEventHandler PropertyChanged;
@@ -53,9 +55,11 @@ namespace LMCSHD
         #region Menu_Serial
         private void MenuItem_Serial_Connect_Click(object sender, RoutedEventArgs e)
         {
-            MatrixConnection m = new MatrixConnection();
-            m.Owner = this;
-            m.WindowStartupLocation = System.Windows.WindowStartupLocation.CenterOwner;
+            MatrixConnection m = new MatrixConnection
+            {
+                Owner = this,
+                WindowStartupLocation = System.Windows.WindowStartupLocation.CenterOwner
+            };
             m.ShowDialog();
         }
         private void MenuItem_Serial_Disconnect_Click(object sender, RoutedEventArgs e)
@@ -90,14 +94,9 @@ namespace LMCSHD
         public void SetMatrixDimensions(int width, int height)
         {
             MatrixFrame.SetDimensions(width, height);
-
             MatrixBitmap = new WriteableBitmap(MatrixFrame.Width, MatrixFrame.Height, 96, 96, PixelFormats.Bgr32, null);
             MatrixImage.Source = MatrixBitmap;
-            //MPCheckBox.Content = " Matrix Preview: " + MatrixFrame.Width.ToString() + "x" + MatrixFrame.Height.ToString();
-            SetupSCUI();
-
-            //AudioProcesser.SetupAudioProcessor(FFTCallback);// = new AudioProcesser(FFTCallback);
-            //RefreshAudioDeviceList();
+            RefreshScreenCaptureUI();
         }
 
         private void UpdatePreview()
@@ -112,13 +111,13 @@ namespace LMCSHD
         }
         public void UpdateContentImage()
         {
-          //  if ((bool)CPCheckBox.IsChecked)
+            //  if ((bool)CPCheckBox.IsChecked)
             //    ContentImage.Source = MatrixFrame.ContentImage;
         }
 
         private void CPCheckBox_CheckedChanged(object sender, RoutedEventArgs e)
         {
-          //  MatrixFrame.RenderContentPreview = (bool)CPCheckBox.IsChecked;
+            //  MatrixFrame.RenderContentPreview = (bool)CPCheckBox.IsChecked;
         }
         //===========================================================================================
 
@@ -126,6 +125,37 @@ namespace LMCSHD
         {
             AbortCaptureThread();
             AbortOutlineThread();
+        }
+
+        private void MatrixImage_MouseDown(object sender, MouseButtonEventArgs e)
+        {
+            System.Windows.Point pos = Mouse.GetPosition(MatrixImage);
+
+            int x = (int)(pos.X / MatrixImage.ActualWidth * MatrixFrame.Width);
+            int y = (int)(pos.Y / MatrixImage.ActualHeight * MatrixFrame.Height);
+
+            //MessageBox.Show(x + " " + y);
+            MatrixFrame.SetPixel(x, y, new MatrixFrame.Pixel(255, 255, 255));
+            UpdatePreview();
+            SerialManager.PushFrame();
+        }
+
+        private void MatrixImage_MouseMove(object sender, MouseEventArgs e)
+        {
+            if(Mouse.LeftButton == MouseButtonState.Pressed)
+            {
+                System.Windows.Point pos = Mouse.GetPosition(MatrixImage);
+
+                int x = (int)(pos.X / MatrixImage.ActualWidth * MatrixFrame.Width);
+                int y = (int)(pos.Y / MatrixImage.ActualHeight * MatrixFrame.Height);
+
+                x = x > MatrixFrame.Width - 1 ? MatrixFrame.Width - 1 : x < 0 ? 0 : x;
+                y = y > MatrixFrame.Height - 1 ? MatrixFrame.Height - 1 : y < 0 ? 0 : y;
+
+                MatrixFrame.SetPixel(x, y, new MatrixFrame.Pixel(255, 255, 255));
+                UpdatePreview();
+                SerialManager.PushFrame();
+            }
         }
     }
 }

@@ -11,6 +11,8 @@ using System.Windows.Input;
 using System.Windows.Media;
 using System.Windows.Media.Imaging;
 using System.Windows.Shapes;
+using System.ComponentModel;
+using System.Runtime.CompilerServices;
 //using static LMCSHD.PixelOrder;
 
 namespace LMCSHD
@@ -18,7 +20,7 @@ namespace LMCSHD
     /// <summary>
     /// Interaction logic for PixelOrderEditor.xaml
     /// </summary>
-    public partial class PixelOrderEditor : Window
+    public partial class PixelOrderEditor : INotifyPropertyChanged
     {
         public PixelOrderEditor()
         {
@@ -30,6 +32,16 @@ namespace LMCSHD
             UIStartingCorner.SelectedIndex = (int)PixelOrder.startCorner;
             UINewLine.SelectedIndex = (int)PixelOrder.newLine;
         }
+
+        public event PropertyChangedEventHandler PropertyChanged;
+        private void OnPropertyChanged([CallerMemberName] string propertyName = null)
+        {
+            PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
+        }
+
+
+
+
 
         private void Direction_SelectionChanged(object sender, SelectionChangedEventArgs e)
         {

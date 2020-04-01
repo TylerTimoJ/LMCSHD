@@ -40,7 +40,6 @@
             <Setter Property="Width" Value="196"/>
         </Style>
 
-
     </Window.Resources>
 
 
@@ -63,31 +62,117 @@
 
             <Menu Grid.ColumnSpan="2">
                 <MenuItem Header="_File">
-                    <MenuItem Header="_New" />
-                    <MenuItem Header="_Open" />
-                    <MenuItem Header="_Save" />
-                    <Separator />
+                    <MenuItem Header="_New" IsEnabled="False"/>
+                    <MenuItem Header="_Open" IsEnabled="False"/>
+                    <MenuItem Header="_Save" IsEnabled="False"/>
+                    <Separator/>
                     <MenuItem Header="_Exit" Click="MenuItem_File_Exit_Click"/>
                 </MenuItem>
 
                 <MenuItem Header="_Serial">
-                    <MenuItem x:Name="MIConnect" Header="Connect" Click="MenuItem_Serial_Connect_Click"/>
-                    <MenuItem Header="Disconnect" Click="MenuItem_Serial_Disconnect_Click"/>
+                    <MenuItem x:Name="MIConnect" Header="Connect" Click="MenuItem_Serial_Connect_Click" >
+                        <MenuItem.Icon>
+                            <Image Source="/Images/Menu/icons8-link-32.png" />
+                        </MenuItem.Icon>
+                    </MenuItem>
+                    <MenuItem Header="Disconnect" Click="MenuItem_Serial_Disconnect_Click">
+                        <MenuItem.Icon>
+                            <Image Source="/Images/Menu/icons8-broken-link-32.png" />
+                        </MenuItem.Icon>
+                    </MenuItem>
                     <MenuItem Header="Color Mode">
-                        <MenuItem Header="24bpp RGB True Color" Click="MenuItem_Serial_ColorMode_BPP24_Click"/>
-                        <MenuItem Header="16bpp RGB High Color" Click="MenuItem_Serial_ColorMode_BPP16_Click"/>
-                        <MenuItem Header="  8bpp RGB 256 Color" Click="MenuItem_Serial_ColorMode_BPP8_Click"/>
+                        <MenuItem.Icon>
+                            <Image Source="/Images/Menu/icons8-color-mode-32.png" />
+                        </MenuItem.Icon>
+                        <MenuItem Header="24bpp" InputGestureText="True Color" Click="MenuItem_Serial_ColorMode_BPP24_Click">
+                            <MenuItem.Icon>
+                                <Image Source="/Images/Menu/icons8-volume-level-32.png" />
+                            </MenuItem.Icon>
+                        </MenuItem>
+                        <MenuItem Header="16bpp" InputGestureText="High Color" Click="MenuItem_Serial_ColorMode_BPP16_Click">
+                            <MenuItem.Icon>
+                                <Image Source="/Images/Menu/icons8-volume-level-med-32.png" />
+                            </MenuItem.Icon>
+                        </MenuItem>
+                        <MenuItem Header="8bpp" InputGestureText="256 Color" Click="MenuItem_Serial_ColorMode_BPP8_Click">
+                            <MenuItem.Icon>
+                                <Image Source="/Images/Menu/icons8-volume-level-low-32.png" />
+                            </MenuItem.Icon>
+                        </MenuItem>
+                    </MenuItem>
+                </MenuItem>
+                
+                <MenuItem Header="Edit">
+                    <MenuItem Header="PixelOrder">
+                        <MenuItem.Icon>
+                            <Image Source="/Images/Menu/icons8-numbers-input-form-32.png" />
+                        </MenuItem.Icon>
+                        <MenuItem Header="Orientation">
+                            <MenuItem.Icon>
+                                <Image Source="/Images/Menu/icons8-directions-four-way-32.png" />
+                            </MenuItem.Icon>
+                            <MenuItem Header="Horizontal">
+                                <MenuItem.Icon>
+                                    <Image Source="/Images/Menu/icons8-width-32.png" />
+                                </MenuItem.Icon>
+                            </MenuItem>
+                            <MenuItem Header="Vertical">
+                                <MenuItem.Icon>
+                                    <Image Source="/Images/Menu/icons8-height-32.png" />
+                                </MenuItem.Icon>
+                            </MenuItem>
+                        </MenuItem>
+                        <MenuItem Header="Origin">
+                            <MenuItem.Icon>
+                                <Image Source="/Images/Menu/icons8-map-pin-32.png" />
+                            </MenuItem.Icon>
+                            <MenuItem Header="Top Left">
+                                <MenuItem.Icon>
+                                    <Image Source="/Images/Menu/icons8-grid-2-top-left-32.png" />
+                                </MenuItem.Icon>
+                            </MenuItem>
+                            <MenuItem Header="Top Right">
+                                <MenuItem.Icon>
+                                    <Image Source="/Images/Menu/icons8-grid-2-top-right-32.png" />
+                                </MenuItem.Icon>
+                            </MenuItem>
+                            <MenuItem Header="Bottom Left">
+                                <MenuItem.Icon>
+                                    <Image Source="/Images/Menu/icons8-grid-2-bottom-left-32.png" />
+                                </MenuItem.Icon>
+                            </MenuItem>
+                            <MenuItem Header="Bottom Right">
+                                <MenuItem.Icon>
+                                    <Image Source="/Images/Menu/icons8-grid-2-bottom-right-32.png" />
+                                </MenuItem.Icon>
+                            </MenuItem>
+                        </MenuItem>
+                        <MenuItem Header="New Line">
+                            <MenuItem.Icon>
+                                <Image Source="/Images/Menu/icons8-shift-down-32.png" />
+                            </MenuItem.Icon>
+                            <MenuItem Header="Scan">
+                                <MenuItem.Icon>
+                                    <Image Source="/Images/Menu/icons8-scan-32.png" />
+                                </MenuItem.Icon>
+                            </MenuItem>
+                            <MenuItem Header="Snake">
+                                <MenuItem.Icon>
+                                    <Image Source="/Images/Menu/icons8-snake-32.png" />
+                                </MenuItem.Icon>
+                            </MenuItem>
+                        </MenuItem>
                     </MenuItem>
                 </MenuItem>
 
-                <MenuItem Header="Edit">
-                    <MenuItem Header="PixelOrder" Click="NewPixelOrder_Click"/>
+                <MenuItem Header="About">
+                    <MenuItem Header="Placeholder link to https://icons8.com"/>
 
                 </MenuItem>
             </Menu>
-            
+
             <Border Grid.Row="1" Grid.Column="1" Margin="4">
-                <Image x:Name="MatrixImage" Margin="1" RenderOptions.BitmapScalingMode="NearestNeighbor" Cursor="Cross"/>
+                <Image x:Name="MatrixImage" Margin="1" RenderOptions.BitmapScalingMode="NearestNeighbor" Cursor="Cross" MouseDown="MatrixImage_MouseDown" MouseMove="MatrixImage_MouseMove"/>
             </Border>
 
             <TabControl Grid.Row="1" Width="300" Margin="4">
@@ -384,7 +469,7 @@
                         </Border>
                     </Grid>
                 </TabItem>
-                
+
                 <TabItem Header="Drawing" IsEnabled="False">
 
                 </TabItem>

@@ -204,7 +204,7 @@ namespace LMCSHD
         }
         private void SCResetSliders_Click(object sender, RoutedEventArgs e)
         {
-            SetupSCUI();
+            RefreshScreenCaptureUI();
         }
         #endregion
         #region Screen_Capture
@@ -277,18 +277,23 @@ namespace LMCSHD
             //GC.Collect();
         }
 
-        void SetupSCUI()
+        void InitializeScreenCaptureUI()
         {
             LockDim = false;
             int screenWidth = (int)SystemParameters.PrimaryScreenWidth;
             int screenHeight = (int)SystemParameters.PrimaryScreenHeight;
-            SCXMax = screenWidth;
-            SCYMax = screenHeight;
-            SCX1 = 0;
-            SCY1 = 0;
-            SCX2 = screenWidth;
-            SCY2 = screenHeight;
-            ScreenRecorder.CaptureRect = new Rectangle(0, 0, screenWidth, screenHeight);
+            SCXMax = SCX2 = screenWidth;
+            SCYMax = SCY2 = screenHeight;
+
+            ScreenRecorder.CaptureRect = new Rectangle(0, 0, SCX2, SCY2);
+        }
+
+        void RefreshScreenCaptureUI()
+        {
+            if (SCX2 < MatrixFrame.Width)
+                SCX2 = MatrixFrame.Width;
+            if (SCY2 < MatrixFrame.Height)
+                SCY2 = MatrixFrame.Height;
         }
         void StartCaptureThread()
         {

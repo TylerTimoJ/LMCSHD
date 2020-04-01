@@ -5,12 +5,14 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:LMCSHD"
         mc:Ignorable="d"
-        Title="Pixel Order Editor" WindowStyle="ToolWindow" WindowStartupLocation="CenterOwner" ShowInTaskbar="False" ResizeMode="NoResize" SizeToContent="WidthAndHeight">
+        Title="Pixel Order Editor"
+        WindowStyle="ToolWindow" 
+        WindowStartupLocation="CenterOwner" 
+        ShowInTaskbar="False" 
+        ResizeMode="NoResize" 
+        SizeToContent="WidthAndHeight">
 
     <Window.Resources>
-        <Style TargetType="{x:Type Button}">
-            <Setter Property="Margin" Value="2"/>
-        </Style>
         <Style TargetType="TextBlock">
             <Setter Property="VerticalAlignment" Value="Center"/>
             <Setter Property="HorizontalAlignment" Value="Right"/>
@@ -21,19 +23,20 @@
     </Window.Resources>
     <Grid Margin="2">
         <Grid.RowDefinitions>
-            <RowDefinition Height="auto"/>
-            <RowDefinition Height="auto"/>
-            <RowDefinition Height="auto"/>
-            <RowDefinition Height="auto"/>
+            <RowDefinition Height="26"/>
+            <RowDefinition Height="26"/>
+            <RowDefinition Height="26"/>
+
         </Grid.RowDefinitions>
         <Grid.ColumnDefinitions>
             <ColumnDefinition Width="84"/>
             <ColumnDefinition Width="103"/>
-            <ColumnDefinition Width="*"/>
+            <ColumnDefinition Width="78"/>
         </Grid.ColumnDefinitions>
 
         <TextBlock Text="Orientation"/>
         <ComboBox x:Name="UIOrientation"
+
                           Grid.Column="1"
                               Margin="2"
                   SelectionChanged="Direction_SelectionChanged">
@@ -65,15 +68,12 @@
             <ComboBoxItem Content="Snake"/>
         </ComboBox>
 
-        <Button Grid.Row="3" Grid.ColumnSpan="2" Margin="2" Content="Save" Click="Button_Click"/>
-
 
         <Image x:Name="HelperImage"
             Grid.Column="2"
                Grid.RowSpan="4"
-                   Margin="2"
-                   Width="100"
-                   Height="100">
+                   Width="78"
+                   Height="78">
         </Image>
 
 

@@ -19,7 +19,7 @@ namespace LMCSHD
         private static SerialPort _sp = new SerialPort();
         private static bool _serialReady = false;
 
-        private static void sp_DataReceived(object sender, SerialDataReceivedEventArgs e)
+        private static void Sp_DataReceived(object sender, SerialDataReceivedEventArgs e)
         {
             try
             {
@@ -136,6 +136,7 @@ namespace LMCSHD
 
 
             if (PixelOrder.orientation == Orientation.HZ)
+            {
                 for (int y = startY; y != termY; y += incY)
                 {
                     for (int x = startX; x != termX; x += incX)
@@ -148,19 +149,22 @@ namespace LMCSHD
                         index++;
                     }
                 }
+            }
             else
-                for (int x = startX; x != termX; x += incX)
+            {
+                for (int y = startY; y != termY; y += incY)
                 {
-                    for (int y = startY; y != termY; y += incY)
+                    for (int x = startX; x != termX; x += incX)
                     {
-                        int yPos = PixelOrder.newLine == NewLine.SC || x % 2 == 0 ? y : MatrixFrame.Height - 1 - y;
-                        yPos += (x * MatrixFrame.Height);
-                        orderedFrame[index * 3] = MatrixFrame.Frame[yPos].R;
-                        orderedFrame[index * 3 + 1] = MatrixFrame.Frame[yPos].G;
-                        orderedFrame[index * 3 + 2] = MatrixFrame.Frame[yPos].B;
+                        int i = PixelOrder.newLine == NewLine.SC || x % 2 == 0 ? y : MatrixFrame.Height - 1 - y;
+                        i += (x * MatrixFrame.Height);
+                        orderedFrame[index * 3] = MatrixFrame.Frame[i].R;
+                        orderedFrame[index * 3 + 1] = MatrixFrame.Frame[i].G;
+                        orderedFrame[index * 3 + 2] = MatrixFrame.Frame[i].B;
                         index++;
                     }
                 }
+            }
             return orderedFrame;
         }
 
@@ -230,7 +234,7 @@ namespace LMCSHD
             {
                 _sp.Open();
             }
-            catch (Exception e)
+            catch (Exception)
             {
                 return null;
             }
@@ -238,7 +242,7 @@ namespace LMCSHD
             var def = GetMatrixDefinition();
             if (def != null)
             {
-                _sp.DataReceived += sp_DataReceived;
+                _sp.DataReceived += Sp_DataReceived;
                 _serialReady = true;
                 return def;
             }
@@ -253,10 +257,22 @@ namespace LMCSHD
         {
             _sp.Close();
             _serialReady = false;
-            _sp.DataReceived -= sp_DataReceived;
+            _sp.DataReceived -= Sp_DataReceived;
 
             //_sp.Dispose();
             //_sp = null;
         }
     }
+
+    #region PixelOrder
+    public struct PixelOrder
+    {
+        public enum Orientation { HZ, VT }
+        public enum StartCorner { TL, TR, BL, BR }
+        public enum NewLine { SC, SN }
+        public static Orientation orientation { get; set; } = Orientation.HZ;
+        public static StartCorner startCorner { get; set; } = StartCorner.TL;
+        public static NewLine newLine { get; set; } = NewLine.SC;
+    }
+    #endregion
 }
