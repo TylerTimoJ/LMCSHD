@@ -61,6 +61,7 @@ namespace LMCSHD
                 WindowStartupLocation = System.Windows.WindowStartupLocation.CenterOwner
             };
             m.ShowDialog();
+            
         }
         private void MenuItem_Serial_Disconnect_Click(object sender, RoutedEventArgs e)
         {

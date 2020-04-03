@@ -173,6 +173,7 @@ namespace LMCSHD
             StartCaptureThread();
             SCStart.IsEnabled = false;
             SCStop.IsEnabled = true;
+            
         }
         private void SC_Stop_Click(object sender, RoutedEventArgs e)
         {

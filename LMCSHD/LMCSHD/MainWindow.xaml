@@ -111,7 +111,7 @@
                             <MenuItem.Icon>
                                 <Image Source="/Images/Menu/icons8-directions-four-way-32.png" />
                             </MenuItem.Icon>
-                            <MenuItem Header="Horizontal">
+                            <MenuItem Header="Horizontal" Click="NewPixelOrder_Click">
                                 <MenuItem.Icon>
                                     <Image Source="/Images/Menu/icons8-width-32.png" />
                                 </MenuItem.Icon>

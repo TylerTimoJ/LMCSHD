@@ -249,16 +249,7 @@
     <Resource Include="LMCSHD.ico" />
   </ItemGroup>
   <ItemGroup>
-    <Resource Include="Images\Menu\icons8-rs-232-female-32.png" />
-  </ItemGroup>
-  <ItemGroup>
     <Resource Include="Images\Menu\icons8-link-32.png" />
-  </ItemGroup>
-  <ItemGroup>
-    <Resource Include="Images\Menu\icons8-rs-232-male-32.png" />
-  </ItemGroup>
-  <ItemGroup>
-    <Resource Include="Images\Menu\icons8-usb-connector-32.png" />
   </ItemGroup>
   <ItemGroup>
     <Resource Include="Images\Menu\icons8-broken-link-32.png" />
@@ -282,22 +273,10 @@
     <Resource Include="Images\Menu\icons8-directions-four-way-32.png" />
   </ItemGroup>
   <ItemGroup>
-    <Resource Include="Images\Menu\icons8-fit-vertical-32.png" />
-  </ItemGroup>
-  <ItemGroup>
     <Resource Include="Images\Menu\icons8-height-32.png" />
   </ItemGroup>
   <ItemGroup>
     <Resource Include="Images\Menu\icons8-width-32.png" />
-  </ItemGroup>
-  <ItemGroup>
-    <Resource Include="Images\Menu\icons8-pin-32.png" />
-  </ItemGroup>
-  <ItemGroup>
-    <Resource Include="Images\Menu\icons8-grid-2-32.png" />
-  </ItemGroup>
-  <ItemGroup>
-    <Resource Include="Images\Menu\icons8-data-grid-32.png" />
   </ItemGroup>
   <ItemGroup>
     <Resource Include="Images\Menu\icons8-grid-2-bottom-left-32.png" />

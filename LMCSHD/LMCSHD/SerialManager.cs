@@ -23,7 +23,8 @@ namespace LMCSHD
         {
             try
             {
-                _serialReady = _sp.BaseStream.ReadByte() == 0x06 ? true : false;
+                byte b = (byte)_sp.BaseStream.ReadByte();
+                _serialReady = b == 0x06 ? true : false;
             }
             catch (Exception)
             {
