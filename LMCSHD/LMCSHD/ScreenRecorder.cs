@@ -19,7 +19,7 @@ namespace LMCSHD
             while (doCapture)
                 pixelDataCallback(ScreenToBitmap());
         }
-        private static Bitmap ScreenToBitmap()
+        public static Bitmap ScreenToBitmap()
         {
             IntPtr handle = IntPtr.Zero;
             IntPtr hdcSrc = GetDC(handle);

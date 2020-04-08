@@ -23,6 +23,8 @@ namespace LMCSHD
         //Frame & Preview
         private static WriteableBitmap MatrixBitmap;
 
+
+
         #region Window
         public MainWindow()
         {
@@ -32,11 +34,27 @@ namespace LMCSHD
             InitializeScreenCaptureUI();
         }
 
+        #region properties and databinding
         public event PropertyChangedEventHandler PropertyChanged;
         private void OnPropertyChanged([CallerMemberName] string propertyName = null)
         {
             PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
         }
+
+        private string _matrixInfo = "test test";
+        public string MatrixInfo
+        {
+            get { return _matrixInfo; }
+            set
+            {
+                if (value != _matrixInfo)
+                {
+                    _matrixInfo = value;
+                    OnPropertyChanged();
+                }
+            }
+        }
+        #endregion
 
         private void Window_Closing(object sender, System.ComponentModel.CancelEventArgs e)
         {
@@ -61,7 +79,7 @@ namespace LMCSHD
                 WindowStartupLocation = System.Windows.WindowStartupLocation.CenterOwner
             };
             m.ShowDialog();
-            
+
         }
         private void MenuItem_Serial_Disconnect_Click(object sender, RoutedEventArgs e)
         {
@@ -82,11 +100,41 @@ namespace LMCSHD
         #endregion
 
         #region Menu_Edit
-        private void NewPixelOrder_Click(object sender, RoutedEventArgs e)
+        private void PixelOrder_Orientation_Horizontal_Click(object sender, RoutedEventArgs e)
         {
-            PixelOrderEditor editor = new PixelOrderEditor();
-            editor.ShowDialog();
+            PixelOrder.orientation = PixelOrder.Orientation.HZ;
         }
+        private void PixelOrder_Orientation_Vertical_Click(object sender, RoutedEventArgs e)
+        {
+            PixelOrder.orientation = PixelOrder.Orientation.VT;
+        }
+
+        private void PixelOrder_StartCorner_TopLeft_Click(object sender, RoutedEventArgs e)
+        {
+            PixelOrder.startCorner = PixelOrder.StartCorner.TL;
+        }
+        private void PixelOrder_StartCorner_TopRight_Click(object sender, RoutedEventArgs e)
+        {
+            PixelOrder.startCorner = PixelOrder.StartCorner.TR;
+        }
+        private void PixelOrder_StartCorner_BottomLeft_Click(object sender, RoutedEventArgs e)
+        {
+            PixelOrder.startCorner = PixelOrder.StartCorner.BL;
+        }
+        private void PixelOrder_StartCorner_BottomRight_Click(object sender, RoutedEventArgs e)
+        {
+            PixelOrder.startCorner = PixelOrder.StartCorner.BR;
+        }
+
+        private void PixelOrder_NewLine_Scan_Click(object sender, RoutedEventArgs e)
+        {
+            PixelOrder.newLine = PixelOrder.NewLine.SC;
+        }
+        private void PixelOrder_NewLine_Snake_Click(object sender, RoutedEventArgs e)
+        {
+            PixelOrder.newLine = PixelOrder.NewLine.SN;
+        }
+
         #endregion
 
 
@@ -97,6 +145,7 @@ namespace LMCSHD
             MatrixFrame.SetDimensions(width, height);
             MatrixBitmap = new WriteableBitmap(MatrixFrame.Width, MatrixFrame.Height, 96, 96, PixelFormats.Bgr32, null);
             MatrixImage.Source = MatrixBitmap;
+
             RefreshScreenCaptureUI();
         }
 
@@ -110,6 +159,7 @@ namespace LMCSHD
             MatrixBitmap.AddDirtyRect(new Int32Rect(0, 0, MatrixFrame.Width, MatrixFrame.Height));
             MatrixBitmap.Unlock();
         }
+
         public void UpdateContentImage()
         {
             //  if ((bool)CPCheckBox.IsChecked)
@@ -124,26 +174,23 @@ namespace LMCSHD
 
         void EndAllThreads()
         {
-            AbortCaptureThread();
+            AbortCapture();
             AbortOutlineThread();
         }
 
         private void MatrixImage_MouseDown(object sender, MouseButtonEventArgs e)
         {
-            System.Windows.Point pos = Mouse.GetPosition(MatrixImage);
-
-            int x = (int)(pos.X / MatrixImage.ActualWidth * MatrixFrame.Width);
-            int y = (int)(pos.Y / MatrixImage.ActualHeight * MatrixFrame.Height);
-
-            //MessageBox.Show(x + " " + y);
-            MatrixFrame.SetPixel(x, y, new MatrixFrame.Pixel(255, 255, 255));
-            UpdatePreview();
-            SerialManager.PushFrame();
+            DrawPixel();
         }
 
         private void MatrixImage_MouseMove(object sender, MouseEventArgs e)
         {
-            if(Mouse.LeftButton == MouseButtonState.Pressed)
+            DrawPixel();
+        }
+
+        void DrawPixel()
+        {
+            if (Mouse.LeftButton == MouseButtonState.Pressed)
             {
                 System.Windows.Point pos = Mouse.GetPosition(MatrixImage);
 
@@ -153,7 +200,7 @@ namespace LMCSHD
                 x = x > MatrixFrame.Width - 1 ? MatrixFrame.Width - 1 : x < 0 ? 0 : x;
                 y = y > MatrixFrame.Height - 1 ? MatrixFrame.Height - 1 : y < 0 ? 0 : y;
 
-                MatrixFrame.SetPixel(x, y, new MatrixFrame.Pixel(255, 255, 255));
+                MatrixFrame.SetPixel(x, y, new MatrixFrame.Pixel(255, 32, 255));
                 UpdatePreview();
                 SerialManager.PushFrame();
             }

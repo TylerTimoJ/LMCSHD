@@ -9,7 +9,7 @@ using System.Windows.Controls;
 using System.Windows.Media;
 using System.Windows.Media.Imaging;
 using System.Windows.Threading;
-using Xceed.Wpf.Toolkit;
+//using Xceed.Wpf.Toolkit;
 using System.Diagnostics;
 
 namespace LMCSHD
@@ -20,6 +20,7 @@ namespace LMCSHD
         Thread outlineThread;
 
         private Stopwatch _fpsStopWatch;
+        private bool _isCapturing = false;
 
         #region Properties & Data Bindings
         private int _scX1;
@@ -30,7 +31,46 @@ namespace LMCSHD
         private int _scXMax;
         private int _scYMax;
         private bool? _lockDim = false;
-
+        private bool? _syncSerial = false;
+        public bool? LockDim
+        {
+            get { return _lockDim; }
+            set
+            {
+                if (value != _lockDim)
+                {
+                    _lockDim = value;
+                    OnPropertyChanged();
+                }
+            }
+        }
+        public bool? SyncSerial
+        {
+            get { return _syncSerial; }
+            set
+            {
+                if (value != _syncSerial)
+                {
+                    AbortCapture();
+                    _syncSerial = value;
+                    if (_syncSerial == true) //has become checked
+                    {
+                        if (_isCapturing)
+                        {
+                            StartSerialSyncCapture();
+                        }
+                    }
+                    else //has become un-checked
+                    {
+                        if (_isCapturing)
+                        {
+                            StartAsyncCapture();
+                        }
+                    }
+                    OnPropertyChanged();
+                }
+            }
+        }
         public int SCXMax
         {
             get { return _scXMax; }
@@ -55,26 +95,6 @@ namespace LMCSHD
                 }
             }
         }
-        public bool? LockDim
-        {
-            get { return _lockDim; }
-            set
-            {
-                if (value != _lockDim)
-                {
-                    _lockDim = value;
-                    OnPropertyChanged();
-                }
-            }
-        }
-        public bool? LockDimInverted
-        {
-            get
-            {
-                return !_lockDim;
-            }
-        }
-
         public int SCX1
         {
             get { return _scX1; }
@@ -163,23 +183,24 @@ namespace LMCSHD
             SCWidth.Text = "Width: " + ScreenRecorder.CaptureRect.Width.ToString();
             SCHeight.Text = "Height: " + ScreenRecorder.CaptureRect.Height.ToString();
 
-            if ((bool)SCDisplayOutline.IsChecked)
+            if (SCDisplayOutline.IsChecked == true)
                 ScreenRecorder.HideOutline();
         }
         #endregion
         #region Event Handlers
         private void SC_Start_Click(object sender, RoutedEventArgs e)
         {
-            StartCaptureThread();
+            StartCapture();
             SCStart.IsEnabled = false;
             SCStop.IsEnabled = true;
-            
+            _isCapturing = true;
         }
         private void SC_Stop_Click(object sender, RoutedEventArgs e)
         {
-            AbortCaptureThread();
+            AbortCapture();
             SCStart.IsEnabled = true;
             SCStop.IsEnabled = false;
+            _isCapturing = false;
         }
 
         private void SCDisplayOutline_Checked(object sender, RoutedEventArgs e)
@@ -205,7 +226,7 @@ namespace LMCSHD
         }
         private void SCResetSliders_Click(object sender, RoutedEventArgs e)
         {
-            RefreshScreenCaptureUI();
+            InitializeScreenCaptureUI();
         }
         #endregion
         #region Screen_Capture
@@ -283,6 +304,7 @@ namespace LMCSHD
             LockDim = false;
             int screenWidth = (int)SystemParameters.PrimaryScreenWidth;
             int screenHeight = (int)SystemParameters.PrimaryScreenHeight;
+            SCX1 = SCY1 = 0;
             SCXMax = SCX2 = screenWidth;
             SCYMax = SCY2 = screenHeight;
 
@@ -296,25 +318,61 @@ namespace LMCSHD
             if (SCY2 < MatrixFrame.Height)
                 SCY2 = MatrixFrame.Height;
         }
-        void StartCaptureThread()
+        void StartCapture()
+        {
+            if (SyncSerial == true)
+            {
+                StartSerialSyncCapture();
+            }
+            else
+            {
+                StartAsyncCapture();
+            }
+        }
+        void StartSerialSyncCapture()
+        {
+            _fpsStopWatch = Stopwatch.StartNew();
+            SerialManager.SerialAcknowledged += OnSerialAcknowledged;
+            MatrixFrame.InjestGDIBitmap(ScreenRecorder.ScreenToBitmap());
+            Dispatcher.Invoke(() => { UpdatePreview(); });
+            SerialManager.PushFrame();
+        }
+        void StartAsyncCapture()
         {
             _fpsStopWatch = Stopwatch.StartNew();
             captureThread = new Thread(() => ScreenRecorder.StartRecording(PixelDataCallback));
             captureThread.Start();
         }
+
+        void OnSerialAcknowledged()
+        {
+            if (SyncSerial == true)
+            {
+                MatrixFrame.InjestGDIBitmap(ScreenRecorder.ScreenToBitmap());
+                Dispatcher.Invoke(() => { UpdatePreview(); });
+                SerialManager.PushFrame();
+                LocalFPS = SerialFPS = _fpsStopWatch.ElapsedMilliseconds - _localPreviousMillis;
+                _localPreviousMillis = _fpsStopWatch.ElapsedMilliseconds;
+            }
+        }
+
         void StartOutlineThread()
         {
             outlineThread = new Thread(() => ScreenRecorder.ShowOutline());
             outlineThread.Start();
         }
-        void AbortCaptureThread()
+
+        void AbortCapture()
         {
+            //not synced with serial
             ScreenRecorder.doCapture = false;
             if (captureThread != null)
             {
                 captureThread.Abort();
                 while (captureThread.IsAlive) {; }
             }
+            //synced with serial
+            SerialManager.SerialAcknowledged -= OnSerialAcknowledged;
         }
         void AbortOutlineThread()
         {

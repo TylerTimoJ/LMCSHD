@@ -19,12 +19,31 @@ namespace LMCSHD
         private static SerialPort _sp = new SerialPort();
         private static bool _serialReady = false;
 
+
+        public delegate void SerialAcknowledgedEventHandler();
+        public static event SerialAcknowledgedEventHandler SerialAcknowledged;
+        public static void OnSerialAcknowledged()
+        {
+            SerialAcknowledged?.Invoke();
+        }
+
+
         private static void Sp_DataReceived(object sender, SerialDataReceivedEventArgs e)
         {
             try
             {
+
                 byte b = (byte)_sp.BaseStream.ReadByte();
-                _serialReady = b == 0x06 ? true : false;
+
+                if (b == 0x06)
+                {
+                    _serialReady = true;
+                    OnSerialAcknowledged();
+                }
+                else
+                {
+                    _serialReady = false;
+                }
             }
             catch (Exception)
             {

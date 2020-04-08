@@ -186,18 +186,6 @@ namespace LMCSHD
                 }
                 scan0 += numBytes;
             }
-
-            //MessageBox.Show(numBytes.ToString());
-            
-            /*
-            for (int i = 0; i < Width * Height; i++)
-            {
-                Frame[i].B = *(scan0 + (i * 3));
-                Frame[i].G = *(scan0 + (i * 3) + 1);
-                Frame[i].R = *(scan0 + (i * 3) + 2);
-            }
-            */
-
             bitmap.UnlockBits(imageData);
             bitmap.Dispose();
         }

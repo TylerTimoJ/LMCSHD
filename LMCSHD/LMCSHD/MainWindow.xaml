@@ -52,6 +52,7 @@
         <Grid Margin="2">
             <Grid.ColumnDefinitions>
                 <ColumnDefinition Width="auto"/>
+                <ColumnDefinition Width="auto" />
                 <ColumnDefinition Width="*"/>
             </Grid.ColumnDefinitions>
             <Grid.RowDefinitions>
@@ -60,7 +61,7 @@
             </Grid.RowDefinitions>
 
 
-            <Menu Grid.ColumnSpan="2">
+            <Menu Grid.ColumnSpan="3">
                 <MenuItem Header="_File">
                     <MenuItem Header="_New" IsEnabled="False"/>
                     <MenuItem Header="_Open" IsEnabled="False"/>
@@ -111,12 +112,12 @@
                             <MenuItem.Icon>
                                 <Image Source="/Images/Menu/icons8-directions-four-way-32.png" />
                             </MenuItem.Icon>
-                            <MenuItem Header="Horizontal" Click="NewPixelOrder_Click">
+                            <MenuItem Header="Horizontal" Click="PixelOrder_Orientation_Horizontal_Click">
                                 <MenuItem.Icon>
                                     <Image Source="/Images/Menu/icons8-width-32.png" />
                                 </MenuItem.Icon>
                             </MenuItem>
-                            <MenuItem Header="Vertical">
+                            <MenuItem Header="Vertical" Click="PixelOrder_Orientation_Vertical_Click">
                                 <MenuItem.Icon>
                                     <Image Source="/Images/Menu/icons8-height-32.png" />
                                 </MenuItem.Icon>
@@ -126,22 +127,22 @@
                             <MenuItem.Icon>
                                 <Image Source="/Images/Menu/icons8-map-pin-32.png" />
                             </MenuItem.Icon>
-                            <MenuItem Header="Top Left">
+                            <MenuItem Header="Top Left" Click="PixelOrder_StartCorner_TopLeft_Click">
                                 <MenuItem.Icon>
                                     <Image Source="/Images/Menu/icons8-grid-2-top-left-32.png" />
                                 </MenuItem.Icon>
                             </MenuItem>
-                            <MenuItem Header="Top Right">
+                            <MenuItem Header="Top Right" Click="PixelOrder_StartCorner_TopRight_Click">
                                 <MenuItem.Icon>
                                     <Image Source="/Images/Menu/icons8-grid-2-top-right-32.png" />
                                 </MenuItem.Icon>
                             </MenuItem>
-                            <MenuItem Header="Bottom Left">
+                            <MenuItem Header="Bottom Left" Click="PixelOrder_StartCorner_BottomLeft_Click">
                                 <MenuItem.Icon>
                                     <Image Source="/Images/Menu/icons8-grid-2-bottom-left-32.png" />
                                 </MenuItem.Icon>
                             </MenuItem>
-                            <MenuItem Header="Bottom Right">
+                            <MenuItem Header="Bottom Right" Click="PixelOrder_StartCorner_BottomRight_Click">
                                 <MenuItem.Icon>
                                     <Image Source="/Images/Menu/icons8-grid-2-bottom-right-32.png" />
                                 </MenuItem.Icon>
@@ -151,12 +152,12 @@
                             <MenuItem.Icon>
                                 <Image Source="/Images/Menu/icons8-shift-down-32.png" />
                             </MenuItem.Icon>
-                            <MenuItem Header="Scan">
+                            <MenuItem Header="Scan" Click="PixelOrder_NewLine_Scan_Click">
                                 <MenuItem.Icon>
                                     <Image Source="/Images/Menu/icons8-scan-32.png" />
                                 </MenuItem.Icon>
                             </MenuItem>
-                            <MenuItem Header="Snake">
+                            <MenuItem Header="Snake" Click="PixelOrder_NewLine_Snake_Click">
                                 <MenuItem.Icon>
                                     <Image Source="/Images/Menu/icons8-snake-32.png" />
                                 </MenuItem.Icon>
@@ -167,13 +168,23 @@
 
                 <MenuItem Header="About">
                     <MenuItem Header="Placeholder link to https://icons8.com"/>
-
                 </MenuItem>
             </Menu>
+            
+            <Grid Grid.Row="1" Grid.Column="2" Margin="4">
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="22"/>
+                    <RowDefinition Height="*"/>
+                </Grid.RowDefinitions>
+                <TextBlock Text="{Binding Path=MatrixInfo, Mode=TwoWay}" Margin="2" HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                <Border Grid.Row="2" BorderBrush="#FFA0A0A0" BorderThickness="1">
+                    <Image x:Name="MatrixImage" RenderOptions.BitmapScalingMode="NearestNeighbor" Cursor="Cross" MouseDown="MatrixImage_MouseDown" MouseMove="MatrixImage_MouseMove"/>
+                </Border>
+            </Grid>
 
-            <Border Grid.Row="1" Grid.Column="1" Margin="4">
-                <Image x:Name="MatrixImage" Margin="1" RenderOptions.BitmapScalingMode="NearestNeighbor" Cursor="Cross" MouseDown="MatrixImage_MouseDown" MouseMove="MatrixImage_MouseMove"/>
-            </Border>
+            <StackPanel Orientation="Horizontal" HorizontalAlignment="Center" Margin="-2,24,-2,2" Grid.Column="1" Grid.Row="1">
+                <Separator Style="{StaticResource {x:Static ToolBar.SeparatorStyleKey}}" />
+            </StackPanel>
 
             <TabControl Grid.Row="1" Width="300" Margin="4">
                 <TabItem Header="Screen Recorder">
@@ -185,6 +196,7 @@
                                 <ColumnDefinition Width="*"/>
                             </Grid.ColumnDefinitions>
                             <Grid.RowDefinitions>
+                                <RowDefinition Height="auto"/>
                                 <RowDefinition Height="auto"/>
                                 <RowDefinition Height="auto"/>
                                 <RowDefinition Height="auto"/>
@@ -293,12 +305,17 @@
                                            Margin="2"
                                            Text="Height: "/>
                             </WrapPanel>
+                            
+                            <CheckBox Grid.Row="5"
+                                      Margin="2"
+                                      Content="Sync Capture to Serial"
+                                      ToolTip="May introduce latency"
+                                      IsChecked="{Binding Path=SyncSerial, Mode=TwoWay}"/>
+                            
+                            <Separator Grid.Row="6" Grid.ColumnSpan="2" Margin="2" />
 
-
-                            <Separator Grid.Row="5" Grid.ColumnSpan="2" Margin="2"/>
-
-                            <TextBlock Grid.Row="6" Margin="2" Text="{Binding StringFormat=Capture FPS: {0}, Path=LocalFPS, Mode=OneWay}"/>
-                            <TextBlock Grid.Row="6" Grid.Column="1" Margin="2" Text="{Binding StringFormat=Serial FPS: {0}, Path=SerialFPS, Mode=OneWay}"/>
+                            <TextBlock Grid.Row="7" Margin="2" Text="{Binding StringFormat=Capture FPS: {0}, Path=LocalFPS, Mode=OneWay}"/>
+                            <TextBlock Grid.Row="7" Grid.Column="1" Margin="2" Text="{Binding StringFormat=Serial FPS: {0}, Path=SerialFPS, Mode=OneWay}"/>
                         </Grid>
 
 
