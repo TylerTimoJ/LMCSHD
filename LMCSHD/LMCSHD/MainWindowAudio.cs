@@ -6,14 +6,13 @@ using System.Text;
 using System.Threading.Tasks;
 using System.Runtime.CompilerServices;
 using System.Collections.ObjectModel;
-using System.Drawing;
+//using System.Drawing;
 using System.Threading;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Media;
 using System.Windows.Media.Imaging;
 using System.Windows.Threading;
-using Xceed.Wpf.Toolkit;
 
 namespace LMCSHD
 {
@@ -21,55 +20,154 @@ namespace LMCSHD
     {
 
         #region DataProperites
-        private int _audioHighSliderValue = 20000;
-        public int AudioHighSliderValue
+        private int _freqRangeMin = 20, _freqRangeMax = 20000, _freqRangeLowerVal = 20, _freqRangeUpperVal = 20000, _amplitudeVal = 1024, _selectedDeviceIndex = 0, _selectedWindowIndex = 0;
+        private ObservableCollection<string> _deviceList;
+        private Color _bottomColor = Color.FromRgb(255,0,0), _topColor = Color.FromRgb(0, 0, 255);
+
+        public int FreqRangeMin
         {
-            get { return _audioHighSliderValue; }
+            get { return _freqRangeMin; }
             set
             {
-                if (_audioHighSliderValue != value)
+                if (_freqRangeMin != value)
                 {
-                    _audioHighSliderValue = value;
+                    _freqRangeMin = value;
                     OnPropertyChanged();
                 }
             }
         }
-        #endregion
-
-
-        #region FFT
-        void FFTCallback(float[] fftData)
+        public int FreqRangeMax
         {
-            Dispatcher.Invoke(() =>
+            get { return _freqRangeMax; }
+            set
             {
-                MatrixFrame.InjestFFT(fftData);
-
-                SerialManager.PushFrame();
-                UpdatePreview();
-            });
-        }
-        private void BeginAudioCapture()
-        {
-            AudioProcesser.BeginCapture(FFTCallback, SADeviceDrop.SelectedIndex);
-        }
-        private void StopAudioCapture()
-        {
-            AudioProcesser.StopRecording();
-        }
-
-        void RefreshAudioDeviceList()
-        {
-            NAudio.CoreAudioApi.MMDeviceCollection devices = AudioProcesser.GetActiveDevices();
-
-            ObservableCollection<string> list = new ObservableCollection<string>();
-            foreach (NAudio.CoreAudioApi.MMDevice device in devices)
-            {
-                string deviceType = device.DataFlow == NAudio.CoreAudioApi.DataFlow.Capture ? "Microphone " : "Speaker ";
-                list.Add(deviceType + device.DeviceFriendlyName);
+                if (_freqRangeMax != value)
+                {
+                    _freqRangeMax = value;
+                    OnPropertyChanged();
+                }
             }
-            SADeviceDrop.ItemsSource = list;
         }
+
+        public int FreqRangeLowerVal
+        {
+            get { return _freqRangeLowerVal; }
+            set
+            {
+                if (_freqRangeLowerVal != value)
+                {
+                    _freqRangeLowerVal = value;
+                    AudioProcesser.LowFreqClip = value;
+                    OnPropertyChanged();
+                }
+            }
+        }
+
+        public int FreqRangeUpperVal
+        {
+            get { return _freqRangeUpperVal; }
+            set
+            {
+                if (_freqRangeUpperVal != value)
+                {
+                    _freqRangeUpperVal = value;
+                    AudioProcesser.HighFreqClip = value;
+                    OnPropertyChanged();
+                }
+            }
+        }
+        public int AmplitudeVal
+        {
+            get { return _amplitudeVal; }
+            set
+            {
+                if (_amplitudeVal != value)
+                {
+                    _amplitudeVal = value;
+                    AudioProcesser.Amplitiude = value;
+                    OnPropertyChanged();
+                }
+            }
+        }
+
+        public int SelectedDeviceIndex
+        {
+            get { return _selectedDeviceIndex; }
+            set
+            {
+                if (_selectedDeviceIndex != value)
+                {
+                    _selectedDeviceIndex = value;
+                    OnPropertyChanged();
+                }
+            }
+        }
+
+        public int SelectedWindowIndex
+        {
+            get { return _selectedWindowIndex; }
+            set
+            {
+                if (_selectedWindowIndex != value)
+                {
+                    _selectedWindowIndex = value;
+                    AudioProcesser.Window = (AudioProcesser.FFTWindow)value;
+                    OnPropertyChanged();
+                }
+            }
+        }
+
+        public ObservableCollection<string> DeviceList
+        {
+            get { return _deviceList; }
+            set
+            {
+                if (_deviceList != value)
+                {
+                    _deviceList = value;
+                    OnPropertyChanged();
+                }
+            }
+        }
+
+        public Color BottomColor
+        {
+            get { return _bottomColor; }
+            set
+            {
+                if (_bottomColor != value)
+                {
+                    _bottomColor = value;
+                    MatrixFrame.GradientColors[0] = value;
+                    OnPropertyChanged();
+                }
+            }
+        }
+        public Color TopColor
+        {
+            get { return _topColor; }
+            set
+            {
+                if (_topColor != value)
+                {
+                    _topColor = value;
+                    MatrixFrame.GradientColors[1] = value;
+                    OnPropertyChanged();
+                }
+            }
+        }
+
+
         #endregion
+        void InitializeAudioCaptureUI()
+        {
+            RefreshAudioDeviceList();
+            AudioProcesser.SetupAudioProcessor(FFTCallback);
+            MatrixFrame.GradientColors[0] = BottomColor;
+            MatrixFrame.GradientColors[1] = TopColor;
+        }
+
+
 
         #region FFT_UI
         private void SAStart_Click(object sender, RoutedEventArgs e)
@@ -93,40 +191,6 @@ namespace LMCSHD
                 BeginAudioCapture();
             }
         }
-
-        private void SARangeS_HigherValueChanged(object sender, RoutedEventArgs e)
-        {
-            AudioProcesser.HighFreqClip = (int)((RangeSlider)sender).HigherValue;
-            // SAHighClipU.Value = AudioProcesser.HighFreqClip;
-        }
-
-        private void SARangeS_LowerValueChanged(object sender, RoutedEventArgs e)
-        {
-            AudioProcesser.LowFreqClip = (int)((RangeSlider)sender).LowerValue;
-            SALowClipU.Value = (int)((RangeSlider)sender).LowerValue;
-        }
-        private void SAIntUpDown_ValueChanged(object sender, RoutedPropertyChangedEventArgs<object> e)
-        {
-            /*
-                switch (((IntegerUpDown)sender).Name)
-                {
-                    case "SALowClipU":
-                        SARangeS.LowerValue = (int)((IntegerUpDown)sender).Value;
-                        //SALowClipS.Value = (int)((IntegerUpDown)sender).Value;
-                        break;
-                    case "SAHighClipU":
-                        2SARangeS.HigherValue = (int)((IntegerUpDown)sender).Value;
-                        //   SAHighClipS.Value = (int)((IntegerUpDown)sender).Value;
-                        break;
-                }
-                */
-        }
-
-        private void SAAmpU_ValueChanged(object sender, RoutedPropertyChangedEventArgs<object> e)
-        {
-            AudioProcesser.Amplitiude = (int)((IntegerUpDown)sender).Value;
-        }
-
         private void SA_SelectedColorChanged(object sender, RoutedPropertyChangedEventArgs<System.Windows.Media.Color?> e)
         {
             // MatrixFrame.Pixel color1 = new MatrixFrame.Pixel(SAColor1.SelectedColor.Value.R, SAColor1.SelectedColor.Value.G, SAColor1.SelectedColor.Value.B);
@@ -136,5 +200,39 @@ namespace LMCSHD
 
         #endregion
 
+        #region FFT
+        void FFTCallback(float[] fftData) //data received
+        {
+            Dispatcher.Invoke(() =>
+            {
+                MatrixFrame.FFTToFrame(fftData);
+                UpdatePreview();
+                SerialManager.PushFrame();
+            });
+        }
+        private void BeginAudioCapture()
+        {
+            AudioProcesser.BeginCapture(FFTCallback, SelectedDeviceIndex);
+        }
+        private void StopAudioCapture()
+        {
+            AudioProcesser.StopRecording();
+        }
+
+        void RefreshAudioDeviceList()
+        {
+            StopAudioCapture();
+            var devices = AudioProcesser.GetActiveDevices();
+
+            ObservableCollection<string> list = new ObservableCollection<string>();
+
+            foreach (NAudio.CoreAudioApi.MMDevice device in devices)
+            {
+                string deviceType = device.DataFlow == NAudio.CoreAudioApi.DataFlow.Capture ? "Microphone " : "Speaker ";
+                list.Add(deviceType + device.DeviceFriendlyName);
+            }
+            DeviceList = list;
+        }
+        #endregion
     }
 }

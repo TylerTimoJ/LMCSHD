@@ -342,6 +342,7 @@
                             <RowDefinition Height="auto"/>
                             <RowDefinition Height="auto"/>
                             <RowDefinition Height="auto"/>
+                            <RowDefinition Height="auto"/>
                         </Grid.RowDefinitions>
 
                         <Button x:Name="SAStart"
@@ -362,7 +363,8 @@
                                   Grid.Column="1"
                                   Grid.Row="1"
                                   Margin="2"
-                                  SelectedIndex="0"
+                                  ItemsSource="{Binding Path=DeviceList, Mode=TwoWay}"
+                                  SelectedIndex="{Binding Path=SelectedDeviceIndex, Mode=TwoWay}"
                                   SelectionChanged="SADeviceDrop_SelectionChanged"/>
 
 
@@ -388,27 +390,25 @@
                                     </Grid.ColumnDefinitions>
 
                                     <xctk:RangeSlider x:Name="SARangeS"
-                                                      Grid.ColumnSpan="2"
-                                                      Minimum="100"
-                                                      Maximum="22050"
-                                                      HigherValue="{Binding Path=AudioHighSliderValue, Mode=TwoWay}"
+                                                      Grid.ColumnSpan="2" 
+                                                      Minimum="{Binding Path=FreqRangeMin, Mode=TwoWay}"
+                                                      Maximum="{Binding Path=FreqRangeMax, Mode=TwoWay}"
+                                                      HigherValue="{Binding Path=FreqRangeUpperVal, Mode=TwoWay}"
+                                                      LowerValue="{Binding Path=FreqRangeLowerVal, Mode=TwoWay}"
                                                       Margin="2"
-                                                      IsSnapToTickEnabled="True"
-                                                      HigherValueChanged="SARangeS_HigherValueChanged"
-                                                      LowerValueChanged="SARangeS_LowerValueChanged"/>
+                                                      IsSnapToTickEnabled="True"/>
                                     <xctk:IntegerUpDown x:Name="SALowClipU"
                                                         Grid.Row="1"
-                                                        ValueChanged="SAIntUpDown_ValueChanged"
-                                                        Maximum="22050"
-                                                        Minimum="100"
+                                                        Value="{Binding Path=FreqRangeLowerVal, Mode=TwoWay}"
+                                                        Minimum="{Binding Path=FreqRangeMin, Mode=TwoWay}"
+                                                        Maximum="{Binding Path=FreqRangeMax, Mode=TwoWay}"
                                                         HorizontalAlignment="Left"/>
                                     <xctk:IntegerUpDown x:Name="SAHighClipU"
                                                         Grid.Row="1"
                                                         Grid.Column="1"
-                                                        ValueChanged="SAIntUpDown_ValueChanged"
-                                                        Value="{Binding Path=AudioHighSliderValue, Mode=TwoWay}"
-                                                        Maximum="22050"
-                                                        Minimum="100"
+                                                        Value="{Binding Path=FreqRangeUpperVal, Mode=TwoWay}"
+                                                        Minimum="{Binding Path=FreqRangeMin, Mode=TwoWay}"
+                                                        Maximum="{Binding Path=FreqRangeMax, Mode=TwoWay}"
                                                         HorizontalAlignment="Right"/>
 
                                 </Grid>
@@ -424,8 +424,7 @@
                                             Grid.Row="4"
                                             Grid.Column="1"
                                             Width="auto"
-                                            ValueChanged="SAAmpU_ValueChanged"
-                                            Value="1024"
+                                            Value="{Binding Path=AmplitudeVal, Mode=TwoWay}"
                                             Maximum="8192"
                                             Minimum="1"/>
 
@@ -435,21 +434,21 @@
                             </GroupBox.Header>
                             <StackPanel Orientation="Horizontal">
                                 <TextBlock Text="Color 1 " VerticalAlignment="Center" HorizontalAlignment="Right" Margin="2"/>
-                                <xctk:ColorPicker x:Name="SAColor1"
-                                                  SelectedColor="Red"
+                                <xctk:ColorPicker
+                                                  Width="90"
+                                                  SelectedColor="{Binding Path=BottomColor, Mode=TwoWay}"
                                                   MaxDropDownWidth="290"
                                                   ColorMode="ColorCanvas"
                                                   UsingAlphaChannel="False"
-                                                  Margin="2"
-                                                  SelectedColorChanged="SA_SelectedColorChanged"/>
+                                                  Margin="2"/>
                                 <TextBlock Text="Color 2 " VerticalAlignment="Center" HorizontalAlignment="Right" Margin="2"/>
-                                <xctk:ColorPicker x:Name="SAColor2"
-                                                  SelectedColor="Blue"
+                                <xctk:ColorPicker 
+                                                  Width="90"
+                                                  SelectedColor="{Binding Path=TopColor, Mode=TwoWay}"
                                                   MaxDropDownWidth="290"
                                                   ColorMode="ColorCanvas"
                                                   UsingAlphaChannel="False"
-                                                  Margin="2"
-                                                  SelectedColorChanged="SA_SelectedColorChanged"/>
+                                                  Margin="2"/>
                             </StackPanel>
                         </GroupBox>
 
@@ -467,6 +466,22 @@
 
                             <ComboBoxItem Content="Mirrored"/>
                             <ComboBoxItem Content="Standard"/>
+                        </ComboBox>
+                        
+                        <TextBlock Grid.Row="7"
+                                   Margin="2"
+                                   Text="FFT Window"
+                                   HorizontalAlignment="Right"
+                                   VerticalAlignment="Center"/>
+                        <ComboBox
+                                  Grid.Column="1"
+                                  Grid.Row="7"
+                                  Margin="2"
+                                  SelectedIndex="{Binding Path=SelectedWindowIndex, Mode=TwoWay}">
+                            
+                            <ComboBoxItem Content="BlackmannHarris"/>
+                            <ComboBoxItem Content="Hamming"/>
+                            <ComboBoxItem Content="Hann"/>
                         </ComboBox>
 
                     </Grid>

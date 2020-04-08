@@ -13,30 +13,31 @@ namespace LMCSHD
     public static class AudioProcesser
     {
         public delegate void Callback(float[] fftData);
-        public static bool isRecording = false;
-
-        public static int LowFreqClip = 0;
-        public static int HighFreqClip = 22050;
-
-        public static int Amplitiude { get; set; } = 1024;
-        // Other inputs are also usable. Just look through the NAudio library.
-        private static IWaveIn waveIn;
-        private static int fftLength = 2048; // NAudio fft wants powers of two!
-
-        // There might be a sample aggregator in NAudio somewhere but I made a variation for my needs
-        private static SampleAggregator sampleAggregator = new SampleAggregator(fftLength);
-
         private static Callback fftDataCallback;
 
-        private static MMDeviceEnumerator enumerator;
+        public static bool isRecording = false;
+
+        public static int LowFreqClip = 20;
+        public static int HighFreqClip = 20000;
+        public static int Amplitiude = 1024;
+
+        public static FFTWindow Window = FFTWindow.BlackmannHarris;
+        public enum FFTWindow { BlackmannHarris, Hamming, Hann };
+
+        private static IWaveIn waveIn;
+
+        private static int _fftLength = 2048; //2^n
+        private static int _m = (int)Math.Log(_fftLength, 2.0);
+        private static int _fftPos = 0;
+        private static int _sampleRate;
+        private static Complex[] _fftBuffer = new Complex[_fftLength];
+
+        private static MMDeviceEnumerator _deviceEnumerator = new MMDeviceEnumerator();
 
         public static void SetupAudioProcessor(Callback fftCallback)
         {
             fftDataCallback = fftCallback;
-            sampleAggregator.FftCalculated += new EventHandler<FftEventArgs>(FftCalculated);
-            sampleAggregator.PerformFFT = true;
-
-            enumerator = new MMDeviceEnumerator();
+            _m = (int)Math.Log(_fftLength, 2.0);
         }
 
         public static void Dispose()
@@ -47,9 +48,9 @@ namespace LMCSHD
 
         public static MMDevice GetDefaultDevice(DataFlow flow)
         {
-            if (enumerator.HasDefaultAudioEndpoint(flow, Role.Multimedia))
+            if (_deviceEnumerator.HasDefaultAudioEndpoint(flow, Role.Multimedia))
             {
-                return enumerator.GetDefaultAudioEndpoint(flow, Role.Multimedia);
+                return _deviceEnumerator.GetDefaultAudioEndpoint(flow, Role.Multimedia);
             }
             else
             {
@@ -59,34 +60,27 @@ namespace LMCSHD
 
         public static MMDeviceCollection GetActiveDevices()
         {
-            return enumerator.EnumerateAudioEndPoints(DataFlow.All, DeviceState.Active);
-
+            return _deviceEnumerator.EnumerateAudioEndPoints(DataFlow.All, DeviceState.Active);
         }
-
 
         public static void BeginCapture(Callback fftCallback, int deviceIndex)
         {
             if (!isRecording)
             {
+                if (deviceIndex <= GetActiveDevices().Count)
+                {
+                    MMDevice device = GetActiveDevices()[deviceIndex];
 
-                MMDevice device = GetActiveDevices()[deviceIndex];
+                    if (device.DataFlow == DataFlow.Render)
+                    {
+                        waveIn = new WasapiLoopbackCapture(device);
+                    }
+                    else
+                    {
+                        waveIn = new WasapiCapture(device);
+                    }
+                    _sampleRate = waveIn.WaveFormat.SampleRate;
 
-                if (device.DataFlow == DataFlow.Render)
-                {
-                    waveIn = new WasapiLoopbackCapture(device);
-                }
-                else
-                {
-                    waveIn = new WasapiCapture(device);
-                }
-
-                if (waveIn.WaveFormat.SampleRate != 44100)
-                {
-                    MessageBox.Show("Device: " + device.DeviceFriendlyName + "\n" + "has its sample rate set to: " + waveIn.WaveFormat.SampleRate.ToString() + " Hz.\n" + "Please set it to 44100 Hz.");
-                    StopRecording();
-                }
-                else
-                {
                     waveIn.DataAvailable += OnDataAvailable;
                     waveIn.RecordingStopped += WaveIn_RecordingStopped;
 
@@ -102,18 +96,17 @@ namespace LMCSHD
             {
                 waveIn.StopRecording();
                 isRecording = false;
-                //waveIn.Dispose();
+                Dispose();
             }
         }
 
         private static void WaveIn_RecordingStopped(object sender, StoppedEventArgs e)
         {
-            // isRecording = false;
+            isRecording = false;
         }
 
         static void OnDataAvailable(object sender, WaveInEventArgs e)
         {
-
             byte[] buffer = e.Buffer;
             int bytesRecorded = e.BytesRecorded;
             int bufferIncrement = waveIn.WaveFormat.BlockAlign;
@@ -121,15 +114,13 @@ namespace LMCSHD
             for (int index = 0; index < bytesRecorded; index += bufferIncrement)
             {
                 float sample32 = BitConverter.ToSingle(buffer, index);
-                sampleAggregator.Add(sample32);
-
+                AddSample(sample32);
             }
-
         }
 
-        static void FftCalculated(object sender, FftEventArgs e)
+        static void FftCalculated()
         {
-            float binFreqRange = 44100f / (float)fftLength;
+            float binFreqRange = _sampleRate / _fftLength;//fftlength 2048
 
             int freqRange = HighFreqClip - LowFreqClip;
 
@@ -143,70 +134,34 @@ namespace LMCSHD
 
             for (int i = startIndex; i < arrayLength + startIndex; i++)
             {
-
-                topHalfFFT[i - startIndex] = (float)Math.Sqrt((e.Result[i].X * e.Result[i].X) * Amplitiude + (e.Result[i].Y * e.Result[i].Y) * Amplitiude);
-
+                topHalfFFT[i - startIndex] = (float)Math.Sqrt((_fftBuffer[i].X * _fftBuffer[i].X) + (_fftBuffer[i].Y * _fftBuffer[i].Y) * Amplitiude);
             }
-
             fftDataCallback(topHalfFFT);
-
-        }
-    }
-
-
-
-
-    class SampleAggregator
-    {
-        // FFT
-        public event EventHandler<FftEventArgs> FftCalculated;
-        public bool PerformFFT { get; set; }
-
-        // This Complex is NAudio's own! 
-        private Complex[] fftBuffer;
-        private FftEventArgs fftArgs;
-        private int fftPos;
-        private int fftLength;
-        private int m;
-
-
-        public SampleAggregator(int fftLength)
-        {
-
-            this.m = (int)Math.Log(fftLength, 2.0);
-            this.fftLength = fftLength;
-            this.fftBuffer = new Complex[fftLength];
-            this.fftArgs = new FftEventArgs(fftBuffer);
         }
 
-
-        public void Add(float value)
+        public static void AddSample(float value)
         {
-
-            if (PerformFFT && FftCalculated != null)
+            switch (Window)
             {
+                case FFTWindow.BlackmannHarris:
+                    _fftBuffer[_fftPos].X = (float)(value * FastFourierTransform.BlackmannHarrisWindow(_fftPos, _fftLength));
+                    break;
+                case FFTWindow.Hamming:
+                    _fftBuffer[_fftPos].X = (float)(value * FastFourierTransform.HammingWindow(_fftPos, _fftLength));
+                    break;
 
-                // Remember the window function! There are many others as well.
-                fftBuffer[fftPos].X = (float)(value * FastFourierTransform.HammingWindow(fftPos, fftLength));
-                fftBuffer[fftPos].Y = 0; // This is always zero with audio.
-                fftPos++;
-                if (fftPos >= fftLength)
-                {
-                    fftPos = 0;
-                    FastFourierTransform.FFT(true, m, fftBuffer);
-                    FftCalculated(this, fftArgs);
-                }
+                case FFTWindow.Hann:
+                    _fftBuffer[_fftPos].X = (float)(value * FastFourierTransform.HannWindow(_fftPos, _fftLength));
+                    break;
+            }
+            _fftBuffer[_fftPos].Y = 0;
+            _fftPos++;
+            if (_fftPos >= _fftLength)
+            {
+                _fftPos = 0;
+                FastFourierTransform.FFT(true, _m, _fftBuffer);
+                FftCalculated();
             }
         }
-    }
-
-    public class FftEventArgs : EventArgs
-    {
-        public FftEventArgs(Complex[] result)
-        {
-            this.Result = result;
-        }
-        public Complex[] Result { get; private set; }
     }
 }
-

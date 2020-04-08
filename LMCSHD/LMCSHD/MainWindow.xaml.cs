@@ -32,6 +32,7 @@ namespace LMCSHD
             InitializeComponent();
             SetMatrixDimensions(MatrixFrame.Width, MatrixFrame.Height);
             InitializeScreenCaptureUI();
+            InitializeAudioCaptureUI();
         }
 
         #region properties and databinding
@@ -154,7 +155,7 @@ namespace LMCSHD
             MatrixBitmap.Lock();
             IntPtr pixelAddress = MatrixBitmap.BackBuffer;
 
-            Marshal.Copy(MatrixFrame.GetFrame(), 0, pixelAddress, (MatrixFrame.Width * MatrixFrame.Height));
+            Marshal.Copy(MatrixFrame.FrameToInt32(), 0, pixelAddress, (MatrixFrame.Width * MatrixFrame.Height));
 
             MatrixBitmap.AddDirtyRect(new Int32Rect(0, 0, MatrixFrame.Width, MatrixFrame.Height));
             MatrixBitmap.Unlock();
