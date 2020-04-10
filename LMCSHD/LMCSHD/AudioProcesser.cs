@@ -26,7 +26,7 @@ namespace LMCSHD
 
         private static IWaveIn waveIn;
 
-        private static int _fftLength = 2048; //2^n
+        private static int _fftLength = 4096; //2^n
         private static int _m = (int)Math.Log(_fftLength, 2.0);
         private static int _fftPos = 0;
         private static int _sampleRate;

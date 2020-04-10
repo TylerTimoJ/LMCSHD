@@ -10,9 +10,9 @@ using System.Windows;
 [assembly: AssemblyTitle("LMCSHD")]
 [assembly: AssemblyDescription("")]
 [assembly: AssemblyConfiguration("")]
-[assembly: AssemblyCompany("")]
+[assembly: AssemblyCompany("Tyler Jones")]
 [assembly: AssemblyProduct("LMCSHD")]
-[assembly: AssemblyCopyright("Copyright © Tyler Jones 2019")]
+[assembly: AssemblyCopyright("Copyright © Tyler Jones 2019-2020")]
 [assembly: AssemblyTrademark("")]
 [assembly: AssemblyCulture("")]
 
@@ -53,3 +53,4 @@ using System.Windows;
 // [assembly: AssemblyVersion("1.0.*")]
 [assembly: AssemblyVersion("1.0.0.0")]
 [assembly: AssemblyFileVersion("1.0.0.0")]
+[assembly: NeutralResourcesLanguage("en-US")]

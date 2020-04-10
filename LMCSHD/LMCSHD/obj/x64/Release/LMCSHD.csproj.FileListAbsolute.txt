@@ -21,13 +21,13 @@ C:\Users\tyler\OneDrive\LMCSHD\LMCSHD\LMCSHD\bin\x64\Release\sv\Xceed.Wpf.Avalon
 C:\Users\tyler\OneDrive\LMCSHD\LMCSHD\LMCSHD\bin\x64\Release\zh-Hans\Xceed.Wpf.AvalonDock.resources.dll
 C:\Users\tyler\OneDrive\LMCSHD\LMCSHD\LMCSHD\obj\x64\Release\MainWindow.g.cs
 C:\Users\tyler\OneDrive\LMCSHD\LMCSHD\LMCSHD\obj\x64\Release\MatrixConnection.g.cs
-C:\Users\tyler\OneDrive\LMCSHD\LMCSHD\LMCSHD\obj\x64\Release\PixelOrderEditor.g.cs
+C:\Users\tyler\OneDrive\LMCSHD\LMCSHD\LMCSHD\obj\x64\Release\ExportWindow.g.cs
 C:\Users\tyler\OneDrive\LMCSHD\LMCSHD\LMCSHD\obj\x64\Release\App.g.cs
 C:\Users\tyler\OneDrive\LMCSHD\LMCSHD\LMCSHD\obj\x64\Release\LMCSHD_MarkupCompile.cache
 C:\Users\tyler\OneDrive\LMCSHD\LMCSHD\LMCSHD\obj\x64\Release\LMCSHD_MarkupCompile.lref
 C:\Users\tyler\OneDrive\LMCSHD\LMCSHD\LMCSHD\obj\x64\Release\MainWindow.baml
 C:\Users\tyler\OneDrive\LMCSHD\LMCSHD\LMCSHD\obj\x64\Release\MatrixConnection.baml
-C:\Users\tyler\OneDrive\LMCSHD\LMCSHD\LMCSHD\obj\x64\Release\PixelOrderEditor.baml
+C:\Users\tyler\OneDrive\LMCSHD\LMCSHD\LMCSHD\obj\x64\Release\ExportWindow.baml
 C:\Users\tyler\OneDrive\LMCSHD\LMCSHD\LMCSHD\obj\x64\Release\LMCSHD.g.resources
 C:\Users\tyler\OneDrive\LMCSHD\LMCSHD\LMCSHD\obj\x64\Release\LMCSHD.Properties.Resources.resources
 C:\Users\tyler\OneDrive\LMCSHD\LMCSHD\LMCSHD\obj\x64\Release\LMCSHD.csproj.GenerateResource.cache
@@ -35,4 +35,3 @@ C:\Users\tyler\OneDrive\LMCSHD\LMCSHD\LMCSHD\obj\x64\Release\LMCSHD.csproj.CoreC
 C:\Users\tyler\OneDrive\LMCSHD\LMCSHD\LMCSHD\obj\x64\Release\LMCSHD.csproj.CopyComplete
 C:\Users\tyler\OneDrive\LMCSHD\LMCSHD\LMCSHD\obj\x64\Release\LMCSHD.exe
 C:\Users\tyler\OneDrive\LMCSHD\LMCSHD\LMCSHD\obj\x64\Release\LMCSHD.pdb
-C:\Users\tyler\OneDrive\LMCSHD\LMCSHD\LMCSHD\obj\x64\Release\LMCSHD.csprojAssemblyReference.cache

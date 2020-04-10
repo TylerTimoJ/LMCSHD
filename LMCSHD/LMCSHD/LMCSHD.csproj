@@ -17,7 +17,7 @@
     <IsWebBootstrapper>false</IsWebBootstrapper>
     <NuGetPackageImportStamp>
     </NuGetPackageImportStamp>
-    <PublishUrl>publish\</PublishUrl>
+    <PublishUrl>C:\Users\tyler\Desktop\test\</PublishUrl>
     <Install>true</Install>
     <InstallFrom>Disk</InstallFrom>
     <UpdateEnabled>false</UpdateEnabled>
@@ -27,6 +27,7 @@
     <UpdatePeriodically>false</UpdatePeriodically>
     <UpdateRequired>false</UpdateRequired>
     <MapFileExtensions>true</MapFileExtensions>
+    <AutorunEnabled>true</AutorunEnabled>
     <ApplicationRevision>0</ApplicationRevision>
     <ApplicationVersion>1.0.0.%2a</ApplicationVersion>
     <UseApplicationTrust>false</UseApplicationTrust>
@@ -74,6 +75,9 @@
     <ErrorReport>prompt</ErrorReport>
     <CodeAnalysisRuleSet>MinimumRecommendedRules.ruleset</CodeAnalysisRuleSet>
     <Prefer32Bit>true</Prefer32Bit>
+    <DocumentationFile>
+    </DocumentationFile>
+    <GenerateSerializationAssemblies>Auto</GenerateSerializationAssemblies>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Debug|x86'">
     <DebugSymbols>true</DebugSymbols>
@@ -99,6 +103,9 @@
   </PropertyGroup>
   <PropertyGroup>
     <ApplicationIcon>LMCSHD.ico</ApplicationIcon>
+  </PropertyGroup>
+  <PropertyGroup>
+    <SignAssembly>false</SignAssembly>
   </PropertyGroup>
   <ItemGroup>
     <Reference Include="NAudio, Version=1.10.0.0, Culture=neutral, processorArchitecture=MSIL">
@@ -150,11 +157,11 @@
     <Compile Include="MatrixConnection.xaml.cs">
       <DependentUpon>MatrixConnection.xaml</DependentUpon>
     </Compile>
-    <Compile Include="PixelOrderEditor.xaml.cs">
-      <DependentUpon>PixelOrderEditor.xaml</DependentUpon>
-    </Compile>
     <Compile Include="ScreenRecorder.cs" />
     <Compile Include="SerialManager.cs" />
+    <Compile Include="ExportWindow.xaml.cs">
+      <DependentUpon>ExportWindow.xaml</DependentUpon>
+    </Compile>
     <Page Include="MainWindow.xaml">
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
@@ -172,7 +179,7 @@
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
-    <Page Include="PixelOrderEditor.xaml">
+    <Page Include="ExportWindow.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
@@ -217,33 +224,6 @@
       <ProductName>.NET Framework 3.5 SP1</ProductName>
       <Install>false</Install>
     </BootstrapperPackage>
-  </ItemGroup>
-  <ItemGroup>
-    <Resource Include="Images\HZ_SC_BL.png" />
-    <Resource Include="Images\HZ_SN_BL.png" />
-    <Resource Include="Images\HZ_SC_BR.png" />
-    <Resource Include="Images\HZ_SN_BR.png" />
-    <Resource Include="Images\HZ_SC_TL.png" />
-    <Resource Include="Images\HZ_SN_TL.png" />
-    <Resource Include="Images\HZ_SC_TR.png" />
-    <Resource Include="Images\HZ_SN_TR.png" />
-    <Resource Include="Images\VT_SC_BL.png" />
-    <Resource Include="Images\VT_SN_BL.png" />
-    <Resource Include="Images\VT_SC_BR.png" />
-    <Resource Include="Images\VT_SN_BR.png" />
-    <Resource Include="Images\VT_SC_TL.png" />
-    <Resource Include="Images\VT_SN_TL.png" />
-    <Resource Include="Images\VT_SC_TR.png" />
-    <Resource Include="Images\VT_SN_TR.png" />
-  </ItemGroup>
-  <ItemGroup>
-    <Resource Include="favicon.ico" />
-  </ItemGroup>
-  <ItemGroup>
-    <Resource Include="icon_bkW_icon.ico" />
-  </ItemGroup>
-  <ItemGroup>
-    <Resource Include="icon_OOs_icon.ico" />
   </ItemGroup>
   <ItemGroup>
     <Resource Include="LMCSHD.ico" />

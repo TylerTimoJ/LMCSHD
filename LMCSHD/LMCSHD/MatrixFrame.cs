@@ -6,30 +6,24 @@ using System.Drawing.Imaging;
 using System.Windows;
 using System.Windows.Interop;
 using System.Windows.Media;
+using static LMCSHD.PixelOrder;
 
 namespace LMCSHD
 {
     public static class MatrixFrame
     {
-        //Data Properties
-        public static int Width = 16, Height = 16;
-
+        #region Public_Variables
+        //implmented get/set to expose references
+        public static int Width { get; set; } = 16;
+        public static int Height { get; set; } = 16;
         public static InterpolationMode InterpMode { get; set; } = InterpolationMode.HighQualityBicubic;
-        public static System.Windows.Media.Color[] GradientColors = new System.Windows.Media.Color[2];
-
-        public static Pixel[] Frame;
-        public static int FrameLength { get { return (Width * Height * 3); } }
-
-        //End Data Properties
-
-        public struct Pixel
-        {
-            public byte R, G, B;
-            public Pixel(byte r, byte g, byte b)
-            {
-                R = r; G = g; B = b;
-            }
-        }
+        public static System.Windows.Media.Color[] GradientColors { get; set; } = new System.Windows.Media.Color[2];
+        public static Pixel[] Frame { get; set; }
+        public static int FrameByteCount { get { return (Width * Height * 3); } }
+        public static Orientation orientation { get; set; } = Orientation.HZ;
+        public static StartCorner startCorner { get; set; } = StartCorner.TL;
+        public static NewLine newLine { get; set; } = NewLine.SC;
+        #endregion
 
         public static void SetDimensions(int w, int h)
         {
@@ -38,10 +32,58 @@ namespace LMCSHD
             Frame = null;
             Frame = new Pixel[Width * Height];
         }
+
+        public static byte[] GetOrderedSerialFrame()
+        {
+            byte[] orderedFrame = new byte[Width * Height * 3];
+
+            int index = 0;
+
+            int startX = startCorner == StartCorner.TR || startCorner == StartCorner.BR ? MatrixFrame.Width - 1 : 0;
+            int termX = startCorner == StartCorner.TR || startCorner == StartCorner.BR ? -1 : MatrixFrame.Width;
+            int incX = startCorner == StartCorner.TR || startCorner == StartCorner.BR ? -1 : 1;
+
+            int startY = startCorner == StartCorner.BL || startCorner == StartCorner.BR ? MatrixFrame.Height - 1 : 0;
+            int termY = startCorner == StartCorner.BL || startCorner == StartCorner.BR ? -1 : MatrixFrame.Height;
+            int incY = startCorner == StartCorner.BL || startCorner == StartCorner.BR ? -1 : 1;
+
+
+            if (orientation == Orientation.HZ)
+            {
+                for (int y = startY; y != termY; y += incY)
+                {
+                    for (int x = startX; x != termX; x += incX)
+                    {
+                        int i = newLine == NewLine.SC || y % 2 == 0 ? x : MatrixFrame.Width - 1 - x;
+                        i += (y * MatrixFrame.Width);
+                        orderedFrame[index * 3] = MatrixFrame.Frame[i].R;
+                        orderedFrame[index * 3 + 1] = MatrixFrame.Frame[i].G;
+                        orderedFrame[index * 3 + 2] = MatrixFrame.Frame[i].B;
+                        index++;
+                    }
+                }
+            }
+            else
+            {
+                for (int y = startY; y != termY; y += incY)
+                {
+                    for (int x = startX; x != termX; x += incX)
+                    {
+                        int i = newLine == NewLine.SC || x % 2 == 0 ? y : MatrixFrame.Height - 1 - y;
+                        i += (x * MatrixFrame.Height);
+                        orderedFrame[index * 3] = MatrixFrame.Frame[i].R;
+                        orderedFrame[index * 3 + 1] = MatrixFrame.Frame[i].G;
+                        orderedFrame[index * 3 + 2] = MatrixFrame.Frame[i].B;
+                        index++;
+                    }
+                }
+            }
+            return orderedFrame;
+        }
+
         public static void SetPixel(int x, int y, Pixel color)
         {
             Frame[y * Width + x] = color;
-            MessageBox.Show((y * Width + x).ToString());
         }
 
         public static unsafe int[] FrameToInt32()
@@ -54,10 +96,7 @@ namespace LMCSHD
 
         public static void InjestGDIBitmap(Bitmap b)
         {
-            if (b.Width == Width && b.Height == Height)
-                BitmapToFrame(b);
-            else
-                BitmapToFrame(DownsampleBitmap(b, Width, Height));
+            BitmapToFrame(b);
             b.Dispose();
         }
         public static void FFTToFrame(float[] fftData)
@@ -145,6 +184,9 @@ namespace LMCSHD
         //****************************************************************************************************************************************************
         public static unsafe void BitmapToFrame(Bitmap bitmap)
         {
+            if (bitmap.Width != Width || bitmap.Height != Height)
+                bitmap = DownsampleBitmap(bitmap, Width, Height);
+
             BitmapData imageData = bitmap.LockBits(
                 new Rectangle(0, 0, bitmap.Width, bitmap.Height),
                 ImageLockMode.ReadOnly,
@@ -181,7 +223,7 @@ namespace LMCSHD
             return result;
         }
 
-        public static Bitmap LoadImageFromDisk(string path)
+        public static Bitmap LoadBitmapFromDisk(string path)
         {
             return new Bitmap(path);
         }
@@ -210,4 +252,5 @@ namespace LMCSHD
         //************************************ OLD BITMAP PROCESSER CLASS MEMBERS ****************************************************************************
         //****************************************************************************************************************************************************
     }
+
 }

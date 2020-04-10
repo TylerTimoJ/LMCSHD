@@ -211,19 +211,6 @@ namespace LMCSHD
         {
             AbortOutlineThread();
         }
-
-        private void SCInterpModeDrop_SelectionChanged(object sender, SelectionChangedEventArgs e)
-        {
-            switch (SCInterpModeDrop.SelectedIndex)
-            {
-                case 0: MatrixFrame.InterpMode = System.Drawing.Drawing2D.InterpolationMode.NearestNeighbor; break;
-                case 1: MatrixFrame.InterpMode = System.Drawing.Drawing2D.InterpolationMode.Bicubic; break;
-                case 2: MatrixFrame.InterpMode = System.Drawing.Drawing2D.InterpolationMode.Bilinear; break;
-                case 3: MatrixFrame.InterpMode = System.Drawing.Drawing2D.InterpolationMode.HighQualityBicubic; break;
-                case 4: MatrixFrame.InterpMode = System.Drawing.Drawing2D.InterpolationMode.HighQualityBilinear; break;
-            }
-
-        }
         private void SCResetSliders_Click(object sender, RoutedEventArgs e)
         {
             InitializeScreenCaptureUI();

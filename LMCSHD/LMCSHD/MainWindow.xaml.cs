@@ -12,12 +12,11 @@ using System.Windows.Threading;
 //using Xceed.Wpf.Toolkit;
 using System.Runtime.InteropServices;
 using System.Windows.Input;
+using System.Windows.Forms;
+using System.IO;
 
 namespace LMCSHD
 {
-    /// <summary>
-    /// Interaction logic for MainWindow.xaml
-    /// </summary>
     public partial class MainWindow : INotifyPropertyChanged
     {
         //Frame & Preview
@@ -34,7 +33,12 @@ namespace LMCSHD
             InitializeScreenCaptureUI();
             InitializeAudioCaptureUI();
         }
-
+        private void Window_Closing(object sender, System.ComponentModel.CancelEventArgs e)
+        {
+            EndAllThreads();
+            SerialManager.SerialSendBlankFrame();
+        }
+        #endregion
         #region properties and databinding
         public event PropertyChangedEventHandler PropertyChanged;
         private void OnPropertyChanged([CallerMemberName] string propertyName = null)
@@ -42,7 +46,7 @@ namespace LMCSHD
             PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
         }
 
-        private string _matrixInfo = "test test";
+        private string _matrixInfo = "16 x 16 24BPP RGB (placeholder text)";
         public string MatrixInfo
         {
             get { return _matrixInfo; }
@@ -55,22 +59,55 @@ namespace LMCSHD
                 }
             }
         }
-        #endregion
 
-        private void Window_Closing(object sender, System.ComponentModel.CancelEventArgs e)
+        private int _tabControlIndex = 0;
+        public int TabControlIndex
         {
-            EndAllThreads();
-            SerialManager.SerialSendBlankFrame();
+            get { return _tabControlIndex; }
+            set
+            {
+                if (value != _tabControlIndex)
+                {
+                    //TODO ---- TURN OFF OTHER MODES WHEN SWITCHED
+                    _tabControlIndex = value;
+                    OnPropertyChanged();
+                }
+            }
         }
-        #endregion
+        private int _interpolationModeIndex = 3;
+        public int InterpolationModeIndex
+        {
+            get { return _interpolationModeIndex; }
+            set
+            {
+                if (value != _interpolationModeIndex)
+                {
+                    switch (value)
+                    {
+                        case 0: MatrixFrame.InterpMode = System.Drawing.Drawing2D.InterpolationMode.NearestNeighbor; break;
+                        case 1: MatrixFrame.InterpMode = System.Drawing.Drawing2D.InterpolationMode.Bicubic; break;
+                        case 2: MatrixFrame.InterpMode = System.Drawing.Drawing2D.InterpolationMode.Bilinear; break;
+                        case 3: MatrixFrame.InterpMode = System.Drawing.Drawing2D.InterpolationMode.HighQualityBicubic; break;
+                        case 4: MatrixFrame.InterpMode = System.Drawing.Drawing2D.InterpolationMode.HighQualityBilinear; break;
+                    }
+                    _interpolationModeIndex = value;
+                    OnPropertyChanged();
+                }
+            }
+        }
 
+        #endregion
         #region Menu_File
+        private void MenuItem_Menu_Export_Click(object sender, RoutedEventArgs e)
+        {
+            ExportWindow w = new ExportWindow();
+            w.Show();
+        }
         private void MenuItem_File_Exit_Click(object sender, RoutedEventArgs e)
         {
             this.Close();
         }
         #endregion
-
         #region Menu_Serial
         private void MenuItem_Serial_Connect_Click(object sender, RoutedEventArgs e)
         {
@@ -99,45 +136,62 @@ namespace LMCSHD
             SerialManager.ColorMode = SerialManager.CMode.BPP8;
         }
         #endregion
-
         #region Menu_Edit
         private void PixelOrder_Orientation_Horizontal_Click(object sender, RoutedEventArgs e)
         {
-            PixelOrder.orientation = PixelOrder.Orientation.HZ;
+            MatrixFrame.orientation = PixelOrder.Orientation.HZ;
         }
         private void PixelOrder_Orientation_Vertical_Click(object sender, RoutedEventArgs e)
         {
-            PixelOrder.orientation = PixelOrder.Orientation.VT;
+            MatrixFrame.orientation = PixelOrder.Orientation.VT;
         }
 
         private void PixelOrder_StartCorner_TopLeft_Click(object sender, RoutedEventArgs e)
         {
-            PixelOrder.startCorner = PixelOrder.StartCorner.TL;
+            MatrixFrame.startCorner = PixelOrder.StartCorner.TL;
         }
         private void PixelOrder_StartCorner_TopRight_Click(object sender, RoutedEventArgs e)
         {
-            PixelOrder.startCorner = PixelOrder.StartCorner.TR;
+            MatrixFrame.startCorner = PixelOrder.StartCorner.TR;
         }
         private void PixelOrder_StartCorner_BottomLeft_Click(object sender, RoutedEventArgs e)
         {
-            PixelOrder.startCorner = PixelOrder.StartCorner.BL;
+            MatrixFrame.startCorner = PixelOrder.StartCorner.BL;
         }
         private void PixelOrder_StartCorner_BottomRight_Click(object sender, RoutedEventArgs e)
         {
-            PixelOrder.startCorner = PixelOrder.StartCorner.BR;
+            MatrixFrame.startCorner = PixelOrder.StartCorner.BR;
         }
-
         private void PixelOrder_NewLine_Scan_Click(object sender, RoutedEventArgs e)
         {
-            PixelOrder.newLine = PixelOrder.NewLine.SC;
+            MatrixFrame.newLine = PixelOrder.NewLine.SC;
         }
         private void PixelOrder_NewLine_Snake_Click(object sender, RoutedEventArgs e)
         {
-            PixelOrder.newLine = PixelOrder.NewLine.SN;
+            MatrixFrame.newLine = PixelOrder.NewLine.SN;
         }
 
         #endregion
+        #region Imaging
 
+        private void Button_Imaging_ImportImage_Click(object sender, RoutedEventArgs e)
+        {
+            OpenFileDialog openFileDialog = new OpenFileDialog();
+            //saveFileDialog.Filter = ".jpg";
+            if (openFileDialog.ShowDialog() == System.Windows.Forms.DialogResult.OK)
+            {
+                Bitmap b = MatrixFrame.LoadBitmapFromDisk(openFileDialog.FileName);
+                ContentImage.Source = MatrixFrame.CreateBitmapSourceFromBitmap(b);
+                MatrixFrame.BitmapToFrame(b); //destroys b
+                UpdatePreview();
+                SerialManager.PushFrame();
+            }
+        }
+        private void Button_Imaging_ImportGif_Click(object sender, RoutedEventArgs e)
+        {
+
+        }
+        #endregion
 
         //Matrix Frame Functions
         //===========================================================================================
@@ -184,7 +238,7 @@ namespace LMCSHD
             DrawPixel();
         }
 
-        private void MatrixImage_MouseMove(object sender, MouseEventArgs e)
+        private void MatrixImage_MouseMove(object sender, System.Windows.Input.MouseEventArgs e)
         {
             DrawPixel();
         }
@@ -201,7 +255,7 @@ namespace LMCSHD
                 x = x > MatrixFrame.Width - 1 ? MatrixFrame.Width - 1 : x < 0 ? 0 : x;
                 y = y > MatrixFrame.Height - 1 ? MatrixFrame.Height - 1 : y < 0 ? 0 : y;
 
-                MatrixFrame.SetPixel(x, y, new MatrixFrame.Pixel(255, 32, 255));
+                MatrixFrame.SetPixel(x, y, new Pixel(255, 32, 255));
                 UpdatePreview();
                 SerialManager.PushFrame();
             }

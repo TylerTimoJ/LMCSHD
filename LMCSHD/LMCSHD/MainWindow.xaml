@@ -63,9 +63,10 @@
 
             <Menu Grid.ColumnSpan="3">
                 <MenuItem Header="_File">
-                    <MenuItem Header="_New" IsEnabled="False"/>
-                    <MenuItem Header="_Open" IsEnabled="False"/>
-                    <MenuItem Header="_Save" IsEnabled="False"/>
+                    <MenuItem Header="_Save Config" IsEnabled="False"/>
+                    <MenuItem Header="_Open Config" IsEnabled="False"/>
+                    <Separator/>
+                    <MenuItem Header="_Export Frame" Click="MenuItem_Menu_Export_Click"/>
                     <Separator/>
                     <MenuItem Header="_Exit" Click="MenuItem_File_Exit_Click"/>
                 </MenuItem>
@@ -186,7 +187,7 @@
                 <Separator Style="{StaticResource {x:Static ToolBar.SeparatorStyleKey}}" />
             </StackPanel>
 
-            <TabControl Grid.Row="1" Width="300" Margin="4">
+            <TabControl Grid.Row="1" Width="300" Margin="4" SelectedIndex="{Binding Path=TabControlIndex, Mode=TwoWay}">
                 <TabItem Header="Screen Recorder">
                     <StackPanel Orientation="Vertical">
 
@@ -220,7 +221,7 @@
 
                             <TextBlock Grid.Row="1" Margin="2" Text="Interpolation Mode" HorizontalAlignment="Right" VerticalAlignment="Center"/>
 
-                            <ComboBox x:Name="SCInterpModeDrop" Grid.Column="1" Grid.Row="1" Margin="2" SelectedIndex="3" SelectionChanged="SCInterpModeDrop_SelectionChanged">
+                            <ComboBox x:Name="SCInterpModeDrop" Grid.Column="1" Grid.Row="1" Margin="2" SelectedIndex="{Binding Path=InterpolationModeIndex, Mode=TwoWay}">
                                 <ComboBoxItem Content="Nearest Neighbor"/>
                                 <ComboBoxItem Content="Bicubic"/>
                                 <ComboBoxItem Content="Bilinear"/>
@@ -487,15 +488,44 @@
                     </Grid>
                 </TabItem>
 
-                <TabItem Header="Imaging" IsEnabled="False">
+                <TabItem Header="Imaging">
                     <Grid>
-                        <Border Grid.Row="5" Grid.ColumnSpan="2" Margin="2" Height="310"  BorderBrush="Gray" BorderThickness="1" Background="#FFFDFDFD">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*"/>
+                            <ColumnDefinition Width="*"/>
+                        </Grid.ColumnDefinitions>
+                        <Grid.RowDefinitions>
+                            <RowDefinition Height="auto"/>
+                            <RowDefinition Height="auto"/>
+                            <RowDefinition Height="auto"/>
+                            <RowDefinition Height="auto"/>
+                            <RowDefinition Height="auto"/>
+                            <RowDefinition Height="auto"/>
+                            <RowDefinition Height="auto"/>
+                            <RowDefinition Height="auto"/>
+                        </Grid.RowDefinitions>
+
+                        <Button Content="Import Image" Click="Button_Imaging_ImportImage_Click"/>
+                        <Button Grid.Column="1" Content="Import Gif" Click="Button_Imaging_ImportGif_Click"/>
+                        
+                        <TextBlock Grid.Row="2" Margin="2" Text="Interpolation Mode" HorizontalAlignment="Right" VerticalAlignment="Center"/>
+
+                        <ComboBox x:Name="ImagingInterpModeDrop" Grid.Column="1" Grid.Row="2" Margin="2" SelectedIndex="{Binding Path=InterpolationModeIndex, Mode=TwoWay}">
+                            <ComboBoxItem Content="Nearest Neighbor"/>
+                            <ComboBoxItem Content="Bicubic"/>
+                            <ComboBoxItem Content="Bilinear"/>
+                            <ComboBoxItem Content="High Quality Bicubic"/>
+                            <ComboBoxItem Content="High Quality Bilinear"/>
+                        </ComboBox>
+
+
+                        <Border Grid.Row="5" Grid.ColumnSpan="2" Margin="2" VerticalAlignment="Bottom" Height="310" BorderBrush="Gray" BorderThickness="1" Background="#FFFDFDFD">
                             <Grid>
                                 <Grid.RowDefinitions>
                                     <RowDefinition Height="auto"/>
                                     <RowDefinition Height="*"/>
                                 </Grid.RowDefinitions>
-                                <CheckBox x:Name="CPCheckBox" HorizontalAlignment="Center" Margin="2" IsChecked="True" Checked="CPCheckBox_CheckedChanged" Unchecked="CPCheckBox_CheckedChanged" Content="Content Preview"/>
+                                <CheckBox x:Name="CPCheckBox" HorizontalAlignment="Center" Margin="2" IsChecked="True" Checked="CPCheckBox_CheckedChanged" Unchecked="CPCheckBox_CheckedChanged" Content="Image Preview"/>
                                 <Image x:Name="ContentImage" Grid.Row="1" Margin="1" RenderOptions.BitmapScalingMode="NearestNeighbor" Cursor="Cross"/>
                             </Grid>
                         </Border>

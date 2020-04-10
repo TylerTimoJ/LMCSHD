@@ -11,9 +11,6 @@ namespace LMCSHD
 {
     class Animation
     {
-        MatrixFrame.Pixel[,][] frames = new MatrixFrame.Pixel[3, 3][];
-       // BitmapSource[] bitmaps;
-
 
     }
 }

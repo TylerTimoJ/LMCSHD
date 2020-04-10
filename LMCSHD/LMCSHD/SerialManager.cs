@@ -19,7 +19,6 @@ namespace LMCSHD
         private static SerialPort _sp = new SerialPort();
         private static bool _serialReady = false;
 
-
         public delegate void SerialAcknowledgedEventHandler();
         public static event SerialAcknowledgedEventHandler SerialAcknowledged;
         public static void OnSerialAcknowledged()
@@ -32,7 +31,6 @@ namespace LMCSHD
         {
             try
             {
-
                 byte b = (byte)_sp.BaseStream.ReadByte();
 
                 if (b == 0x06)
@@ -55,7 +53,7 @@ namespace LMCSHD
         {
             if (_serialReady)
             {
-                byte[] orderedFrame = GetOrderedSerialFrame();
+                byte[] orderedFrame = MatrixFrame.GetOrderedSerialFrame();
 
                 if (ColorMode == CMode.BPP24)
                 {
@@ -140,53 +138,7 @@ namespace LMCSHD
         }
 
         //NOTE Rework to work more efficiently with single dimensional pixel array
-        static byte[] GetOrderedSerialFrame()
-        {
-            byte[] orderedFrame = new byte[MatrixFrame.Width * MatrixFrame.Height * 3];
-
-            int index = 0;
-
-            int startX = PixelOrder.startCorner == StartCorner.TR || PixelOrder.startCorner == StartCorner.BR ? MatrixFrame.Width - 1 : 0;
-            int termX = PixelOrder.startCorner == StartCorner.TR || PixelOrder.startCorner == StartCorner.BR ? -1 : MatrixFrame.Width;
-            int incX = PixelOrder.startCorner == StartCorner.TR || PixelOrder.startCorner == StartCorner.BR ? -1 : 1;
-
-            int startY = PixelOrder.startCorner == StartCorner.BL || PixelOrder.startCorner == StartCorner.BR ? MatrixFrame.Height - 1 : 0;
-            int termY = PixelOrder.startCorner == StartCorner.BL || PixelOrder.startCorner == StartCorner.BR ? -1 : MatrixFrame.Height;
-            int incY = PixelOrder.startCorner == StartCorner.BL || PixelOrder.startCorner == StartCorner.BR ? -1 : 1;
-
-
-            if (PixelOrder.orientation == Orientation.HZ)
-            {
-                for (int y = startY; y != termY; y += incY)
-                {
-                    for (int x = startX; x != termX; x += incX)
-                    {
-                        int i = PixelOrder.newLine == NewLine.SC || y % 2 == 0 ? x : MatrixFrame.Width - 1 - x;
-                        i += (y * MatrixFrame.Width);
-                        orderedFrame[index * 3] = MatrixFrame.Frame[i].R;
-                        orderedFrame[index * 3 + 1] = MatrixFrame.Frame[i].G;
-                        orderedFrame[index * 3 + 2] = MatrixFrame.Frame[i].B;
-                        index++;
-                    }
-                }
-            }
-            else
-            {
-                for (int y = startY; y != termY; y += incY)
-                {
-                    for (int x = startX; x != termX; x += incX)
-                    {
-                        int i = PixelOrder.newLine == NewLine.SC || x % 2 == 0 ? y : MatrixFrame.Height - 1 - y;
-                        i += (x * MatrixFrame.Height);
-                        orderedFrame[index * 3] = MatrixFrame.Frame[i].R;
-                        orderedFrame[index * 3 + 1] = MatrixFrame.Frame[i].G;
-                        orderedFrame[index * 3 + 2] = MatrixFrame.Frame[i].B;
-                        index++;
-                    }
-                }
-            }
-            return orderedFrame;
-        }
+        
 
         public static void SerialSendBlankFrame()
         {
@@ -196,7 +148,7 @@ namespace LMCSHD
                 {
                     byte[] blankFrameData = new byte[(MatrixFrame.Width * MatrixFrame.Height * 3) + 1];
                     blankFrameData[0] = 0x11;
-                    _sp.BaseStream.WriteAsync(blankFrameData, 0, MatrixFrame.FrameLength + 1);
+                    _sp.BaseStream.WriteAsync(blankFrameData, 0, MatrixFrame.FrameByteCount + 1);
                     _serialReady = false;
                 }
                 catch (Exception e)
@@ -278,21 +230,6 @@ namespace LMCSHD
             _sp.Close();
             _serialReady = false;
             _sp.DataReceived -= Sp_DataReceived;
-
-            //_sp.Dispose();
-            //_sp = null;
         }
     }
-
-    #region PixelOrder
-    public struct PixelOrder
-    {
-        public enum Orientation { HZ, VT }
-        public enum StartCorner { TL, TR, BL, BR }
-        public enum NewLine { SC, SN }
-        public static Orientation orientation { get; set; } = Orientation.HZ;
-        public static StartCorner startCorner { get; set; } = StartCorner.TL;
-        public static NewLine newLine { get; set; } = NewLine.SC;
-    }
-    #endregion
 }
