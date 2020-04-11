@@ -1,11 +1,8 @@
 ﻿using System.Drawing;
 using System.Drawing.Drawing2D;
-using System.Windows.Media.Imaging;
-using System;
 using System.Drawing.Imaging;
-using System.Windows;
-using System.Windows.Interop;
 using System.Windows.Media;
+using System.Windows.Media.Imaging;
 using static LMCSHD.PixelOrder;
 
 namespace LMCSHD
@@ -16,7 +13,7 @@ namespace LMCSHD
         //implmented get/set to expose references
         public static int Width { get; set; } = 16;
         public static int Height { get; set; } = 16;
-        public static InterpolationMode InterpMode { get; set; } = InterpolationMode.HighQualityBicubic;
+      //  public static InterpolationMode InterpMode { get; set; } = InterpolationMode.HighQualityBicubic;
         public static System.Windows.Media.Color[] GradientColors { get; set; } = new System.Windows.Media.Color[2];
         public static Pixel[] Frame { get; set; }
         public static int FrameByteCount { get { return (Width * Height * 3); } }
@@ -94,9 +91,9 @@ namespace LMCSHD
             return data;
         }
 
-        public static void InjestGDIBitmap(Bitmap b)
+        public static void InjestGDIBitmap(Bitmap b, InterpolationMode mode)
         {
-            BitmapToFrame(b);
+            BitmapToFrame(b, mode);
             b.Dispose();
         }
         public static void FFTToFrame(float[] fftData)
@@ -182,10 +179,10 @@ namespace LMCSHD
         //****************************************************************************************************************************************************
         //************************************ OLD BITMAP PROCESSER CLASS MEMBERS ****************************************************************************
         //****************************************************************************************************************************************************
-        public static unsafe void BitmapToFrame(Bitmap bitmap)
+        public static unsafe void BitmapToFrame(Bitmap bitmap, InterpolationMode mode)
         {
             if (bitmap.Width != Width || bitmap.Height != Height)
-                bitmap = DownsampleBitmap(bitmap, Width, Height);
+                bitmap = DownsampleBitmap(bitmap, Width, Height, mode);
 
             BitmapData imageData = bitmap.LockBits(
                 new Rectangle(0, 0, bitmap.Width, bitmap.Height),
@@ -208,18 +205,17 @@ namespace LMCSHD
                 scan0 += numBytes;
             }
             bitmap.UnlockBits(imageData);
-            bitmap.Dispose();
+            
         }
-        public static Bitmap DownsampleBitmap(Bitmap b, int width, int height)
+        public static Bitmap DownsampleBitmap(Bitmap b, int width, int height, InterpolationMode mode)
         {
             Bitmap result = new Bitmap(width, height);
             using (Graphics g = Graphics.FromImage(result))
             {
-                g.InterpolationMode = InterpMode;
+                g.InterpolationMode = mode;
                 g.DrawImage(b, 0, 0, width, height);
                 g.Save();
             }
-            b.Dispose();
             return result;
         }
 

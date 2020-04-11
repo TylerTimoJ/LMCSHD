@@ -221,7 +221,7 @@
 
                             <TextBlock Grid.Row="1" Margin="2" Text="Interpolation Mode" HorizontalAlignment="Right" VerticalAlignment="Center"/>
 
-                            <ComboBox x:Name="SCInterpModeDrop" Grid.Column="1" Grid.Row="1" Margin="2" SelectedIndex="{Binding Path=InterpolationModeIndex, Mode=TwoWay}">
+                            <ComboBox x:Name="SCInterpModeDrop" Grid.Column="1" Grid.Row="1" Margin="2" SelectedIndex="{Binding Path=SCInterpolationModeIndex, Mode=TwoWay}">
                                 <ComboBoxItem Content="Nearest Neighbor"/>
                                 <ComboBoxItem Content="Bicubic"/>
                                 <ComboBoxItem Content="Bilinear"/>
@@ -266,7 +266,7 @@
                                     <GroupBox.Style>
                                         <Style>
                                             <Style.Triggers>
-                                                <DataTrigger Binding='{Binding Path=IsChecked, ElementName=LockDimCheck}' Value='True'>
+                                                <DataTrigger Binding='{Binding Path=IsChecked, ElementName=SCLockDimCheck}' Value='True'>
                                                     <Setter Property='GroupBox.IsEnabled' Value='False'/>
                                                 </DataTrigger>
                                             </Style.Triggers>
@@ -279,33 +279,23 @@
                                 </GroupBox>
                             </StackPanel>
 
-                            <Button x:Name="SCResetSliders"
-                                    Grid.Row="3"
+                            <Button Grid.Row="3"
                                        Content="Reset Bounds" Click="SCResetSliders_Click"/>
-                            <CheckBox x:Name="LockDimCheck"
-                                      Grid.Row="4"
-                                      IsChecked="{Binding Path=LockDim, Mode=TwoWay}"
+                            <CheckBox Grid.Row="4"
+                                      x:Name="SCLockDimCheck"
+                                      IsChecked="{Binding Path=SCLockDim, Mode=TwoWay}"
                                           Margin="2"
                                           Content="Lock Dimensions"/>
+                            <TextBlock Grid.Column="1" Grid.Row="3" Margin="2" HorizontalAlignment="Center" VerticalAlignment="Center" Text="{Binding Path=Text_SC_WidthHeight, Mode=TwoWay}"/>
+                                <CheckBox x:Name="SCDisplayOutline"
+                                      Margin="2"
+                                      Grid.Row="4"
+                                      Grid.Column="1"
+                                      Content="Display Outline"
+                                      IsChecked="False"
+                                      Checked="SCDisplayOutline_Checked"
+                                      Unchecked="SCDisplayOutline_Unchecked"/>
 
-                            <CheckBox x:Name="SCDisplayOutline"
-                                          Margin="2"
-                                          Grid.Row="4"
-                                          Grid.Column="1"
-                                          Content="Display Outline"
-                                          Checked="SCDisplayOutline_Checked"
-                                          Unchecked="SCDisplayOutline_Unchecked"/>
-                            <WrapPanel Grid.Column="1" Grid.Row="3">
-                                <TextBlock x:Name="SCWidth"
-                                           Grid.Column="0"
-                                           Margin="2"
-                                           Text="Width: "/>
-
-                                <TextBlock x:Name="SCHeight"
-                                           Grid.Column="1"
-                                           Margin="2"
-                                           Text="Height: "/>
-                            </WrapPanel>
                             
                             <CheckBox Grid.Row="5"
                                       Margin="2"
@@ -510,7 +500,7 @@
                         
                         <TextBlock Grid.Row="2" Margin="2" Text="Interpolation Mode" HorizontalAlignment="Right" VerticalAlignment="Center"/>
 
-                        <ComboBox x:Name="ImagingInterpModeDrop" Grid.Column="1" Grid.Row="2" Margin="2" SelectedIndex="{Binding Path=InterpolationModeIndex, Mode=TwoWay}">
+                        <ComboBox x:Name="ImagingInterpModeDrop" Grid.Column="1" Grid.Row="2" Margin="2" SelectedIndex="{Binding Path=IMInterpolationModeIndex, Mode=TwoWay}">
                             <ComboBoxItem Content="Nearest Neighbor"/>
                             <ComboBoxItem Content="Bicubic"/>
                             <ComboBoxItem Content="Bilinear"/>
@@ -518,17 +508,76 @@
                             <ComboBoxItem Content="High Quality Bilinear"/>
                         </ComboBox>
 
+                        <StackPanel Grid.ColumnSpan="2" Grid.Row="3">
+                            <GroupBox Header="Start X">
+                                <StackPanel Orientation="Horizontal">
+                                    <xctk:IntegerUpDown Value="{Binding Path=IMX1, Mode=TwoWay}" Minimum="0" Maximum="{Binding Path=IMXMax, Mode=TwoWay}"/>
+                                    <Slider Value="{Binding Path=IMX1, Mode=TwoWay}" Minimum="0" Maximum="{Binding Path=IMXMax, Mode=TwoWay}" SmallChange="1"/>
+                                </StackPanel>
+                            </GroupBox>
 
-                        <Border Grid.Row="5" Grid.ColumnSpan="2" Margin="2" VerticalAlignment="Bottom" Height="310" BorderBrush="Gray" BorderThickness="1" Background="#FFFDFDFD">
+                            <GroupBox Header="Start Y" Grid.Row="1">
+                                <StackPanel Orientation="Horizontal">
+                                    <xctk:IntegerUpDown Value="{Binding Path=IMY1, Mode=TwoWay}" Minimum="0" Maximum="{Binding Path=IMYMax, Mode=TwoWay}"/>
+                                    <Slider Value="{Binding Path=IMY1, Mode=TwoWay}" Minimum="0" Maximum="{Binding Path=IMYMax, Mode=TwoWay}" SmallChange="1"/>
+                                </StackPanel>
+                            </GroupBox>
+
+                            <GroupBox Header="End X" Grid.Row="2">
+                                <GroupBox.Style>
+                                    <Style>
+                                        <Style.Triggers>
+                                            <DataTrigger Binding='{Binding Path=IsChecked, ElementName=IMLockDimCheck}' Value='True'>
+                                                <Setter Property='GroupBox.IsEnabled' Value='False'/>
+                                            </DataTrigger>
+                                        </Style.Triggers>
+                                    </Style>
+                                </GroupBox.Style>
+                                <StackPanel Orientation="Horizontal">
+                                    <xctk:IntegerUpDown Value="{Binding Path=IMX2, Mode=TwoWay}" Minimum="0" Maximum="{Binding Path=IMXMax, Mode=TwoWay}"/>
+                                    <Slider Value="{Binding Path=IMX2, Mode=TwoWay}" Minimum="0" Maximum="{Binding Path=IMXMax, Mode=TwoWay}" SmallChange="1"/>
+                                </StackPanel>
+                            </GroupBox>
+
+                            <GroupBox Header="End Y" Grid.Row="3">
+                                <GroupBox.Style>
+                                    <Style>
+                                        <Style.Triggers>
+                                            <DataTrigger Binding='{Binding Path=IsChecked, ElementName=IMLockDimCheck}' Value='True'>
+                                                <Setter Property='GroupBox.IsEnabled' Value='False'/>
+                                            </DataTrigger>
+                                        </Style.Triggers>
+                                    </Style>
+                                </GroupBox.Style>
+                                <StackPanel Orientation="Horizontal">
+                                    <xctk:IntegerUpDown Value="{Binding Path=IMY2, Mode=TwoWay}" Minimum="0" Maximum="{Binding Path=IMYMax, Mode=TwoWay}"/>
+                                    <Slider Value="{Binding Path=IMY2, Mode=TwoWay}" Minimum="0" Maximum="{Binding Path=IMYMax, Mode=TwoWay}" SmallChange="1"/>
+                                </StackPanel>
+                            </GroupBox>
+                        </StackPanel>
+
+
+
+                        <Button Grid.Row="4"
+                                       Content="Reset Bounds" Click="IMResetSliders_Click"/>
+                        <CheckBox Grid.Row="5"
+                                  x:Name="IMLockDimCheck"
+                                      IsChecked="{Binding Path=IMLockDim, Mode=TwoWay}"
+                                          Margin="2"
+                                          Content="Lock Dimensions"/>
+                        <TextBlock Grid.Column="1" Grid.Row="4" Margin="2" HorizontalAlignment="Center" VerticalAlignment="Center" Text="{Binding Path=Text_IM_WidthHeight, Mode=TwoWay}"/>
+
+                        <Border Grid.Row="6" Grid.ColumnSpan="2" Margin="2" VerticalAlignment="Bottom" Height="310" BorderBrush="Gray" BorderThickness="1" Background="#FFFDFDFD">
                             <Grid>
                                 <Grid.RowDefinitions>
                                     <RowDefinition Height="auto"/>
                                     <RowDefinition Height="*"/>
                                 </Grid.RowDefinitions>
                                 <CheckBox x:Name="CPCheckBox" HorizontalAlignment="Center" Margin="2" IsChecked="True" Checked="CPCheckBox_CheckedChanged" Unchecked="CPCheckBox_CheckedChanged" Content="Image Preview"/>
-                                <Image x:Name="ContentImage" Grid.Row="1" Margin="1" RenderOptions.BitmapScalingMode="NearestNeighbor" Cursor="Cross"/>
+                                <Image Grid.Row="1" Margin="1" RenderOptions.BitmapScalingMode="NearestNeighbor"  Source="{Binding Path=ContentBitmap, Mode=OneWay}"/>
                             </Grid>
                         </Border>
+
                     </Grid>
                 </TabItem>
 

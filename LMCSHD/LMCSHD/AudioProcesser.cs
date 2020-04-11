@@ -1,12 +1,7 @@
-﻿using System;
-using NAudio.Wave;
+﻿using NAudio.CoreAudioApi;
 using NAudio.Dsp;
-using NAudio.CoreAudioApi;
-using System.IO;
-using System.Windows;
-using System.Threading;
-using NAudio.Wave.SampleProviders;
-using NAudio.Wave.Compression;
+using NAudio.Wave;
+using System;
 
 namespace LMCSHD
 {

@@ -1,16 +1,9 @@
-﻿using System;
-using System.ComponentModel;
-using System.Runtime.CompilerServices;
-using System.Collections.ObjectModel;
+﻿using System.ComponentModel;
+using System.Diagnostics;
 using System.Drawing;
 using System.Threading;
 using System.Windows;
-using System.Windows.Controls;
-using System.Windows.Media;
-using System.Windows.Media.Imaging;
 using System.Windows.Threading;
-//using Xceed.Wpf.Toolkit;
-using System.Diagnostics;
 
 namespace LMCSHD
 {
@@ -30,16 +23,19 @@ namespace LMCSHD
 
         private int _scXMax;
         private int _scYMax;
-        private bool? _lockDim = false;
+        private bool? _scLockDim = false;
         private bool? _syncSerial = false;
-        public bool? LockDim
+        private string _text_SC_WidthHeight;
+
+        private int _scInterpolationModeIndex = 3;
+        public bool? SCLockDim
         {
-            get { return _lockDim; }
+            get { return _scLockDim; }
             set
             {
-                if (value != _lockDim)
+                if (value != _scLockDim)
                 {
-                    _lockDim = value;
+                    _scLockDim = value;
                     OnPropertyChanged();
                 }
             }
@@ -102,7 +98,7 @@ namespace LMCSHD
             {
                 if (value != _scX1)
                 {
-                    if (LockDim == true)
+                    if (SCLockDim == true)
                     {
                         if (value + ScreenRecorder.CaptureRect.Width > SCXMax)
                         {
@@ -142,7 +138,7 @@ namespace LMCSHD
             {
                 if (value != _scY1)
                 {
-                    if (LockDim == true)
+                    if (SCLockDim == true)
                     {
                         if (value + ScreenRecorder.CaptureRect.Height > SCYMax)
                         {
@@ -180,14 +176,46 @@ namespace LMCSHD
         {
             ScreenRecorder.CaptureRect = new System.Drawing.Rectangle(SCX1, SCY1, SCX2 - SCX1, SCY2 - SCY1);
 
-            SCWidth.Text = "Width: " + ScreenRecorder.CaptureRect.Width.ToString();
-            SCHeight.Text = "Height: " + ScreenRecorder.CaptureRect.Height.ToString();
+            Text_SC_WidthHeight = "Width: " + ScreenRecorder.CaptureRect.Width.ToString() + " " + "Height: " + ScreenRecorder.CaptureRect.Height.ToString();
 
             if (SCDisplayOutline.IsChecked == true)
                 ScreenRecorder.HideOutline();
         }
+        public string Text_SC_WidthHeight
+        {
+            get { return _text_SC_WidthHeight; }
+            set
+            {
+                if (value != _text_SC_WidthHeight)
+                {
+                    _text_SC_WidthHeight = value;
+                    OnPropertyChanged();
+                }
+            }
+        }
+
+        public int SCInterpolationModeIndex
+        {
+            get { return _scInterpolationModeIndex; }
+            set
+            {
+                if (value != _scInterpolationModeIndex)
+                {
+                    switch (value)
+                    {
+                        case 0: ScreenRecorder.InterpMode = System.Drawing.Drawing2D.InterpolationMode.NearestNeighbor; break;
+                        case 1: ScreenRecorder.InterpMode = System.Drawing.Drawing2D.InterpolationMode.Bicubic; break;
+                        case 2: ScreenRecorder.InterpMode = System.Drawing.Drawing2D.InterpolationMode.Bilinear; break;
+                        case 3: ScreenRecorder.InterpMode = System.Drawing.Drawing2D.InterpolationMode.HighQualityBicubic; break;
+                        case 4: ScreenRecorder.InterpMode = System.Drawing.Drawing2D.InterpolationMode.HighQualityBilinear; break;
+                    }
+                    _scInterpolationModeIndex = value;
+                    OnPropertyChanged();
+                }
+            }
+        }
         #endregion
-        #region Event Handlers
+            #region Event Handlers
         private void SC_Start_Click(object sender, RoutedEventArgs e)
         {
             StartCapture();
@@ -274,7 +302,7 @@ namespace LMCSHD
             LocalFPS = _fpsStopWatch.ElapsedMilliseconds - _localPreviousMillis;
             _localPreviousMillis = _fpsStopWatch.ElapsedMilliseconds;
 
-            MatrixFrame.InjestGDIBitmap(capturedBitmap);
+            MatrixFrame.InjestGDIBitmap(capturedBitmap, ScreenRecorder.InterpMode);
 
             Dispatcher.Invoke(() => { UpdatePreview(); });
 
@@ -288,7 +316,7 @@ namespace LMCSHD
 
         void InitializeScreenCaptureUI()
         {
-            LockDim = false;
+            SCLockDim = false;
             int screenWidth = (int)SystemParameters.PrimaryScreenWidth;
             int screenHeight = (int)SystemParameters.PrimaryScreenHeight;
             SCX1 = SCY1 = 0;
@@ -320,7 +348,7 @@ namespace LMCSHD
         {
             _fpsStopWatch = Stopwatch.StartNew();
             SerialManager.SerialAcknowledged += OnSerialAcknowledged;
-            MatrixFrame.InjestGDIBitmap(ScreenRecorder.ScreenToBitmap());
+            MatrixFrame.InjestGDIBitmap(ScreenRecorder.ScreenToBitmap(), ScreenRecorder.InterpMode);
             Dispatcher.Invoke(() => { UpdatePreview(); });
             SerialManager.PushFrame();
         }
@@ -335,7 +363,7 @@ namespace LMCSHD
         {
             if (SyncSerial == true)
             {
-                MatrixFrame.InjestGDIBitmap(ScreenRecorder.ScreenToBitmap());
+                MatrixFrame.InjestGDIBitmap(ScreenRecorder.ScreenToBitmap(), ScreenRecorder.InterpMode);
                 Dispatcher.Invoke(() => { UpdatePreview(); });
                 SerialManager.PushFrame();
                 LocalFPS = SerialFPS = _fpsStopWatch.ElapsedMilliseconds - _localPreviousMillis;

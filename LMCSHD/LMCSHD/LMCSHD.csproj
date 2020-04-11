@@ -152,7 +152,9 @@
       <SubType>Designer</SubType>
     </ApplicationDefinition>
     <Compile Include="AudioProcesser.cs" />
+    <Compile Include="ImageProcesser.cs" />
     <Compile Include="MainWindowAudio.cs" />
+    <Compile Include="MainWindowImaging.cs" />
     <Compile Include="MainWindowScreenCapture.cs" />
     <Compile Include="MatrixConnection.xaml.cs">
       <DependentUpon>MatrixConnection.xaml</DependentUpon>
@@ -166,7 +168,6 @@
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </Page>
-    <Compile Include="Animation.cs" />
     <Compile Include="App.xaml.cs">
       <DependentUpon>App.xaml</DependentUpon>
       <SubType>Code</SubType>
@@ -278,6 +279,9 @@
   </ItemGroup>
   <ItemGroup>
     <Resource Include="Images\Menu\icons8-shift-down-32.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <Resource Include="Images\Icon16.png" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>

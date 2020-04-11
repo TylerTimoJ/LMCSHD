@@ -1,26 +1,18 @@
 ﻿using System;
 using System.ComponentModel;
 using System.Runtime.CompilerServices;
-using System.Collections.ObjectModel;
-using System.Drawing;
-using System.Threading;
+using System.Runtime.InteropServices;
 using System.Windows;
-using System.Windows.Controls;
+using System.Windows.Input;
 using System.Windows.Media;
 using System.Windows.Media.Imaging;
-using System.Windows.Threading;
-//using Xceed.Wpf.Toolkit;
-using System.Runtime.InteropServices;
-using System.Windows.Input;
-using System.Windows.Forms;
-using System.IO;
 
 namespace LMCSHD
 {
     public partial class MainWindow : INotifyPropertyChanged
     {
         //Frame & Preview
-        private static WriteableBitmap MatrixBitmap;
+        private static WriteableBitmap MatrixBitmap { get; set; }
 
 
 
@@ -32,6 +24,8 @@ namespace LMCSHD
             SetMatrixDimensions(MatrixFrame.Width, MatrixFrame.Height);
             InitializeScreenCaptureUI();
             InitializeAudioCaptureUI();
+            MatrixFrame.BitmapToFrame(Properties.Resources.Icon16, System.Drawing.Drawing2D.InterpolationMode.NearestNeighbor);
+            UpdatePreview();
         }
         private void Window_Closing(object sender, System.ComponentModel.CancelEventArgs e)
         {
@@ -74,27 +68,9 @@ namespace LMCSHD
                 }
             }
         }
-        private int _interpolationModeIndex = 3;
-        public int InterpolationModeIndex
-        {
-            get { return _interpolationModeIndex; }
-            set
-            {
-                if (value != _interpolationModeIndex)
-                {
-                    switch (value)
-                    {
-                        case 0: MatrixFrame.InterpMode = System.Drawing.Drawing2D.InterpolationMode.NearestNeighbor; break;
-                        case 1: MatrixFrame.InterpMode = System.Drawing.Drawing2D.InterpolationMode.Bicubic; break;
-                        case 2: MatrixFrame.InterpMode = System.Drawing.Drawing2D.InterpolationMode.Bilinear; break;
-                        case 3: MatrixFrame.InterpMode = System.Drawing.Drawing2D.InterpolationMode.HighQualityBicubic; break;
-                        case 4: MatrixFrame.InterpMode = System.Drawing.Drawing2D.InterpolationMode.HighQualityBilinear; break;
-                    }
-                    _interpolationModeIndex = value;
-                    OnPropertyChanged();
-                }
-            }
-        }
+        
+
+        
 
         #endregion
         #region Menu_File
@@ -172,26 +148,7 @@ namespace LMCSHD
         }
 
         #endregion
-        #region Imaging
 
-        private void Button_Imaging_ImportImage_Click(object sender, RoutedEventArgs e)
-        {
-            OpenFileDialog openFileDialog = new OpenFileDialog();
-            //saveFileDialog.Filter = ".jpg";
-            if (openFileDialog.ShowDialog() == System.Windows.Forms.DialogResult.OK)
-            {
-                Bitmap b = MatrixFrame.LoadBitmapFromDisk(openFileDialog.FileName);
-                ContentImage.Source = MatrixFrame.CreateBitmapSourceFromBitmap(b);
-                MatrixFrame.BitmapToFrame(b); //destroys b
-                UpdatePreview();
-                SerialManager.PushFrame();
-            }
-        }
-        private void Button_Imaging_ImportGif_Click(object sender, RoutedEventArgs e)
-        {
-
-        }
-        #endregion
 
         //Matrix Frame Functions
         //===========================================================================================

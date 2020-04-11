@@ -3,14 +3,13 @@ using System.Drawing;
 using System.Runtime.InteropServices;
 using System.Threading;
 
-//using Xceed.Wpf.Toolkit;
-
 namespace LMCSHD
 {
     public static class ScreenRecorder
     {
         public static Rectangle CaptureRect;
         public static bool doCapture, doOutline;
+        public static System.Drawing.Drawing2D.InterpolationMode InterpMode = System.Drawing.Drawing2D.InterpolationMode.HighQualityBicubic;
 
         public delegate void Callback(Bitmap capturedFrame);
         public static void StartRecording(Callback pixelDataCallback)

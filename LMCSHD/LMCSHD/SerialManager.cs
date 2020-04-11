@@ -1,14 +1,7 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using System.IO.Ports;
-using System.Windows;
-using System.IO;
-using System.Diagnostics;
-using static LMCSHD.PixelOrder;
 using System.Text.RegularExpressions;
+using System.Windows;
 
 namespace LMCSHD
 {
