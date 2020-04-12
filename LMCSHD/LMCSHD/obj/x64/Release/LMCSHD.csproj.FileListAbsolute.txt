@@ -35,3 +35,4 @@ C:\Users\tyler\OneDrive\LMCSHD\LMCSHD\LMCSHD\obj\x64\Release\LMCSHD.csproj.CoreC
 C:\Users\tyler\OneDrive\LMCSHD\LMCSHD\LMCSHD\obj\x64\Release\LMCSHD.csproj.CopyComplete
 C:\Users\tyler\OneDrive\LMCSHD\LMCSHD\LMCSHD\obj\x64\Release\LMCSHD.exe
 C:\Users\tyler\OneDrive\LMCSHD\LMCSHD\LMCSHD\obj\x64\Release\LMCSHD.pdb
+C:\Users\tyler\OneDrive\LMCSHD\LMCSHD\LMCSHD\obj\x64\Release\LMCSHD.csprojAssemblyReference.cache

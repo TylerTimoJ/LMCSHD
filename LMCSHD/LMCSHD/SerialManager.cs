@@ -19,6 +19,15 @@ namespace LMCSHD
             SerialAcknowledged?.Invoke();
         }
 
+        public static bool IsConnected()
+        {
+            if (_sp == null)
+                return false;
+            else if (_sp.IsOpen)
+                return true;
+            else
+                return false;
+        }
 
         private static void Sp_DataReceived(object sender, SerialDataReceivedEventArgs e)
         {
@@ -131,7 +140,7 @@ namespace LMCSHD
         }
 
         //NOTE Rework to work more efficiently with single dimensional pixel array
-        
+
 
         public static void SerialSendBlankFrame()
         {

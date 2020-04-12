@@ -13,7 +13,6 @@ namespace LMCSHD
         //implmented get/set to expose references
         public static int Width { get; set; } = 16;
         public static int Height { get; set; } = 16;
-      //  public static InterpolationMode InterpMode { get; set; } = InterpolationMode.HighQualityBicubic;
         public static System.Windows.Media.Color[] GradientColors { get; set; } = new System.Windows.Media.Color[2];
         public static Pixel[] Frame { get; set; }
         public static int FrameByteCount { get { return (Width * Height * 3); } }
@@ -218,6 +217,8 @@ namespace LMCSHD
             }
             return result;
         }
+
+
 
         public static Bitmap LoadBitmapFromDisk(string path)
         {

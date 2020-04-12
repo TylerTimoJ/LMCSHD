@@ -14,8 +14,6 @@ namespace LMCSHD
         //Frame & Preview
         private static WriteableBitmap MatrixBitmap { get; set; }
 
-
-
         #region Window
         public MainWindow()
         {
@@ -30,7 +28,8 @@ namespace LMCSHD
         private void Window_Closing(object sender, System.ComponentModel.CancelEventArgs e)
         {
             EndAllThreads();
-            SerialManager.SerialSendBlankFrame();
+            SerialManager.Disconnect();
+            while (SerialManager.IsConnected()) ;
         }
         #endregion
         #region properties and databinding

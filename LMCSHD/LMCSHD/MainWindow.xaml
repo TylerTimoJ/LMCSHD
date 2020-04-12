@@ -496,7 +496,7 @@
                         </Grid.RowDefinitions>
 
                         <Button Content="Import Image" Click="Button_Imaging_ImportImage_Click"/>
-                        <Button Grid.Column="1" Content="Import Gif" Click="Button_Imaging_ImportGif_Click"/>
+                        <Button IsEnabled="False" Grid.Column="1" Content="Import Gif" Click="Button_Imaging_ImportGif_Click"/>
                         
                         <TextBlock Grid.Row="2" Margin="2" Text="Interpolation Mode" HorizontalAlignment="Right" VerticalAlignment="Center"/>
 
@@ -567,15 +567,9 @@
                                           Content="Lock Dimensions"/>
                         <TextBlock Grid.Column="1" Grid.Row="4" Margin="2" HorizontalAlignment="Center" VerticalAlignment="Center" Text="{Binding Path=Text_IM_WidthHeight, Mode=TwoWay}"/>
 
-                        <Border Grid.Row="6" Grid.ColumnSpan="2" Margin="2" VerticalAlignment="Bottom" Height="310" BorderBrush="Gray" BorderThickness="1" Background="#FFFDFDFD">
-                            <Grid>
-                                <Grid.RowDefinitions>
-                                    <RowDefinition Height="auto"/>
-                                    <RowDefinition Height="*"/>
-                                </Grid.RowDefinitions>
-                                <CheckBox x:Name="CPCheckBox" HorizontalAlignment="Center" Margin="2" IsChecked="True" Checked="CPCheckBox_CheckedChanged" Unchecked="CPCheckBox_CheckedChanged" Content="Image Preview"/>
-                                <Image Grid.Row="1" Margin="1" RenderOptions.BitmapScalingMode="NearestNeighbor"  Source="{Binding Path=ContentBitmap, Mode=OneWay}"/>
-                            </Grid>
+                        <Border Grid.Row="6" Grid.ColumnSpan="2" Margin="2" VerticalAlignment="Bottom" Height="290" BorderBrush="Gray" BorderThickness="1" Background="#FFFDFDFD">
+
+                            <Image Margin="1" RenderOptions.BitmapScalingMode="NearestNeighbor"  Source="{Binding Path=ContentBitmap, Mode=OneWay}"/>
                         </Border>
 
                     </Grid>

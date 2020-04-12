@@ -2,19 +2,31 @@
 using System.Text.RegularExpressions;
 using System.Windows;
 using System.Windows.Input;
+using System.ComponentModel;
+using System.Runtime.CompilerServices;
+using System.Runtime.InteropServices;
+using System.Windows.Media;
+using System.Windows.Media.Imaging;
 
 namespace LMCSHD
 {
     /// <summary>
     /// Interaction logic for MatrixConnection.xaml
     /// </summary>
-    public partial class MatrixConnection : Window
+    public partial class MatrixConnection : INotifyPropertyChanged
     {
         public MatrixConnection()
         {
             InitializeComponent();
             RefreshSerialPorts();
         }
+
+        public event PropertyChangedEventHandler PropertyChanged;
+        private void OnPropertyChanged([CallerMemberName] string propertyName = null)
+        {
+            PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
+        }
+
         void RefreshSerialPorts()
         {
             string[] ports = SerialManager.GetPortNames();
@@ -31,6 +43,12 @@ namespace LMCSHD
         }
         private void SSerialConnect_Click(object sender, RoutedEventArgs e)
         {
+            switch (SSColorModeList.SelectedIndex)
+            {
+                case 0: SerialManager.ColorMode = SerialManager.CMode.BPP24; break;
+                case 1: SerialManager.ColorMode = SerialManager.CMode.BPP16; break;
+                case 2: SerialManager.ColorMode = SerialManager.CMode.BPP8; break;
+            }
             int[] matrixDef = null;
 
                 matrixDef = SerialManager.Connect(SSerialPortList.SelectedValue.ToString(), int.Parse(SBaudRate.Text));

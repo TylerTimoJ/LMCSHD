@@ -12,8 +12,7 @@ ILI9341_t3n tft = ILI9341_t3n(9, 10, 8);
 const int width = 320;
 const int height = 240;
 
-unsigned volatile char sBuf[width * height * 3] = {0};
-uint16_t cBuf[UINT16_LEN] = {0};
+unsigned volatile char sBuf[width * height * 2] = {0};
 
 uint8_t *sP;
 uint16_t *cP;
@@ -23,10 +22,9 @@ long end = 0;
 
 void setup() {
   tft.useFrameBuffer(true);
-  tft.begin(112000000);
-  tft.setRotation(3);
+  tft.begin(72000000);
+  tft.setRotation(1);
   Serial.begin(1);
-  tft.updateScreenAsync(true);
 }
 
 void loop(void) {}
@@ -46,15 +44,15 @@ void serialEvent()
 
     case 0x12: //frame data
       Serial.readBytes(sBuf, BPP16_LEN);
+      tft.waitUpdateAsyncComplete();
 
       sP = sBuf + (BPP16_LEN);
-      cP = cBuf + (UINT16_LEN);
-
-      for (int i = 0; i < 76800; i++)
+      cP = tft.getFrameBuffer() + (UINT16_LEN);
+      
+      for (int i = 0; i < UINT16_LEN; i++)
         *--cP = (*--sP | *--sP << 8);
         
-      memcpy(tft.getFrameBuffer(), cBuf, BPP16_LEN);
-      
+      tft.updateScreenAsync();
       Serial.write(0x06); //acknowledge
       break;
 

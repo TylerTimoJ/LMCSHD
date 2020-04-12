@@ -1,8 +1,10 @@
-﻿using System.ComponentModel;
+﻿using System;
+using System.ComponentModel;
 using System.Drawing;
 using System.Windows;
 using System.Windows.Forms;
 using System.Windows.Media.Imaging;
+using static LMCSHD.ImageProcesser;
 
 namespace LMCSHD
 {
@@ -147,6 +149,8 @@ namespace LMCSHD
         {
             ImageProcesser.ImageRect = new Rectangle(IMX1, IMY1, IMX2 - IMX1, IMY2 - IMY1);
             Text_IM_WidthHeight = "Width: " + ImageProcesser.ImageRect.Width.ToString() + " " + "Height: " + ImageProcesser.ImageRect.Height.ToString();
+
+            RefreshImage();
         }
 
         public BitmapSource ContentBitmap
@@ -191,6 +195,7 @@ namespace LMCSHD
                         case 4: ImageProcesser.InterpMode = System.Drawing.Drawing2D.InterpolationMode.HighQualityBilinear; break;
                     }
                     _imInterpolationModeIndex = value;
+                    RefreshImage();
                     OnPropertyChanged();
                 }
             }
@@ -203,8 +208,8 @@ namespace LMCSHD
             IMLockDim = false;
             if(ImageProcesser.workingBitmap != null)
             {
-                IMXMax = IMX2 = ImageProcesser.workingBitmap.Width;
-                IMYMax = IMY2 = ImageProcesser.workingBitmap.Height;
+                IMXMax = IMX2 = ImageProcesser.loadedBitmap.Width;
+                IMYMax = IMY2 = ImageProcesser.loadedBitmap.Height;
                 IMX1 = 0;
                 IMY1 = 0;
             }
@@ -212,9 +217,23 @@ namespace LMCSHD
             {
                 IMXMax = IMX2 = IMYMax = IMY2 = IMX1 = IMY1 = 0;
             }
+            RefreshImage();
         }
 
         #region Imaging
+
+        private void RefreshImage()
+        {
+            if (ImageProcesser.ImageReady)
+            {
+                ImageProcesser.workingBitmap.Dispose();
+                ImageProcesser.workingBitmap = ImageProcesser.CropBitmap(ImageProcesser.loadedBitmap, ImageProcesser.ImageRect);
+                ContentBitmap = MatrixFrame.CreateBitmapSourceFromBitmap(ImageProcesser.workingBitmap);
+                MatrixFrame.BitmapToFrame(ImageProcesser.workingBitmap, ImageProcesser.InterpMode);
+                UpdatePreview();
+                SerialManager.PushFrame();
+            }
+        }
 
         private void Button_Imaging_ImportImage_Click(object sender, RoutedEventArgs e)
         {
@@ -222,23 +241,40 @@ namespace LMCSHD
             //saveFileDialog.Filter = ".jpg";
             if (openFileDialog.ShowDialog() == System.Windows.Forms.DialogResult.OK)
             {
+                IMLockDim = false;
+                ImageProcesser.ImageReady = false;
                 if (ImageProcesser.workingBitmap != null)
                     ImageProcesser.workingBitmap.Dispose();
 
-                ImageProcesser.workingBitmap = MatrixFrame.LoadBitmapFromDisk(openFileDialog.FileName);
-                ContentBitmap = MatrixFrame.CreateBitmapSourceFromBitmap(ImageProcesser.workingBitmap);
-                MatrixFrame.BitmapToFrame(ImageProcesser.workingBitmap, ImageProcesser.InterpMode);
-                IMXMax = IMX2 = ImageProcesser.workingBitmap.Width;
-                IMYMax = IMY2 = ImageProcesser.workingBitmap.Height;
-                IMX1 = 0;
-                IMY1 = 0;
-                UpdatePreview();
-                SerialManager.PushFrame();
+                if (ImageProcesser.loadedBitmap != null)
+                    ImageProcesser.loadedBitmap.Dispose();
+                try
+                {
+                    ImageProcesser.loadedBitmap = MatrixFrame.LoadBitmapFromDisk(openFileDialog.FileName);
+                    ImageProcesser.workingBitmap = new Bitmap(ImageProcesser.loadedBitmap);
+                    ContentBitmap = MatrixFrame.CreateBitmapSourceFromBitmap(ImageProcesser.workingBitmap);
+                    MatrixFrame.BitmapToFrame(ImageProcesser.workingBitmap, ImageProcesser.InterpMode);
+                    IMXMax = IMX2 = ImageProcesser.workingBitmap.Width;
+                    IMYMax = IMY2 = ImageProcesser.workingBitmap.Height;
+                    IMX1 = 0;
+                    IMY1 = 0;
+                    UpdatePreview();
+                    SerialManager.PushFrame();
+                    ImageProcesser.ImageReady = true;
+                }
+                catch(Exception)
+                {
+                    System.Windows.MessageBox.Show("Cannot load image.");
+                }
             }
         }
         private void Button_Imaging_ImportGif_Click(object sender, RoutedEventArgs e)
         {
-
+            ImageProcesser.workingBitmap = ImageProcesser.CropBitmap(ImageProcesser.loadedBitmap, ImageProcesser.ImageRect);
+            ContentBitmap = MatrixFrame.CreateBitmapSourceFromBitmap(ImageProcesser.workingBitmap);
+            MatrixFrame.BitmapToFrame(ImageProcesser.workingBitmap, ImageProcesser.InterpMode);
+            UpdatePreview();
+            SerialManager.PushFrame();
         }
         #endregion
 
