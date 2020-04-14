@@ -8,6 +8,7 @@
 // </auto-generated>
 //------------------------------------------------------------------------------
 
-[assembly: System.Windows.Resources.AssemblyAssociatedContentFileAttribute("images/menu/icons8-new-line-32.png")]
+[assembly: System.Windows.Resources.AssemblyAssociatedContentFileAttribute("images/menu/icons8-play-32.png")]
+[assembly: System.Windows.Resources.AssemblyAssociatedContentFileAttribute("images/menu/icons8-stop-32.png")]
 
 

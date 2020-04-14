@@ -191,12 +191,12 @@ namespace LMCSHD
 
         private void MatrixImage_MouseDown(object sender, MouseButtonEventArgs e)
         {
-            DrawPixel();
+        //    DrawPixel();
         }
 
         private void MatrixImage_MouseMove(object sender, System.Windows.Input.MouseEventArgs e)
         {
-            DrawPixel();
+        //    DrawPixel();
         }
 
         void DrawPixel()
@@ -216,5 +216,7 @@ namespace LMCSHD
                 SerialManager.PushFrame();
             }
         }
+
+    
     }
 }

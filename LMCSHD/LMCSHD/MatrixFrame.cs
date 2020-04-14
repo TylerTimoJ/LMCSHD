@@ -218,13 +218,6 @@ namespace LMCSHD
             return result;
         }
 
-
-
-        public static Bitmap LoadBitmapFromDisk(string path)
-        {
-            return new Bitmap(path);
-        }
-
         public static BitmapSource CreateBitmapSourceFromBitmap(Bitmap bitmap)
         {
             var bitmapData = bitmap.LockBits(

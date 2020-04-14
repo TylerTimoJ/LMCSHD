@@ -4,7 +4,7 @@ using System.Drawing;
 using System.Windows;
 using System.Windows.Forms;
 using System.Windows.Media.Imaging;
-using static LMCSHD.ImageProcesser;
+using System.Windows.Threading;
 
 namespace LMCSHD
 {
@@ -22,9 +22,16 @@ namespace LMCSHD
         private bool? _imLockDim = false;
         private string _text_IM_WidthHeight;
 
+        private bool? _gifPlayPause = false;
+
         private int _imInterpolationModeIndex = 3;
 
         private BitmapSource _contentBitmap;
+        private BitmapSource _gifPlayPauseImage = MatrixFrame.CreateBitmapSourceFromBitmap(Properties.Resources.icons8_play_32);
+
+
+        private static DispatcherTimer GifTimer = new DispatcherTimer();
+        private static int _gifFrameIndex = 0;
 
         public bool? IMLockDim
         {
@@ -144,13 +151,13 @@ namespace LMCSHD
                 }
             }
         }
-
         private void IMDimensionsChanged()
         {
             ImageProcesser.ImageRect = new Rectangle(IMX1, IMY1, IMX2 - IMX1, IMY2 - IMY1);
             Text_IM_WidthHeight = "Width: " + ImageProcesser.ImageRect.Width.ToString() + " " + "Height: " + ImageProcesser.ImageRect.Height.ToString();
 
-            RefreshImage();
+            RefreshStillImage();
+            RefreshGifImages();
         }
 
         public BitmapSource ContentBitmap
@@ -165,7 +172,6 @@ namespace LMCSHD
                 }
             }
         }
-
         public string Text_IM_WidthHeight
         {
             get { return _text_IM_WidthHeight; }
@@ -178,7 +184,6 @@ namespace LMCSHD
                 }
             }
         }
-
         public int IMInterpolationModeIndex
         {
             get { return _imInterpolationModeIndex; }
@@ -195,21 +200,67 @@ namespace LMCSHD
                         case 4: ImageProcesser.InterpMode = System.Drawing.Drawing2D.InterpolationMode.HighQualityBilinear; break;
                     }
                     _imInterpolationModeIndex = value;
-                    RefreshImage();
+                    RefreshStillImage();
+                    RefreshGifImages();
                     OnPropertyChanged();
                 }
             }
         }
-
+        public bool? GifPlayPause
+        {
+            get { return _gifPlayPause; }
+            set
+            {
+                if (value != _gifPlayPause)
+                {
+                    if (value == true)
+                    {
+                        GifPlayPauseImage = MatrixFrame.CreateBitmapSourceFromBitmap(Properties.Resources.icons8_stop_32);
+                        StartGif();
+                    }
+                    else
+                    {
+                        GifPlayPauseImage = MatrixFrame.CreateBitmapSourceFromBitmap(Properties.Resources.icons8_play_32);
+                        StopGif();
+                    }
+                    _gifPlayPause = value;
+                    OnPropertyChanged();
+                }
+            }
+        }
+        public BitmapSource GifPlayPauseImage
+        {
+            get { return _gifPlayPauseImage; }
+            set
+            {
+                if (value != _gifPlayPauseImage)
+                {
+                    _gifPlayPauseImage = value;
+                    OnPropertyChanged();
+                }
+            }
+        }
         #endregion
 
         private void IMResetSliders_Click(object sender, RoutedEventArgs e)
         {
+            ResetSliders();
+        }
+
+        private void ResetSliders()
+        {
             IMLockDim = false;
-            if(ImageProcesser.workingBitmap != null)
+            if (ImageProcesser.ImageLoadState == ImageProcesser.LoadState.Still)
             {
-                IMXMax = IMX2 = ImageProcesser.loadedBitmap.Width;
-                IMYMax = IMY2 = ImageProcesser.loadedBitmap.Height;
+                IMXMax = IMX2 = ImageProcesser.LoadedStillBitmap.Width;
+                IMYMax = IMY2 = ImageProcesser.LoadedStillBitmap.Height;
+                IMX1 = 0;
+                IMY1 = 0;
+            }
+            else if (ImageProcesser.ImageLoadState == ImageProcesser.LoadState.Gif)
+            {
+                IMXMax = IMX2 = ImageProcesser.LoadedGifBitmapFrames[0].Width;
+                IMYMax = IMY2 = ImageProcesser.LoadedGifBitmapFrames[0].Height;
                 IMX1 = 0;
                 IMY1 = 0;
             }
@@ -217,52 +268,100 @@ namespace LMCSHD
             {
                 IMXMax = IMX2 = IMYMax = IMY2 = IMX1 = IMY1 = 0;
             }
-            RefreshImage();
+            RefreshStillImage();
+            RefreshGifImages();
         }
 
         #region Imaging
 
-        private void RefreshImage()
+
+        public void StartGif()
         {
-            if (ImageProcesser.ImageReady)
+
+            GifTimer.Interval = new TimeSpan(0, 0, 0, 0, ImageProcesser.GifMillisconds);
+            GifTimer.Tick -= GifTimer_Tick;
+            GifTimer.Tick += GifTimer_Tick;
+            GifTimer.Start();
+
+        }
+        public void StopGif()
+        {
+            GifTimer.Stop();
+        }
+
+        private void GifTimer_Tick(object sender, EventArgs e)
+        {
+            if (_gifFrameIndex >= ImageProcesser.LoadedGifBitmapFrames.Length - 1)
+                _gifFrameIndex = 0;
+            else
+                _gifFrameIndex++;
+
+            ContentBitmap = MatrixFrame.CreateBitmapSourceFromBitmap(ImageProcesser.WorkingGifBitmapFrames[_gifFrameIndex]);
+            MatrixFrame.BitmapToFrame(ImageProcesser.WorkingGifBitmapFrames[_gifFrameIndex], ImageProcesser.InterpMode);
+            UpdatePreview();
+            SerialManager.PushFrame();
+        }
+
+
+        private void RefreshStillImage()
+        {
+            if (ImageProcesser.ImageLoadState == ImageProcesser.LoadState.Still)
             {
-                ImageProcesser.workingBitmap.Dispose();
-                ImageProcesser.workingBitmap = ImageProcesser.CropBitmap(ImageProcesser.loadedBitmap, ImageProcesser.ImageRect);
-                ContentBitmap = MatrixFrame.CreateBitmapSourceFromBitmap(ImageProcesser.workingBitmap);
-                MatrixFrame.BitmapToFrame(ImageProcesser.workingBitmap, ImageProcesser.InterpMode);
+                ImageProcesser.DisposeWorkingStill();
+                ImageProcesser.WorkingStillBitmap = ImageProcesser.CropBitmap(ImageProcesser.LoadedStillBitmap, ImageProcesser.ImageRect);
+                ContentBitmap = MatrixFrame.CreateBitmapSourceFromBitmap(ImageProcesser.WorkingStillBitmap);
+                MatrixFrame.BitmapToFrame(ImageProcesser.WorkingStillBitmap, ImageProcesser.InterpMode);
                 UpdatePreview();
                 SerialManager.PushFrame();
+            }
+        }
+
+        private void RefreshGifImages()
+        {
+            if (ImageProcesser.ImageLoadState == ImageProcesser.LoadState.Gif)
+            {
+                ImageProcesser.DisposeWorkingGif();
+                for (int i = 0; i < ImageProcesser.LoadedGifBitmapFrames.Length; i++)
+                {
+                    ImageProcesser.WorkingGifBitmapFrames[i] = ImageProcesser.CropBitmap(ImageProcesser.LoadedGifBitmapFrames[i], ImageProcesser.ImageRect);
+                }
+                if(GifPlayPause != true) //if gif is not playing
+                {
+                    if (_gifFrameIndex > ImageProcesser.LoadedGifBitmapFrames.Length - 1)
+                        _gifFrameIndex = 0;
+                    ImageProcesser.WorkingGifBitmapFrames[_gifFrameIndex] = ImageProcesser.CropBitmap(ImageProcesser.LoadedGifBitmapFrames[_gifFrameIndex], ImageProcesser.ImageRect);
+                    ContentBitmap = MatrixFrame.CreateBitmapSourceFromBitmap(ImageProcesser.WorkingGifBitmapFrames[_gifFrameIndex]);
+                    MatrixFrame.BitmapToFrame(ImageProcesser.WorkingGifBitmapFrames[_gifFrameIndex], ImageProcesser.InterpMode);
+                    UpdatePreview();
+                    SerialManager.PushFrame();
+                }
             }
         }
 
         private void Button_Imaging_ImportImage_Click(object sender, RoutedEventArgs e)
         {
             OpenFileDialog openFileDialog = new OpenFileDialog();
-            //saveFileDialog.Filter = ".jpg";
+            openFileDialog.Filter = "Image Files(*.BMP;*.JPG;*.PNG;*.GIF)|*.BMP;*.JPG;*.PNG;*.GIF";
             if (openFileDialog.ShowDialog() == System.Windows.Forms.DialogResult.OK)
             {
                 IMLockDim = false;
-                ImageProcesser.ImageReady = false;
-                if (ImageProcesser.workingBitmap != null)
-                    ImageProcesser.workingBitmap.Dispose();
-
-                if (ImageProcesser.loadedBitmap != null)
-                    ImageProcesser.loadedBitmap.Dispose();
-                try
+                GifPlayPause = false;
+                ImageProcesser.DisposeStill();
+                ImageProcesser.DisposeGif();
+                if (ImageProcesser.LoadBitmapFromDisk(openFileDialog.FileName))
                 {
-                    ImageProcesser.loadedBitmap = MatrixFrame.LoadBitmapFromDisk(openFileDialog.FileName);
-                    ImageProcesser.workingBitmap = new Bitmap(ImageProcesser.loadedBitmap);
-                    ContentBitmap = MatrixFrame.CreateBitmapSourceFromBitmap(ImageProcesser.workingBitmap);
-                    MatrixFrame.BitmapToFrame(ImageProcesser.workingBitmap, ImageProcesser.InterpMode);
-                    IMXMax = IMX2 = ImageProcesser.workingBitmap.Width;
-                    IMYMax = IMY2 = ImageProcesser.workingBitmap.Height;
+                    ContentBitmap = MatrixFrame.CreateBitmapSourceFromBitmap(ImageProcesser.WorkingStillBitmap);
+                    MatrixFrame.BitmapToFrame(ImageProcesser.WorkingStillBitmap, ImageProcesser.InterpMode);
+                    IMXMax = IMX2 = ImageProcesser.WorkingStillBitmap.Width;
+                    IMYMax = IMY2 = ImageProcesser.WorkingStillBitmap.Height;
                     IMX1 = 0;
                     IMY1 = 0;
                     UpdatePreview();
                     SerialManager.PushFrame();
-                    ImageProcesser.ImageReady = true;
+                    ImageProcesser.ImageLoadState = ImageProcesser.LoadState.Still;
+                    ResetSliders();
                 }
-                catch(Exception)
+                else
                 {
                     System.Windows.MessageBox.Show("Cannot load image.");
                 }
@@ -270,14 +369,32 @@ namespace LMCSHD
         }
         private void Button_Imaging_ImportGif_Click(object sender, RoutedEventArgs e)
         {
-            ImageProcesser.workingBitmap = ImageProcesser.CropBitmap(ImageProcesser.loadedBitmap, ImageProcesser.ImageRect);
-            ContentBitmap = MatrixFrame.CreateBitmapSourceFromBitmap(ImageProcesser.workingBitmap);
-            MatrixFrame.BitmapToFrame(ImageProcesser.workingBitmap, ImageProcesser.InterpMode);
-            UpdatePreview();
-            SerialManager.PushFrame();
+            OpenFileDialog openFileDialog = new OpenFileDialog();
+            openFileDialog.Filter = "Image Files(*.GIF)|*.GIF";
+            if (openFileDialog.ShowDialog() == System.Windows.Forms.DialogResult.OK)
+            {
+                GifPlayPause = false;
+                ImageProcesser.DisposeGif();
+                ImageProcesser.DisposeStill();
+                if (ImageProcesser.LoadGifFromDisk(openFileDialog.FileName))
+                {
+                    ContentBitmap = MatrixFrame.CreateBitmapSourceFromBitmap(ImageProcesser.WorkingGifBitmapFrames[0]);
+                    MatrixFrame.BitmapToFrame(ImageProcesser.WorkingGifBitmapFrames[0], ImageProcesser.InterpMode);
+                    IMXMax = IMX2 = ImageProcesser.WorkingGifBitmapFrames[0].Width;
+                    IMYMax = IMY2 = ImageProcesser.WorkingGifBitmapFrames[0].Height;
+                    IMX1 = 0;
+                    IMY1 = 0;
+                    UpdatePreview();
+                    SerialManager.PushFrame();
+                    ImageProcesser.ImageLoadState = ImageProcesser.LoadState.Gif;
+                    ResetSliders();
+                }
+                else
+                {
+                    System.Windows.MessageBox.Show("Cannot load image.");
+                }
+            }
         }
         #endregion
-
-
     }
 }

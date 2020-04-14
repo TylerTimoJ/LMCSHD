@@ -19,6 +19,7 @@ namespace LMCSHD
         {
             InitializeComponent();
             RefreshSerialPorts();
+            SSColorModeList.SelectedIndex = (int)SerialManager.ColorMode;
         }
 
         public event PropertyChangedEventHandler PropertyChanged;
