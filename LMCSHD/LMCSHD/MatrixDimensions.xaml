@@ -1,0 +1,31 @@
+﻿<Window x:Class="LMCSHD.MatrixDimensions"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:local="clr-namespace:LMCSHD"
+        xmlns:xctk="http://schemas.xceed.com/wpf/xaml/toolkit"
+        mc:Ignorable="d"
+        Title="Matrix Dimensions" Height="300" Width="300" ResizeMode="NoResize" SizeToContent="WidthAndHeight" WindowStyle="ToolWindow">
+    <Grid Margin="2">
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="auto"/>
+            <ColumnDefinition Width="*"/>
+        </Grid.ColumnDefinitions>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="auto"/>
+            <RowDefinition Height="auto"/>
+            <RowDefinition Height="auto"/>
+            <RowDefinition Height="auto"/>
+        </Grid.RowDefinitions>
+
+        <TextBlock Margin="2" Text="Width: " HorizontalAlignment="Right"/>
+        <xctk:IntegerUpDown Margin="2" Grid.Column="1" Minimum="1" Maximum="2048" Value="{Binding Path=MatrixWidth, Mode=TwoWay}"/>
+        
+        <TextBlock Margin="2" Grid.Row="1" Text="Height: " HorizontalAlignment="Right"/>
+        <xctk:IntegerUpDown Margin="2" Grid.Row="1" Grid.Column="1" Minimum="1" Maximum="2048" Value="{Binding Path=MatrixHeight, Mode=TwoWay}"/>
+
+        <Button Width="128" Margin="2" Grid.Row="2" Grid.ColumnSpan="2" Content="Accept" Click="Button_Accept_Click"/>
+        <Button Width="128" Margin="2" Grid.Row="3" Grid.ColumnSpan="2" Content="Cancel" Click="Button_Cancel_Click"/>
+    </Grid>
+</Window>

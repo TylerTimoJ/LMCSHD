@@ -213,18 +213,21 @@ namespace LMCSHD
             {
                 if (value != _gifPlayPause)
                 {
-                    if (value == true)
+                    if (ImageProcesser.ImageLoadState == ImageProcesser.LoadState.Gif)
                     {
-                        GifPlayPauseImage = MatrixFrame.CreateBitmapSourceFromBitmap(Properties.Resources.icons8_stop_32);
-                        StartGif();
+                        if (value == true)
+                        {
+                            GifPlayPauseImage = MatrixFrame.CreateBitmapSourceFromBitmap(Properties.Resources.icons8_stop_32);
+                            StartGif();
+                        }
+                        else
+                        {
+                            GifPlayPauseImage = MatrixFrame.CreateBitmapSourceFromBitmap(Properties.Resources.icons8_play_32);
+                            StopGif();
+                        }
+                        _gifPlayPause = value;
+                        OnPropertyChanged();
                     }
-                    else
-                    {
-                        GifPlayPauseImage = MatrixFrame.CreateBitmapSourceFromBitmap(Properties.Resources.icons8_play_32);
-                        StopGif();
-                    }
-                    _gifPlayPause = value;
-                    OnPropertyChanged();
                 }
             }
         }
@@ -298,7 +301,7 @@ namespace LMCSHD
 
             ContentBitmap = MatrixFrame.CreateBitmapSourceFromBitmap(ImageProcesser.WorkingGifBitmapFrames[_gifFrameIndex]);
             MatrixFrame.BitmapToFrame(ImageProcesser.WorkingGifBitmapFrames[_gifFrameIndex], ImageProcesser.InterpMode);
-            UpdatePreview();
+            FrameToPreview();
             SerialManager.PushFrame();
         }
 
@@ -311,7 +314,7 @@ namespace LMCSHD
                 ImageProcesser.WorkingStillBitmap = ImageProcesser.CropBitmap(ImageProcesser.LoadedStillBitmap, ImageProcesser.ImageRect);
                 ContentBitmap = MatrixFrame.CreateBitmapSourceFromBitmap(ImageProcesser.WorkingStillBitmap);
                 MatrixFrame.BitmapToFrame(ImageProcesser.WorkingStillBitmap, ImageProcesser.InterpMode);
-                UpdatePreview();
+                FrameToPreview();
                 SerialManager.PushFrame();
             }
         }
@@ -332,7 +335,7 @@ namespace LMCSHD
                     ImageProcesser.WorkingGifBitmapFrames[_gifFrameIndex] = ImageProcesser.CropBitmap(ImageProcesser.LoadedGifBitmapFrames[_gifFrameIndex], ImageProcesser.ImageRect);
                     ContentBitmap = MatrixFrame.CreateBitmapSourceFromBitmap(ImageProcesser.WorkingGifBitmapFrames[_gifFrameIndex]);
                     MatrixFrame.BitmapToFrame(ImageProcesser.WorkingGifBitmapFrames[_gifFrameIndex], ImageProcesser.InterpMode);
-                    UpdatePreview();
+                    FrameToPreview();
                     SerialManager.PushFrame();
                 }
             }
@@ -356,7 +359,7 @@ namespace LMCSHD
                     IMYMax = IMY2 = ImageProcesser.WorkingStillBitmap.Height;
                     IMX1 = 0;
                     IMY1 = 0;
-                    UpdatePreview();
+                    FrameToPreview();
                     SerialManager.PushFrame();
                     ImageProcesser.ImageLoadState = ImageProcesser.LoadState.Still;
                     ResetSliders();
@@ -384,7 +387,7 @@ namespace LMCSHD
                     IMYMax = IMY2 = ImageProcesser.WorkingGifBitmapFrames[0].Height;
                     IMX1 = 0;
                     IMY1 = 0;
-                    UpdatePreview();
+                    FrameToPreview();
                     SerialManager.PushFrame();
                     ImageProcesser.ImageLoadState = ImageProcesser.LoadState.Gif;
                     ResetSliders();

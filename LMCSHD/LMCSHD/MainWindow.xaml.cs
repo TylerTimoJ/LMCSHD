@@ -19,11 +19,12 @@ namespace LMCSHD
         {
             DataContext = this;
             InitializeComponent();
-            SetMatrixDimensions(MatrixFrame.Width, MatrixFrame.Height);
+            MatrixFrame.DimensionsChanged += OnMatrixDimensionsChanged;
+            MatrixFrame.SetDimensions(MatrixFrame.Width, MatrixFrame.Height);
             InitializeScreenCaptureUI();
             InitializeAudioCaptureUI();
             MatrixFrame.BitmapToFrame(Properties.Resources.Icon16, System.Drawing.Drawing2D.InterpolationMode.NearestNeighbor);
-            UpdatePreview();
+            FrameToPreview();
         }
         private void Window_Closing(object sender, System.ComponentModel.CancelEventArgs e)
         {
@@ -31,6 +32,15 @@ namespace LMCSHD
             SerialManager.Disconnect();
             while (SerialManager.IsConnected()) ;
         }
+
+        private void OnMatrixDimensionsChanged()
+        {
+            MatrixBitmap = new WriteableBitmap(MatrixFrame.Width, MatrixFrame.Height, 96, 96, PixelFormats.Bgr32, null);
+            MatrixImage.Source = MatrixBitmap;
+
+            RefreshScreenCaptureUI();
+        }
+
         #endregion
         #region properties and databinding
         public event PropertyChangedEventHandler PropertyChanged;
@@ -151,16 +161,9 @@ namespace LMCSHD
 
         //Matrix Frame Functions
         //===========================================================================================
-        public void SetMatrixDimensions(int width, int height)
-        {
-            MatrixFrame.SetDimensions(width, height);
-            MatrixBitmap = new WriteableBitmap(MatrixFrame.Width, MatrixFrame.Height, 96, 96, PixelFormats.Bgr32, null);
-            MatrixImage.Source = MatrixBitmap;
 
-            RefreshScreenCaptureUI();
-        }
 
-        private void UpdatePreview()
+        private void FrameToPreview()
         {
             MatrixBitmap.Lock();
             IntPtr pixelAddress = MatrixBitmap.BackBuffer;
@@ -212,11 +215,19 @@ namespace LMCSHD
                 y = y > MatrixFrame.Height - 1 ? MatrixFrame.Height - 1 : y < 0 ? 0 : y;
 
                 MatrixFrame.SetPixel(x, y, new Pixel(255, 32, 255));
-                UpdatePreview();
+                FrameToPreview();
                 SerialManager.PushFrame();
             }
         }
 
-    
+        private void MenuItem_Edit_MatrixDimensions_Click(object sender, RoutedEventArgs e)
+        {
+            MatrixDimensions md = new MatrixDimensions
+            {
+                Owner = this,
+                WindowStartupLocation = System.Windows.WindowStartupLocation.CenterOwner
+            };
+            md.ShowDialog();
+        }
     }
 }

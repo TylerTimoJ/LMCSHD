@@ -304,7 +304,7 @@ namespace LMCSHD
 
             MatrixFrame.InjestGDIBitmap(capturedBitmap, ScreenRecorder.InterpMode);
 
-            Dispatcher.Invoke(() => { UpdatePreview(); });
+            Dispatcher.Invoke(() => { FrameToPreview(); });
 
             if (SerialManager.PushFrame())
             {
@@ -349,7 +349,7 @@ namespace LMCSHD
             _fpsStopWatch = Stopwatch.StartNew();
             SerialManager.SerialAcknowledged += OnSerialAcknowledged;
             MatrixFrame.InjestGDIBitmap(ScreenRecorder.ScreenToBitmap(), ScreenRecorder.InterpMode);
-            Dispatcher.Invoke(() => { UpdatePreview(); });
+            Dispatcher.Invoke(() => { FrameToPreview(); });
             SerialManager.PushFrame();
         }
         void StartAsyncCapture()
@@ -364,7 +364,7 @@ namespace LMCSHD
             if (SyncSerial == true)
             {
                 MatrixFrame.InjestGDIBitmap(ScreenRecorder.ScreenToBitmap(), ScreenRecorder.InterpMode);
-                Dispatcher.Invoke(() => { UpdatePreview(); });
+                Dispatcher.Invoke(() => { FrameToPreview(); });
                 SerialManager.PushFrame();
                 LocalFPS = SerialFPS = _fpsStopWatch.ElapsedMilliseconds - _localPreviousMillis;
                 _localPreviousMillis = _fpsStopWatch.ElapsedMilliseconds;

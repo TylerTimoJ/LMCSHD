@@ -67,7 +67,8 @@
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Release|x64'">
     <OutputPath>bin\x64\Release\</OutputPath>
-    <DefineConstants>TRACE</DefineConstants>
+    <DefineConstants>
+    </DefineConstants>
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
     <Optimize>true</Optimize>
     <DebugType>pdbonly</DebugType>
@@ -164,6 +165,9 @@
     <Compile Include="ExportWindow.xaml.cs">
       <DependentUpon>ExportWindow.xaml</DependentUpon>
     </Compile>
+    <Compile Include="MatrixDimensions.xaml.cs">
+      <DependentUpon>MatrixDimensions.xaml</DependentUpon>
+    </Compile>
     <Page Include="MainWindow.xaml">
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
@@ -181,6 +185,10 @@
       <Generator>MSBuild:Compile</Generator>
     </Page>
     <Page Include="ExportWindow.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="MatrixDimensions.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
@@ -287,5 +295,24 @@
     <Resource Include="Images\Menu\icons8-play-32.png" />
     <Resource Include="Images\Menu\icons8-stop-32.png" />
   </ItemGroup>
+  <ItemGroup>
+    <Resource Include="Images\Menu\icons8-enlarge-32.png" />
+  </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
+  <PropertyGroup>
+    <PostBuildEvent>RMDIR "$(TargetDir)de/" /S /Q
+RMDIR "$(TargetDir)es/" /S /Q 
+RMDIR "$(TargetDir)fr/" /S /Q
+RMDIR "$(TargetDir)it/" /S /Q
+RMDIR "$(TargetDir)ja/" /S /Q
+RMDIR "$(TargetDir)ko/" /S /Q
+RMDIR "$(TargetDir)ru/" /S /Q
+RMDIR "$(TargetDir)zh-Hans/" /S /Q
+RMDIR "$(TargetDir)zh-Hant/" /S /Q
+RMDIR "$(TargetDir)cs-CZ/" /S /Q
+RMDIR "$(TargetDir)hu/" /S /Q
+RMDIR "$(TargetDir)pt-BR/" /S /Q
+RMDIR "$(TargetDir)ro/" /S /Q
+RMDIR "$(TargetDir)sv/" /S /Q</PostBuildEvent>
+  </PropertyGroup>
 </Project>

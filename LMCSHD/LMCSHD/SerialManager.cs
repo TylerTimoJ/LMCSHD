@@ -178,10 +178,16 @@ namespace LMCSHD
                 width = Regex.Replace(width, "[^0-9]", "");
                 height = Regex.Replace(height, "[^0-9]", "");
             }
-            catch (Exception e)
+            catch (Exception)
             {
-                MessageBox.Show("Application cannot parse matrix width/height definition\n" + width + height + "\n" + e.Message);
-                return null;
+                //MessageBox.Show("Application cannot parse matrix width/height definition");
+                //This is kinda a hacky way of adding this feature...
+                MatrixDimensions md = new MatrixDimensions();
+                md.ShowDialog();
+                data[0] = MatrixFrame.Width;
+                data[1] = MatrixFrame.Height;
+                return data;
+                //return null;
             }
             try
             {

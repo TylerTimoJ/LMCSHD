@@ -56,7 +56,8 @@ namespace LMCSHD
 
             if (matrixDef != null)
             {
-                ((MainWindow)Application.Current.MainWindow).SetMatrixDimensions(matrixDef[0], matrixDef[1]);
+                MatrixFrame.SetDimensions(matrixDef[0], matrixDef[1]);
+               // ((MainWindow)Application.Current.MainWindow).SetMatrixDimensions(matrixDef[0], matrixDef[1]);
                 Close();
             }
             else

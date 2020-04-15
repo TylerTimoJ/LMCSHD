@@ -21,12 +21,20 @@ namespace LMCSHD
         public static NewLine newLine { get; set; } = NewLine.SC;
         #endregion
 
+        public delegate void DimensionsChangedEventHandler();
+        public static event DimensionsChangedEventHandler DimensionsChanged;
+
+        public static void OnDimensionsChanged()
+        {
+            DimensionsChanged?.Invoke();
+        }
         public static void SetDimensions(int w, int h)
         {
             Width = w;
             Height = h;
             Frame = null;
             Frame = new Pixel[Width * Height];
+            OnDimensionsChanged();
         }
 
         public static byte[] GetOrderedSerialFrame()
