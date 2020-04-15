@@ -28,9 +28,9 @@
                 <TextBox x:Name="SBaudRate" Grid.Row="1" Grid.Column="1" Margin="2" Text="2000000" PreviewTextInput="SBaudRate_PreviewTextInput" DataObject.Pasting="SBaudRate_TextBoxPasting"/>
                 <TextBlock Grid.Row="2" Margin="2" HorizontalAlignment="Right" VerticalAlignment="Center" Text="Color Mode"/>
                 <ComboBox x:Name="SSColorModeList" Grid.Row="2" Margin="2" Grid.Column="1" SelectedIndex="0">
-                    <ComboBoxItem Content="24bpp RGB"/>
-                    <ComboBoxItem Content="16bpp RGB"/>
-                    <ComboBoxItem Content="8bpp RGB"/>
+                    <ComboBoxItem Content="24bpp"/>
+                    <ComboBoxItem Content="16bpp"/>
+                    <ComboBoxItem Content="8bpp"/>
                 </ComboBox>
                 <Button x:Name="SSerialConnect" Grid.Row="3" Grid.ColumnSpan="2" Height="20" Content="Connect" Margin="2" Click="SSerialConnect_Click"/>
                 <Button x:Name="SSerialRefreshPorts" Grid.Row="4" Grid.ColumnSpan="2" Height="20" Content="Refresh" Margin="2" Click="SSerialRefreshPorts_Click"/>

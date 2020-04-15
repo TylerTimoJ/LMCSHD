@@ -181,7 +181,7 @@
                     <RowDefinition Height="22"/>
                     <RowDefinition Height="*"/>
                 </Grid.RowDefinitions>
-                <TextBlock Text="{Binding Path=MatrixInfo, Mode=TwoWay}" Margin="2" HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                <TextBlock Text="{Binding Path=MatrixTitleString, Mode=OneWay}" Margin="2" HorizontalAlignment="Center" VerticalAlignment="Center"/>
                 <Border Grid.Row="2" BorderBrush="#FFA0A0A0" BorderThickness="1">
                     <Image x:Name="MatrixImage" RenderOptions.BitmapScalingMode="NearestNeighbor" Cursor="Cross" MouseDown="MatrixImage_MouseDown" MouseMove="MatrixImage_MouseMove"/>
                 </Border>

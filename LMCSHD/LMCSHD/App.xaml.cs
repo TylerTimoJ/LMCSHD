@@ -21,5 +21,24 @@ namespace LMCSHD
         public enum StartCorner { TL, TR, BL, BR }
         public enum NewLine { SC, SN }
     }
+
+    public struct MatrixTitle
+    {
+        public int MatrixTitleDimensionX;
+        public int MatrixTitleDimensionY;
+        public string MatrixTitleColormode;
+
+        public MatrixTitle(int x, int y, string cm)
+        {
+            MatrixTitleDimensionX = x;
+            MatrixTitleDimensionY = y;
+            MatrixTitleColormode = cm;
+        }
+
+        public string GetTitle()
+        {
+            return MatrixTitleDimensionX.ToString() + " x " + MatrixTitleDimensionY.ToString() + " | " + MatrixTitleColormode;
+        }
+    }
     #endregion
 }

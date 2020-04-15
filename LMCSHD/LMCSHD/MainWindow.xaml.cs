@@ -13,6 +13,7 @@ namespace LMCSHD
     {
         //Frame & Preview
         private static WriteableBitmap MatrixBitmap { get; set; }
+        
 
         #region Window
         public MainWindow()
@@ -20,6 +21,7 @@ namespace LMCSHD
             DataContext = this;
             InitializeComponent();
             MatrixFrame.DimensionsChanged += OnMatrixDimensionsChanged;
+            SerialManager.ColorModeChanged += OnColorModeChanged;
             MatrixFrame.SetDimensions(MatrixFrame.Width, MatrixFrame.Height);
             InitializeScreenCaptureUI();
             InitializeAudioCaptureUI();
@@ -38,7 +40,21 @@ namespace LMCSHD
             MatrixBitmap = new WriteableBitmap(MatrixFrame.Width, MatrixFrame.Height, 96, 96, PixelFormats.Bgr32, null);
             MatrixImage.Source = MatrixBitmap;
 
+            _matrixTitle.MatrixTitleDimensionX = MatrixFrame.Width;
+            _matrixTitle.MatrixTitleDimensionY = MatrixFrame.Height;
+            OnPropertyChanged("MatrixTitleString");
+
             RefreshScreenCaptureUI();
+        }
+        private void OnColorModeChanged()
+        {
+            if (SerialManager.ColorMode == SerialManager.CMode.BPP8)
+                _matrixTitle.MatrixTitleColormode = "8bpp";
+            else if (SerialManager.ColorMode == SerialManager.CMode.BPP16)
+                _matrixTitle.MatrixTitleColormode = "16bpp";
+            else if (SerialManager.ColorMode == SerialManager.CMode.BPP24)
+                _matrixTitle.MatrixTitleColormode = "24bpp";
+            OnPropertyChanged("MatrixTitleString");
         }
 
         #endregion
@@ -49,18 +65,10 @@ namespace LMCSHD
             PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
         }
 
-        private string _matrixInfo = "16 x 16 24BPP RGB (placeholder text)";
-        public string MatrixInfo
+        private MatrixTitle _matrixTitle = new MatrixTitle(MatrixFrame.Width, MatrixFrame.Height, "24bpp");
+        public string MatrixTitleString
         {
-            get { return _matrixInfo; }
-            set
-            {
-                if (value != _matrixInfo)
-                {
-                    _matrixInfo = value;
-                    OnPropertyChanged();
-                }
-            }
+            get { return _matrixTitle.GetTitle(); }
         }
 
         private int _tabControlIndex = 0;
@@ -77,9 +85,9 @@ namespace LMCSHD
                 }
             }
         }
-        
 
-        
+
+
 
         #endregion
         #region Menu_File
@@ -194,12 +202,12 @@ namespace LMCSHD
 
         private void MatrixImage_MouseDown(object sender, MouseButtonEventArgs e)
         {
-        //    DrawPixel();
+            //    DrawPixel();
         }
 
         private void MatrixImage_MouseMove(object sender, System.Windows.Input.MouseEventArgs e)
         {
-        //    DrawPixel();
+            //    DrawPixel();
         }
 
         void DrawPixel()

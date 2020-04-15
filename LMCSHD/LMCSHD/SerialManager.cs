@@ -8,12 +8,27 @@ namespace LMCSHD
     public static class SerialManager
     {
         public enum CMode { BPP24, BPP16, BPP8 };
-        public static CMode ColorMode = CMode.BPP24;
+        public static CMode _colorMode = CMode.BPP24;
         private static SerialPort _sp = new SerialPort();
         private static bool _serialReady = false;
 
         public delegate void SerialAcknowledgedEventHandler();
         public static event SerialAcknowledgedEventHandler SerialAcknowledged;
+        public delegate void ColorModeChangedEventHandler();
+        public static event ColorModeChangedEventHandler ColorModeChanged;
+        public static CMode ColorMode
+        {
+            get { return _colorMode; }
+            set
+            {
+                if (value != _colorMode)
+                {
+                    _colorMode = value;
+                    ColorModeChanged?.Invoke();
+                }
+            }
+        }
+
         public static void OnSerialAcknowledged()
         {
             SerialAcknowledged?.Invoke();
