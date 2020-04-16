@@ -42,13 +42,7 @@
 
     </Window.Resources>
 
-
-
-
     <Grid>
-
-
-
         <Grid Margin="2">
             <Grid.ColumnDefinitions>
                 <ColumnDefinition Width="auto"/>
@@ -59,7 +53,6 @@
                 <RowDefinition Height="20"/>
                 <RowDefinition Height="*"/>
             </Grid.RowDefinitions>
-
 
             <Menu Grid.ColumnSpan="3">
                 <MenuItem Header="_File">

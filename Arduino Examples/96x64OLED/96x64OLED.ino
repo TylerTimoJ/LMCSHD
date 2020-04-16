@@ -25,8 +25,8 @@ void serialEvent()
   switch (Serial.read())
   {
     case 0x05: //request for matrix definition
-      Serial.println(96);
-      Serial.println(64);
+   //   Serial.println(96);
+   //   Serial.println(64);
       break;
 
     case 0x12: //frame data
