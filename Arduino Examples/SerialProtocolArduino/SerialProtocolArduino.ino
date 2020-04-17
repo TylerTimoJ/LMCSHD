@@ -6,7 +6,7 @@
 
 char frameData[3];
 void setup() {
-  Serial.begin(1);
+  Serial.begin(115200);
 }
 
 void loop() {}

@@ -14,7 +14,7 @@ void setup()
   SPI.beginTransaction(settingsB);
   my_lcd.Init_LCD();
   my_lcd.Fill_Screen(0);
-  Serial.begin(1);
+  Serial.begin(115200);
   SPI.endTransaction();
   SPI.beginTransaction(settingsB);
 }

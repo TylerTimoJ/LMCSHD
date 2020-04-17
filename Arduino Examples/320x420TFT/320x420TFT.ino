@@ -24,7 +24,7 @@ void setup() {
   tft.useFrameBuffer(true);
   tft.begin(72000000);
   tft.setRotation(1);
-  Serial.begin(1);
+  Serial.begin(115200);
 }
 
 void loop(void) {}

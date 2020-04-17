@@ -17,7 +17,7 @@ void setup() {
   matrix.setBrightness(254);
   matrix.begin();
 
-  Serial.begin(1);
+  Serial.begin(115200);
 }
 
 unsigned char pix[3] = { 0 };
