@@ -1,4 +1,5 @@
-﻿using System.Drawing;
+﻿using System;
+using System.Drawing;
 using System.Drawing.Drawing2D;
 using System.Drawing.Imaging;
 using System.Windows.Media;
@@ -21,13 +22,16 @@ namespace LMCSHD
         public static NewLine newLine { get; set; } = NewLine.SC;
         #endregion
 
+
+        public delegate void FrameChangedEventHandler();
+        public static event FrameChangedEventHandler FrameChanged;
+        public static void OnFrameChanged() { FrameChanged?.Invoke(); }
+
         public delegate void DimensionsChangedEventHandler();
         public static event DimensionsChangedEventHandler DimensionsChanged;
+        public static void OnDimensionsChanged() { DimensionsChanged?.Invoke(); }
 
-        public static void OnDimensionsChanged()
-        {
-            DimensionsChanged?.Invoke();
-        }
+
         public static void SetDimensions(int w, int h)
         {
             Width = w;
@@ -87,16 +91,81 @@ namespace LMCSHD
 
         public static void SetPixel(int x, int y, Pixel color)
         {
+            x = x > Width - 1 ? Width - 1 : x < 0 ? 0 : x;
+            y = y > Height - 1 ? Height - 1 : y < 0 ? 0 : y;
+
             Frame[y * Width + x] = color;
         }
-
-        public static unsafe int[] FrameToInt32()
+        public static Pixel GetPixel(int x, int y)
         {
-            int[] data = new int[Width * Height];
-            for (int i = 0; i < Width * Height; i++)
-                data[i] = Frame[i].R << 16 | Frame[i].G << 8 | Frame[i].B;
+            x = x > Width - 1 ? Width - 1 : x < 0 ? 0 : x;
+            y = y > Height - 1 ? Height - 1 : y < 0 ? 0 : y;
+
+            return Frame[y * Width + x];
+        }
+
+        public static int GetPixelIntensity(Pixel p)
+        {
+            return p.R + p.G + p.B;
+        }
+
+        public static Int32[] FrameToInt32()
+        {
+            Int32[] data = new Int32[Width * Height];
+            if (SerialManager.ColorMode == SerialManager.CMode.BPP24RGB)
+            {
+                for (int i = 0; i < Width * Height; i++)
+                    data[i] = Frame[i].GetBPP24RGB_Int32();
+            }
+            else if (SerialManager.ColorMode == SerialManager.CMode.BPP16RGB)
+            {
+                for (int i = 0; i < Width * Height; i++)
+                    data[i] = Frame[i].GetBPP16RGB_Int32();
+            }
+            else if (SerialManager.ColorMode == SerialManager.CMode.BPP8RGB)
+            {
+                for (int i = 0; i < Width * Height; i++)
+                    data[i] = Frame[i].GetBPP8RGB_Int32();
+            }
+            else if (SerialManager.ColorMode == SerialManager.CMode.BPP8Gray)
+            {
+                for (int i = 0; i < Width * Height; i++)
+                    data[i] = Frame[i].GetBPP8Grayscale_Int32();
+            }
+            else if (SerialManager.ColorMode == SerialManager.CMode.BPP1Mono)
+            {
+
+                for (int i = 0; i < Width * Height; i++)
+                    data[i] = Frame[i].GetBPP1Monochrome_Int32();
+
+
+
+                /* This feature allows for locally adaptive thresholding for binarizing the frame
+            int index = 0;
+            for (int y = 0; y < Height; y++)
+            {
+                for (int x = 0; x < Width; x++)
+                {
+                    int total = 0;
+                    for (int i = -1; i < 2; i++)
+                    {
+                        for (int e = -1; e < 2; e++)
+                        {
+                            total += GetPixelIntensity(GetPixel(x + i, y + e));
+                        }
+                    }
+                    total /= 9;
+                    data[index] = (GetPixelIntensity(GetPixel(x, y)) > (total * (Threshold / 100f)) ? (255 << 16 | 255 << 8 | 255) : 0x0);
+                    index++;
+                }
+            }
+            */
+            }
+
             return data;
         }
+
+        public static int Threshold { get; set; }
 
         public static void InjestGDIBitmap(Bitmap b, InterpolationMode mode)
         {
@@ -109,6 +178,7 @@ namespace LMCSHD
             float[] downSampledData = ResizeSampleArray(fftData, Width);
             for (int i = 0; i < Width; i++)
                 DrawColumnMirrored(i, (int)(downSampledData[i] * Height));
+            OnFrameChanged();
         }
         public static float[] ResizeSampleArray(float[] rawData, int newSize)
         {
@@ -212,7 +282,7 @@ namespace LMCSHD
                 scan0 += numBytes;
             }
             bitmap.UnlockBits(imageData);
-            
+            OnFrameChanged();
         }
         public static Bitmap DownsampleBitmap(Bitmap b, int width, int height, InterpolationMode mode)
         {

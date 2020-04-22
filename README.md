@@ -12,7 +12,9 @@ This version of the LMCS can support very high resolution matrices, hence LMCS-_
 * Image exporting to a variety of formats
 
 ## Setup
-Grab the latest release for a stable build [here](https://github.com/TylerTimoJ/LMCSHD/releases), or clone the repo and navigate to LMCSHD/bin for the latest built executable.
+Grab the latest release for a stable build [here](https://github.com/TylerTimoJ/LMCSHD/releases)
+
+see [this](https://docs.google.com/spreadsheets/d/1Yj7z65aB2vSuuKZ2YIDSMPz1oNud_M95WxM7BJwhVwQ/edit?usp=sharing) Google Sheet detailing the serial protocol
 
 Requires .NET Framework 4.7.2
 

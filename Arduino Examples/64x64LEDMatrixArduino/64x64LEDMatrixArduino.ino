@@ -35,7 +35,7 @@ void serialEvent()
       Serial.println(kMatrixHeight);
       break;
 
-    case 0x11: //24bpp frame data
+    case 0x41: //24bpp frame data
       while (backgroundLayer.isSwapPending());
       buffer = backgroundLayer.backBuffer();
       for (int i = 0; i < kMatrixWidth * kMatrixHeight; i++) {
@@ -46,7 +46,7 @@ void serialEvent()
       backgroundLayer.swapBuffers(false);
       break;
 
-    case 0x12: //16bpp frame data
+    case 0x42: //16bpp frame data
       while (backgroundLayer.isSwapPending());
       buffer = backgroundLayer.backBuffer();
       for (int i = 0; i < kMatrixWidth * kMatrixHeight; i++) {
@@ -57,7 +57,7 @@ void serialEvent()
       backgroundLayer.swapBuffers(false);
       break;
 
-    case 0x13: //8bpp frame data
+    case 0x43: //8bpp frame data
       while (backgroundLayer.isSwapPending());
       buffer = backgroundLayer.backBuffer();
       for (int i = 0; i < kMatrixWidth * kMatrixHeight; i++) {
@@ -67,5 +67,45 @@ void serialEvent()
       Serial.write(0x06); //acknowledge
       backgroundLayer.swapBuffers(false);
       break;
+
+    case 0x44: //8bpp monochrome frame data
+      while (backgroundLayer.isSwapPending());
+      buffer = backgroundLayer.backBuffer();
+      for (int i = 0; i < kMatrixWidth * kMatrixHeight; i++) {
+        Serial.readBytes(pix, 1);
+        byte c = map(pix[0], 0, 255, BLK, 255);
+        *buffer++ = rgb24{c, c, c}; //,
+      }
+      Serial.write(0x06); //acknowledge
+      backgroundLayer.swapBuffers(false);
+      break;
+
+    case 0x45: //1bpp monochrome frame data
+      while (backgroundLayer.isSwapPending());
+      buffer = backgroundLayer.backBuffer();
+      for (int i = 0; i < ((kMatrixWidth * kMatrixHeight) / 8) + ((kMatrixWidth * kMatrixHeight) % 8); i++) {
+        Serial.readBytes(pix, 1);
+        byte b = ((pix[0] & B10000000) >> 7) * 255;
+        *buffer++ = rgb24{b, b, b};
+        b = ((pix[0] & B01000000) >> 6) * 255;
+        *buffer++ = rgb24{b, b, b};
+        b = ((pix[0] & B00100000) >> 5) * 255;
+        *buffer++ = rgb24{b, b, b};
+        b = ((pix[0] & B00010000) >> 4) * 255;
+        *buffer++ = rgb24{b, b, b};
+        b = ((pix[0] & B00001000) >> 3) * 255;
+        *buffer++ = rgb24{b, b, b};
+        b = ((pix[0] & B00000100) >> 2) * 255;
+        *buffer++ = rgb24{b, b, b};
+        b = ((pix[0] & B00000010) >> 1) * 255;
+        *buffer++ = rgb24{b, b, b};
+        b = (pix[0] & B00000001) * 255;
+        *buffer++ = rgb24{b, b, b};
+      }
+      Serial.write(0x06); //acknowledge
+      backgroundLayer.swapBuffers(false);
+      break;
+
+
   }
 }

@@ -29,7 +29,7 @@ void serialEvent()
    //   Serial.println(64);
       break;
 
-    case 0x12: //frame data
+    case 0x42: //frame data
       for (int y = 0; y < 64; y++) {
         for (int x = 0; x < 96; x++) {
           Serial.readBytes(frame, 2);
@@ -39,7 +39,7 @@ void serialEvent()
       Serial.write(0x06); //acknowledge
       break;
 
-    case 0x11:
+    case 0x41:
       for (int y = 0; y < 64; y++) {
         for (int x = 0; x < 96; x++) {
           Serial.readBytes(frame, 3);
@@ -51,7 +51,7 @@ void serialEvent()
 
       Serial.write(0x06); //acknowledge
       break;
-    case 0x13:
+    case 0x43:
       Serial.readBytes(frame, 96 * 64);
       Serial.write(0x06); //acknowledge
       break;

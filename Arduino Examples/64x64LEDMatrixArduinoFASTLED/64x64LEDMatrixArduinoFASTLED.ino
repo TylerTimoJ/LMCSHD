@@ -25,13 +25,13 @@ void serialEvent() {
       Serial.println(HEIGHT);
       break;
 
-    case 0x11: //frame data
+    case 0x41: //frame data
       Serial.readBytes((char*)leds, NUM_LEDS * 3);
       FastLED.show();
       Serial.write(0x06); //acknowledge
       break;
 
-    case 0x12:
+    case 0x42:
       byte sDat[2] = {0};
       for (int i = 0; i < NUM_LEDS; i++) {
         Serial.readBytes(sDat, 2);
@@ -43,7 +43,7 @@ void serialEvent() {
       Serial.write(0x06); //acknowledge
       break;
 
-    case 0x13:
+    case 0x43:
       Serial.readBytes((char*)leds, NUM_LEDS * 3);
       FastLED.show();
       Serial.write(0x06); //acknowledge

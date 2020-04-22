@@ -46,9 +46,11 @@ namespace LMCSHD
         {
             switch (SSColorModeList.SelectedIndex)
             {
-                case 0: SerialManager.ColorMode = SerialManager.CMode.BPP24; break;
-                case 1: SerialManager.ColorMode = SerialManager.CMode.BPP16; break;
-                case 2: SerialManager.ColorMode = SerialManager.CMode.BPP8; break;
+                case 0: SerialManager.ColorMode = SerialManager.CMode.BPP24RGB; break;
+                case 1: SerialManager.ColorMode = SerialManager.CMode.BPP16RGB; break;
+                case 2: SerialManager.ColorMode = SerialManager.CMode.BPP8RGB; break;
+                case 3: SerialManager.ColorMode = SerialManager.CMode.BPP8Gray; break;
+                case 4: SerialManager.ColorMode = SerialManager.CMode.BPP1Mono; break;
             }
             int[] matrixDef = null;
 

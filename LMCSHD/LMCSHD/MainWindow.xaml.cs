@@ -21,18 +21,25 @@ namespace LMCSHD
             DataContext = this;
             InitializeComponent();
             MatrixFrame.DimensionsChanged += OnMatrixDimensionsChanged;
+
+            MatrixFrame.FrameChanged += OnFrameChanged;
             SerialManager.ColorModeChanged += OnColorModeChanged;
             MatrixFrame.SetDimensions(MatrixFrame.Width, MatrixFrame.Height);
             InitializeScreenCaptureUI();
             InitializeAudioCaptureUI();
             MatrixFrame.BitmapToFrame(Properties.Resources.Icon16, System.Drawing.Drawing2D.InterpolationMode.NearestNeighbor);
-            FrameToPreview();
+            //FrameToPreview();
         }
         private void Window_Closing(object sender, System.ComponentModel.CancelEventArgs e)
         {
             EndAllThreads();
             SerialManager.Disconnect();
             while (SerialManager.IsConnected()) ;
+        }
+
+        private void OnFrameChanged()
+        {
+            Dispatcher.Invoke(() => { FrameToPreview(); });
         }
 
         private void OnMatrixDimensionsChanged()
@@ -48,12 +55,17 @@ namespace LMCSHD
         }
         private void OnColorModeChanged()
         {
-            if (SerialManager.ColorMode == SerialManager.CMode.BPP8)
-                _matrixTitle.MatrixTitleColormode = "8bpp";
-            else if (SerialManager.ColorMode == SerialManager.CMode.BPP16)
-                _matrixTitle.MatrixTitleColormode = "16bpp";
-            else if (SerialManager.ColorMode == SerialManager.CMode.BPP24)
-                _matrixTitle.MatrixTitleColormode = "24bpp";
+            if (SerialManager.ColorMode == SerialManager.CMode.BPP8RGB)
+                _matrixTitle.MatrixTitleColormode = "8bpp RGB";
+            else if (SerialManager.ColorMode == SerialManager.CMode.BPP16RGB)
+                _matrixTitle.MatrixTitleColormode = "16bpp RGB";
+            else if (SerialManager.ColorMode == SerialManager.CMode.BPP24RGB)
+                _matrixTitle.MatrixTitleColormode = "24bpp RGB";
+            else if (SerialManager.ColorMode == SerialManager.CMode.BPP8Gray)
+                _matrixTitle.MatrixTitleColormode = "8bpp Grayscale";
+            else if (SerialManager.ColorMode == SerialManager.CMode.BPP1Mono)
+                _matrixTitle.MatrixTitleColormode = "1bpp Monochrome";
+
             OnPropertyChanged("MatrixTitleString");
         }
 
@@ -86,7 +98,18 @@ namespace LMCSHD
             }
         }
 
-
+        public int Threshold
+        {
+            get { return MatrixFrame.Threshold; }
+            set
+            {
+                if(value != MatrixFrame.Threshold)
+                {
+                    MatrixFrame.Threshold = value;
+                    OnPropertyChanged();
+                }
+            }
+        }
 
 
         #endregion
@@ -116,18 +139,29 @@ namespace LMCSHD
         {
             SerialManager.Disconnect();
         }
-        private void MenuItem_Serial_ColorMode_BPP24_Click(object sender, RoutedEventArgs e)
+        private void MenuItem_Serial_ColorMode_BPP24RGB_Click(object sender, RoutedEventArgs e)
         {
-            SerialManager.ColorMode = SerialManager.CMode.BPP24;
+            SerialManager.ColorMode = SerialManager.CMode.BPP24RGB;
         }
-        private void MenuItem_Serial_ColorMode_BPP16_Click(object sender, RoutedEventArgs e)
+        private void MenuItem_Serial_ColorMode_BPP16RGB_Click(object sender, RoutedEventArgs e)
         {
-            SerialManager.ColorMode = SerialManager.CMode.BPP16;
+            SerialManager.ColorMode = SerialManager.CMode.BPP16RGB;
         }
-        private void MenuItem_Serial_ColorMode_BPP8_Click(object sender, RoutedEventArgs e)
+        private void MenuItem_Serial_ColorMode_BPP8RGB_Click(object sender, RoutedEventArgs e)
         {
-            SerialManager.ColorMode = SerialManager.CMode.BPP8;
+            SerialManager.ColorMode = SerialManager.CMode.BPP8RGB;
         }
+        private void MenuItem_Serial_ColorMode_BPP8Gray_Click(object sender, RoutedEventArgs e)
+        {
+            SerialManager.ColorMode = SerialManager.CMode.BPP8Gray;
+        }
+        private void MenuItem_Serial_ColorMode_BPP1Mono_Click(object sender, RoutedEventArgs e)
+        {
+            SerialManager.ColorMode = SerialManager.CMode.BPP1Mono;
+        }
+
+
+
         #endregion
         #region Menu_Edit
         private void PixelOrder_Orientation_Horizontal_Click(object sender, RoutedEventArgs e)

@@ -17,9 +17,6 @@ unsigned volatile char sBuf[width * height * 3] = {0};
 uint8_t *sP;
 uint16_t *cP;
 
-long start = 0;
-long end = 0;
-
 void setup() {
   tft.useFrameBuffer(true);
   tft.begin(72000000);
@@ -38,11 +35,12 @@ void serialEvent()
       Serial.println(height);
       break;
 
-    case 'A':
-      Serial.println(end - start);
+    case 0x41:
+      Serial.readBytes(sBuf, BPP24_LEN);
+      Serial.write(0x06);
       break;
 
-    case 0x12: //frame data
+    case 0x42: //frame data
       Serial.readBytes(sBuf, BPP16_LEN);
       tft.waitUpdateAsyncComplete();
 
@@ -56,11 +54,7 @@ void serialEvent()
       Serial.write(0x06); //acknowledge
       break;
 
-    case 0x11:
-      Serial.readBytes(sBuf, BPP24_LEN);
-      Serial.write(0x06);
-      break;
-    case 0x13:
+    case 0x43:
       Serial.readBytes(sBuf, UINT16_LEN);
       tft.waitUpdateAsyncComplete();
 
@@ -70,5 +64,39 @@ void serialEvent()
       tft.updateScreenAsync();
       Serial.write(0x06);
       break;
+
+    case 0x44:
+      Serial.readBytes(sBuf, UINT16_LEN);
+      tft.waitUpdateAsyncComplete();
+      cP = tft.getFrameBuffer();
+      for (int i = 0; i < UINT16_LEN; i++)
+        *cP++ = ((sBuf[i] & B11111000) << 8) | ((sBuf[i] & B11111100) << 3) | ((sBuf[i] & B11111000) >> 3);
+      tft.updateScreenAsync();
+      Serial.write(0x06);
+      break;
+
+    case 0x45:
+      Serial.readBytes(sBuf, ((width * height) / 8) + ((width * height) % 8));
+      tft.waitUpdateAsyncComplete();
+      cP = tft.getFrameBuffer();
+      for (int i = 0; i < ((width * height) / 8) + ((width * height) % 8); i++) {
+
+        *cP++ = sBuf[i] & B10000000 ? 0xFFFF : 0x0000;
+        *cP++ = sBuf[i] & B01000000 ? 0xFFFF : 0x0000;
+        *cP++ = sBuf[i] & B00100000 ? 0xFFFF : 0x0000;
+        *cP++ = sBuf[i] & B00010000 ? 0xFFFF : 0x0000;
+
+        *cP++ = sBuf[i] & B00001000 ? 0xFFFF : 0x0000;
+        *cP++ = sBuf[i] & B00000100 ? 0xFFFF : 0x0000;
+        *cP++ = sBuf[i] & B00000010 ? 0xFFFF : 0x0000;
+        *cP++ = sBuf[i] & B00000001 ? 0xFFFF : 0x0000;
+        // CL(23, 23, 23);
+
+        // *cP++ = ((sBuf[i] & B11111000) << 8) | ((sBuf[i] & B11111100) << 3) | ((sBuf[i] & B11111000) >> 3);
+      }
+      tft.updateScreenAsync();
+      Serial.write(0x06);
+      break;
+
   }
 }

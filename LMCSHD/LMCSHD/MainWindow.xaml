@@ -43,7 +43,7 @@
     </Window.Resources>
 
     <Grid>
-        <Grid Margin="2">
+        <Grid >
             <Grid.ColumnDefinitions>
                 <ColumnDefinition Width="auto"/>
                 <ColumnDefinition Width="auto" />
@@ -63,7 +63,6 @@
                     <Separator/>
                     <MenuItem Header="_Exit" Click="MenuItem_File_Exit_Click"/>
                 </MenuItem>
-
                 <MenuItem Header="_Serial">
                     <MenuItem x:Name="MIConnect" Header="Connect" Click="MenuItem_Serial_Connect_Click" >
                         <MenuItem.Icon>
@@ -79,24 +78,25 @@
                         <MenuItem.Icon>
                             <Image Source="/Images/Menu/icons8-color-mode-32.png" />
                         </MenuItem.Icon>
-                        <MenuItem Header="24bpp" InputGestureText="True Color" Click="MenuItem_Serial_ColorMode_BPP24_Click">
+                        <MenuItem Header="24bpp RGB" InputGestureText="True Color" Click="MenuItem_Serial_ColorMode_BPP24RGB_Click">
                             <MenuItem.Icon>
                                 <Image Source="/Images/Menu/icons8-volume-level-32.png" />
                             </MenuItem.Icon>
                         </MenuItem>
-                        <MenuItem Header="16bpp" InputGestureText="High Color" Click="MenuItem_Serial_ColorMode_BPP16_Click">
+                        <MenuItem Header="16bpp RGB" InputGestureText="High Color" Click="MenuItem_Serial_ColorMode_BPP16RGB_Click">
                             <MenuItem.Icon>
                                 <Image Source="/Images/Menu/icons8-volume-level-med-32.png" />
                             </MenuItem.Icon>
                         </MenuItem>
-                        <MenuItem Header="8bpp" InputGestureText="256 Color" Click="MenuItem_Serial_ColorMode_BPP8_Click">
+                        <MenuItem Header="8bpp RGB" InputGestureText="256 Color" Click="MenuItem_Serial_ColorMode_BPP8RGB_Click">
                             <MenuItem.Icon>
                                 <Image Source="/Images/Menu/icons8-volume-level-low-32.png" />
                             </MenuItem.Icon>
                         </MenuItem>
+                        <MenuItem Header="8bpp" InputGestureText="Grayscale" Click="MenuItem_Serial_ColorMode_BPP8Gray_Click"/>
+                        <MenuItem Header="1bpp" InputGestureText="Monochrome" Click="MenuItem_Serial_ColorMode_BPP1Mono_Click"/>
                     </MenuItem>
                 </MenuItem>
-
                 <MenuItem Header="Edit">
                     <MenuItem Header="Matrix Dimensions" Click="MenuItem_Edit_MatrixDimensions_Click">
                         <MenuItem.Icon>
@@ -169,9 +169,9 @@
                 </MenuItem>
             </Menu>
             
-            <Grid Grid.Row="1" Grid.Column="2" Margin="4">
+            <Grid Grid.Row="1" Grid.Column="2" Margin="2">
                 <Grid.RowDefinitions>
-                    <RowDefinition Height="22"/>
+                    <RowDefinition Height="auto"/>
                     <RowDefinition Height="*"/>
                 </Grid.RowDefinitions>
                 <TextBlock Text="{Binding Path=MatrixTitleString, Mode=OneWay}" Margin="2" HorizontalAlignment="Center" VerticalAlignment="Center"/>
@@ -180,13 +180,12 @@
                 </Border>
             </Grid>
 
-            <StackPanel Orientation="Horizontal" HorizontalAlignment="Center" Margin="-2,24,-2,2" Grid.Column="1" Grid.Row="1">
+            <StackPanel Orientation="Horizontal" HorizontalAlignment="Center" Margin="0,24,0,2" Grid.Column="1" Grid.Row="1">
                 <Separator Style="{StaticResource {x:Static ToolBar.SeparatorStyleKey}}" />
             </StackPanel>
 
-            <TabControl Grid.Row="1" Width="300" Margin="4" SelectedIndex="{Binding Path=TabControlIndex, Mode=TwoWay}">
+            <TabControl Grid.Row="1" Width="300" Margin="2" SelectedIndex="{Binding Path=TabControlIndex, Mode=TwoWay}">
                 <TabItem Header="Screen Recorder">
-                    <StackPanel Orientation="Vertical">
 
                         <Grid>
                             <Grid.ColumnDefinitions>
@@ -202,17 +201,20 @@
                                 <RowDefinition Height="auto"/>
                                 <RowDefinition Height="auto"/>
                                 <RowDefinition Height="auto"/>
-                            </Grid.RowDefinitions>
+                                <RowDefinition Height="auto"/>
+                        </Grid.RowDefinitions>
 
+                        <xctk:IntegerUpDown Grid.Row="10" Value="{Binding Path=Threshold, Mode=TwoWay}">
+                            
+                        </xctk:IntegerUpDown>
+                            
                             <Button x:Name="SCStart"
-                                    Grid.Column="0"
-                                    Grid.Row="0"
                                     Content="Start Capture"
                                     Click="SC_Start_Click"/>
+                            
                             <Button x:Name="SCStop"
                                 IsEnabled="False"
                                 Grid.Column="1"
-                                Grid.Row="0"
                                 Content="Stop Capture"
                                 Click="SC_Stop_Click"/>
 
@@ -306,11 +308,6 @@
                             <TextBlock Grid.Row="7" Grid.Column="1" Margin="2" Text="{Binding StringFormat=Serial FPS: {0}, Path=SerialFPS, Mode=OneWay}"/>
                         </Grid>
 
-
-
-
-
-                    </StackPanel>
 
                 </TabItem>
 
@@ -489,7 +486,6 @@
                             <RowDefinition Height="auto"/>
                             <RowDefinition Height="auto"/>
                             <RowDefinition Height="auto"/>
-                            <RowDefinition Height="auto"/>
                         </Grid.RowDefinitions>
 
                         <Button Content="Import Image" Click="Button_Imaging_ImportImage_Click"/>
@@ -497,21 +493,21 @@
                         <Grid Grid.Column="1">
                             <Grid.ColumnDefinitions>
                                 <ColumnDefinition Width="*"/>
-                                <ColumnDefinition Width="26"/>
+                                <ColumnDefinition Width="25"/>
                             </Grid.ColumnDefinitions>
                             <Button Content="Import Gif" Click="Button_Imaging_ImportGif_Click"/>
                             <ToggleButton Grid.Column="1" Margin="2" IsChecked="{Binding Path=GifPlayPause, Mode=TwoWay}">
                                 <StackPanel  Margin="0,0,0,-1">
-                                    <Image Source="{Binding Path =GifPlayPauseImage, Mode=OneWay}"/>
+                                    <Image Source="{Binding Path=GifPlayPauseImage, Mode=OneWay}"/>
                                 </StackPanel>
                             </ToggleButton>
                         </Grid>
                         
                         
                         
-                        <TextBlock Grid.Row="2" Margin="2" Text="Interpolation Mode" HorizontalAlignment="Right" VerticalAlignment="Center"/>
+                        <TextBlock Grid.Row="1" Margin="2" Text="Interpolation Mode" HorizontalAlignment="Right" VerticalAlignment="Center"/>
 
-                        <ComboBox x:Name="ImagingInterpModeDrop" Grid.Column="1" Grid.Row="2" Margin="2" SelectedIndex="{Binding Path=IMInterpolationModeIndex, Mode=TwoWay}">
+                        <ComboBox x:Name="ImagingInterpModeDrop" Grid.Column="1" Grid.Row="1" Margin="2" SelectedIndex="{Binding Path=IMInterpolationModeIndex, Mode=TwoWay}">
                             <ComboBoxItem Content="Nearest Neighbor"/>
                             <ComboBoxItem Content="Bicubic"/>
                             <ComboBoxItem Content="Bilinear"/>
@@ -519,7 +515,7 @@
                             <ComboBoxItem Content="High Quality Bilinear"/>
                         </ComboBox>
 
-                        <StackPanel Grid.ColumnSpan="2" Grid.Row="3">
+                        <StackPanel Grid.ColumnSpan="2" Grid.Row="2">
                             <GroupBox Header="Start X">
                                 <StackPanel Orientation="Horizontal">
                                     <xctk:IntegerUpDown Value="{Binding Path=IMX1, Mode=TwoWay}" Minimum="0" Maximum="{Binding Path=IMXMax, Mode=TwoWay}"/>
@@ -527,14 +523,14 @@
                                 </StackPanel>
                             </GroupBox>
 
-                            <GroupBox Header="Start Y" Grid.Row="1">
+                            <GroupBox Header="Start Y" >
                                 <StackPanel Orientation="Horizontal">
                                     <xctk:IntegerUpDown Value="{Binding Path=IMY1, Mode=TwoWay}" Minimum="0" Maximum="{Binding Path=IMYMax, Mode=TwoWay}"/>
                                     <Slider Value="{Binding Path=IMY1, Mode=TwoWay}" Minimum="0" Maximum="{Binding Path=IMYMax, Mode=TwoWay}" SmallChange="1"/>
                                 </StackPanel>
                             </GroupBox>
 
-                            <GroupBox Header="End X" Grid.Row="2">
+                            <GroupBox Header="End X" >
                                 <GroupBox.Style>
                                     <Style>
                                         <Style.Triggers>
@@ -569,16 +565,16 @@
 
 
 
-                        <Button Grid.Row="4"
+                        <Button Grid.Row="3"
                                        Content="Reset Bounds" Click="IMResetSliders_Click"/>
-                        <CheckBox Grid.Row="5"
+                        <CheckBox Grid.Row="4"
                                   x:Name="IMLockDimCheck"
                                       IsChecked="{Binding Path=IMLockDim, Mode=TwoWay}"
                                           Margin="2"
                                           Content="Lock Dimensions"/>
-                        <TextBlock Grid.Column="1" Grid.Row="4" Margin="2" HorizontalAlignment="Center" VerticalAlignment="Center" Text="{Binding Path=Text_IM_WidthHeight, Mode=TwoWay}"/>
+                        <TextBlock Grid.Column="1" Grid.Row="3" Margin="2" HorizontalAlignment="Center" VerticalAlignment="Center" Text="{Binding Path=Text_IM_WidthHeight, Mode=TwoWay}"/>
 
-                        <Border Grid.Row="6" Grid.ColumnSpan="2" Margin="2" VerticalAlignment="Bottom" Height="290" BorderBrush="Gray" BorderThickness="1" Background="#FFFDFDFD">
+                        <Border Grid.Row="5" Grid.ColumnSpan="2" Margin="2" VerticalAlignment="Bottom" Height="290" BorderBrush="Gray" BorderThickness="1" Background="#FFFDFDFD">
 
                             <Image Margin="1" RenderOptions.BitmapScalingMode="NearestNeighbor"  Source="{Binding Path=ContentBitmap, Mode=OneWay}"/>
                         </Border>

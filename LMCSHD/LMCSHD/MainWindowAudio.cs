@@ -197,7 +197,7 @@ namespace LMCSHD
             Dispatcher.Invoke(() =>
             {
                 MatrixFrame.FFTToFrame(fftData);
-                FrameToPreview();
+                //FrameToPreview();
                 SerialManager.PushFrame();
             });
         }

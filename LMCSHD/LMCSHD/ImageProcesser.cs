@@ -2,29 +2,24 @@
 using System.Drawing;
 using System.Drawing.Imaging;
 using System.Windows.Threading;
+using System.Threading.Tasks;
 
 namespace LMCSHD
 {
     static class ImageProcesser
     {
         public enum LoadState { None, Still, Gif };
-        public static LoadState ImageLoadState = LoadState.None;
-        public static Rectangle ImageRect;
-
-        public static Bitmap WorkingStillBitmap;
-        public static Bitmap LoadedStillBitmap;
-
-        public static Bitmap[] WorkingGifBitmapFrames;
-        public static Bitmap[] LoadedGifBitmapFrames;
-
-        public static System.Drawing.Drawing2D.InterpolationMode InterpMode = System.Drawing.Drawing2D.InterpolationMode.HighQualityBicubic;
-
-        public static int GifMillisconds = 0;
-
-        private static void GifTimer_Tick(object sender, EventArgs e)
-        {
-
-        }
+        public static LoadState ImageLoadState { get; set; } = LoadState.None;
+        public static Rectangle ImageRect { get; set; }
+        public static Bitmap WorkingBitmap { get; set; }
+        public static Bitmap LoadedStillBitmap { get; set; }
+        public static Image LoadedGifImage { get; set; }
+        public static FrameDimension LoadedGifFrameDim { get; set; }
+        public static int LoadedGifFrameCount { get; set; }
+        //   public static Bitmap[] WorkingGifBitmapFrames { get; set; }
+        //  public static Bitmap[] LoadedGifBitmapFrames { get; set; }
+        public static System.Drawing.Drawing2D.InterpolationMode InterpMode { get; set; } = System.Drawing.Drawing2D.InterpolationMode.HighQualityBicubic;
+        public static int GifMillisconds { get; set; } = 0;
 
         public static Bitmap CropBitmap(Bitmap img, Rectangle cropArea)
         {
@@ -36,6 +31,7 @@ namespace LMCSHD
                                  cropArea,
                                  GraphicsUnit.Pixel);
             }
+            img.Dispose();
             return target;
         }
 
@@ -44,7 +40,7 @@ namespace LMCSHD
             try
             {
                 LoadedStillBitmap = new Bitmap(path);
-                WorkingStillBitmap = new Bitmap(LoadedStillBitmap);
+                WorkingBitmap = new Bitmap(LoadedStillBitmap);
                 ImageLoadState = LoadState.None;
                 return true;
             }
@@ -58,29 +54,21 @@ namespace LMCSHD
         {
             try
             {
-                using (Image gifImg = Image.FromFile(path))
-                {
-                    FrameDimension fd = new FrameDimension(gifImg.FrameDimensionsList[0]);
+                LoadedGifImage = Image.FromFile(path);
+                LoadedGifFrameDim = new FrameDimension(LoadedGifImage.FrameDimensionsList[0]);
+                LoadedGifFrameCount = LoadedGifImage.GetFrameCount(LoadedGifFrameDim);
 
-                    int FrameCount = gifImg.GetFrameCount(fd);
+                var delayPropertyBytes = LoadedGifImage.GetPropertyItem(0x5100).Value;
 
-                    var delayPropertyBytes = gifImg.GetPropertyItem(0x5100).Value;
+                int averageFrameLen = 0;
+                for (int i = 0; i < LoadedGifFrameCount; i++)
+                    averageFrameLen += (BitConverter.ToInt32(delayPropertyBytes, i * 4) * 10);
+                averageFrameLen /= LoadedGifFrameCount;
+                GifMillisconds = averageFrameLen;
 
-                    int averageFrameLen = 0;
-                    for (int i = 0; i < FrameCount; i++)
-                        averageFrameLen += (BitConverter.ToInt32(delayPropertyBytes, i * 4) * 10);
-                    averageFrameLen /= FrameCount;
-                    GifMillisconds = averageFrameLen;
+                LoadedGifImage.SelectActiveFrame(LoadedGifFrameDim, 0);
+                WorkingBitmap = new Bitmap(LoadedGifImage);
 
-                    LoadedGifBitmapFrames = new Bitmap[FrameCount];
-
-                    for (int i = 0; i < FrameCount; i++)
-                    {
-                        gifImg.SelectActiveFrame(fd, i);
-                        LoadedGifBitmapFrames[i] = new Bitmap(gifImg);
-                    }
-                }
-                CopyLoadedGifFramesToWorkingFrames();
                 ImageLoadState = LoadState.None;
                 return true;
             }
@@ -90,43 +78,26 @@ namespace LMCSHD
             }
         }
 
-        public static void CopyLoadedGifFramesToWorkingFrames()
-        {
-            WorkingGifBitmapFrames = new Bitmap[LoadedGifBitmapFrames.Length];
-            for (int i = 0; i < LoadedGifBitmapFrames.Length; i++)
-                WorkingGifBitmapFrames[i] = new Bitmap(LoadedGifBitmapFrames[i]);
-        }
-
-        public static void DisposeWorkingGif()
-        {
-
-            if (WorkingGifBitmapFrames != null)
-                foreach (Bitmap b in WorkingGifBitmapFrames)
-                    b.Dispose();
-        }
-
         public static void DisposeGif()
         {
-            if (LoadedGifBitmapFrames != null)
-                foreach (Bitmap b in LoadedGifBitmapFrames)
-                    b.Dispose();
+            if (LoadedStillBitmap != null)
+                LoadedStillBitmap.Dispose();
 
-            if (WorkingGifBitmapFrames != null)
-                foreach (Bitmap b in WorkingGifBitmapFrames)
-                    b.Dispose();
+            if (LoadedGifImage != null)
+                LoadedGifImage.Dispose();
         }
 
-        public static void DisposeWorkingStill()
+        public static void DisposeWorkingBitmap()
         {
-            if (WorkingStillBitmap != null)
-                WorkingStillBitmap.Dispose();
+            if (WorkingBitmap != null)
+                WorkingBitmap.Dispose();
         }
         public static void DisposeStill()
         {
             if (LoadedStillBitmap != null)
                 LoadedStillBitmap.Dispose();
-            if (WorkingStillBitmap != null)
-                WorkingStillBitmap.Dispose();
+            if (WorkingBitmap != null)
+                WorkingBitmap.Dispose();
         }
     }
 }

@@ -3,6 +3,10 @@
 ##
 ## Get latest from https://github.com/github/gitignore/blob/master/VisualStudio.gitignore
 
+
+#release zip files
+/ReleaseBuilds
+
 # User-specific files
 *.rsuser
 *.suo
@@ -330,8 +334,6 @@ __pycache__/
 *.odx.cs
 *.xsd.cs
 
-#release zip files
-/ReleaseBuilds
 
 # OpenCover UI analysis results
 OpenCover/

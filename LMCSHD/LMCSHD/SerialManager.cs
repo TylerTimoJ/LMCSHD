@@ -7,8 +7,8 @@ namespace LMCSHD
 {
     public static class SerialManager
     {
-        public enum CMode { BPP24, BPP16, BPP8 };
-        public static CMode _colorMode = CMode.BPP24;
+        public enum CMode { BPP24RGB, BPP16RGB, BPP8RGB, BPP8Gray, BPP1Mono };
+        public static CMode _colorMode = CMode.BPP24RGB;
         private static SerialPort _sp = new SerialPort();
         private static bool _serialReady = false;
 
@@ -72,12 +72,12 @@ namespace LMCSHD
             {
                 byte[] orderedFrame = MatrixFrame.GetOrderedSerialFrame();
 
-                if (ColorMode == CMode.BPP24)
+                if (ColorMode == CMode.BPP24RGB)
                 {
                     try
                     {
-                        byte[] header = { 0x11 };
-                        _sp.BaseStream.WriteAsync(header, 0, 1);
+                        byte[] header = { 0x41 };
+                        _sp.BaseStream.Write(header, 0, 1);
                         _sp.BaseStream.WriteAsync(orderedFrame, 0, orderedFrame.Length);
                         _serialReady = false;
                         return true;
@@ -89,15 +89,14 @@ namespace LMCSHD
                         return false;
                     }
                 }
-                else if (ColorMode == CMode.BPP16)
+                else if (ColorMode == CMode.BPP16RGB)
                 {
                     try
                     {
-                        byte[] header = { 0x12 };
+                        byte[] header = { 0x42 };
                         byte[] newOrderedFrame = new byte[MatrixFrame.Width * MatrixFrame.Height * 2];
                         for (int i = 0; i < MatrixFrame.Width * MatrixFrame.Height; i++)
                         {
-
                             byte r = (byte)(orderedFrame[i * 3] & 0xF8);
                             byte g = (byte)(orderedFrame[(i * 3) + 1] & 0xFC);
                             byte b = (byte)(orderedFrame[(i * 3) + 2] & 0xF8);
@@ -105,7 +104,7 @@ namespace LMCSHD
                             newOrderedFrame[i * 2] = (byte)(r | (g >> 5));
                             newOrderedFrame[(i * 2) + 1] = (byte)((g << 3) | (b >> 3));
                         }
-                        _sp.BaseStream.WriteAsync(header, 0, 1);
+                        _sp.BaseStream.Write(header, 0, 1);
                         _sp.BaseStream.WriteAsync(newOrderedFrame, 0, newOrderedFrame.Length);
                         _serialReady = false;
                         return true;
@@ -118,11 +117,11 @@ namespace LMCSHD
                     }
 
                 }
-                else if (ColorMode == CMode.BPP8)
+                else if (ColorMode == CMode.BPP8RGB)
                 {
                     try
                     {
-                        byte[] header = { 0x13 };
+                        byte[] header = { 0x43 };
                         byte[] newOrderedFrame = new byte[MatrixFrame.Width * MatrixFrame.Height];
                         for (int i = 0; i < MatrixFrame.Width * MatrixFrame.Height; i++)
                         {
@@ -133,7 +132,7 @@ namespace LMCSHD
 
                             newOrderedFrame[i] = (byte)(r | (g >> 3) | (b >> 6));
                         }
-                        _sp.BaseStream.WriteAsync(header, 0, 1);
+                        _sp.BaseStream.Write(header, 0, 1);
                         _sp.BaseStream.WriteAsync(newOrderedFrame, 0, newOrderedFrame.Length);
                         _serialReady = false;
                         return true;
@@ -145,13 +144,76 @@ namespace LMCSHD
                         return false;
                     }
                 }
+                else if (ColorMode == CMode.BPP8Gray)
+                {
+                    try
+                    {
+                        byte[] header = { 0x44 };
+                        byte[] newOrderedFrame = new byte[MatrixFrame.Width * MatrixFrame.Height];
+                        for (int i = 0; i < MatrixFrame.Width * MatrixFrame.Height; i++)
+                        {
+                            newOrderedFrame[i] = (byte)((orderedFrame[i * 3] + orderedFrame[(i * 3) + 1] + orderedFrame[(i * 3) + 2]) / 3);
+                        }
+                        _sp.BaseStream.Write(header, 0, 1);
+                        _sp.BaseStream.WriteAsync(newOrderedFrame, 0, newOrderedFrame.Length);
+                        _serialReady = false;
+                        return true;
+                    }
+                    catch (Exception e)
+                    {
+                        _serialReady = false;
+                        MessageBox.Show(e.Message);
+                        return false;
+                    }
+                }
+                else if (ColorMode == CMode.BPP1Mono)
+                {
+                    try
+                    {
+                        byte[] header = { 0x45 };
+                        int newOrderedFrameLength = ((MatrixFrame.Width * MatrixFrame.Height) / 8) + ((MatrixFrame.Width + MatrixFrame.Height) % 8);
+                        byte[] newOrderedFrame = new byte[newOrderedFrameLength];
+                        for (int i = 0; i < MatrixFrame.Width * MatrixFrame.Height;)
+                        {
+                            newOrderedFrame[i / 8] |= (byte)(((orderedFrame[i * 3] + orderedFrame[(i * 3) + 1] + orderedFrame[(i * 3) + 2]) / 3) > 127 ? 0x80 : 0);
+                            i++;
+                            newOrderedFrame[i / 8] |= (byte)(((orderedFrame[i * 3] + orderedFrame[(i * 3) + 1] + orderedFrame[(i * 3) + 2]) / 3) > 127 ? 0x40 : 0);
+                            i++;
+                            newOrderedFrame[i / 8] |= (byte)(((orderedFrame[i * 3] + orderedFrame[(i * 3) + 1] + orderedFrame[(i * 3) + 2]) / 3) > 127 ? 0x20 : 0);
+                            i++;
+                            newOrderedFrame[i / 8] |= (byte)(((orderedFrame[i * 3] + orderedFrame[(i * 3) + 1] + orderedFrame[(i * 3) + 2]) / 3) > 127 ? 0x10 : 0);
+                            i++;
+                            newOrderedFrame[i / 8] |= (byte)(((orderedFrame[i * 3] + orderedFrame[(i * 3) + 1] + orderedFrame[(i * 3) + 2]) / 3) > 127 ? 0x08 : 0);
+                            i++;
+                            newOrderedFrame[i / 8] |= (byte)(((orderedFrame[i * 3] + orderedFrame[(i * 3) + 1] + orderedFrame[(i * 3) + 2]) / 3) > 127 ? 0x04 : 0);
+                            i++;
+                            newOrderedFrame[i / 8] |= (byte)(((orderedFrame[i * 3] + orderedFrame[(i * 3) + 1] + orderedFrame[(i * 3) + 2]) / 3) > 127 ? 0x02 : 0);
+                            i++;
+                            newOrderedFrame[i / 8] |= (byte)(((orderedFrame[i * 3] + orderedFrame[(i * 3) + 1] + orderedFrame[(i * 3) + 2]) / 3) > 127 ? 1 : 0);
+                            i++;
+                        }
+                        _sp.BaseStream.Write(header, 0, 1);
+                        _sp.BaseStream.WriteAsync(newOrderedFrame, 0, newOrderedFrame.Length);
+                        _serialReady = false;
+                        return true;
+                    }
+                    catch (Exception e)
+                    {
+                        _serialReady = false;
+                        MessageBox.Show(e.Message);
+                        return false;
+                    }
+                }
+
                 else
                 {
                     return false;
                 }
             }
             else
+            {
                 return false;
+            }
         }
 
         //NOTE Rework to work more efficiently with single dimensional pixel array

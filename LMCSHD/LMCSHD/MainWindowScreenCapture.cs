@@ -60,7 +60,7 @@ namespace LMCSHD
                     {
                         if (_isCapturing)
                         {
-                            StartAsyncCapture();
+                            StartCaptureAsync();
                         }
                     }
                     OnPropertyChanged();
@@ -304,7 +304,7 @@ namespace LMCSHD
 
             MatrixFrame.InjestGDIBitmap(capturedBitmap, ScreenRecorder.InterpMode);
 
-            Dispatcher.Invoke(() => { FrameToPreview(); });
+       //     Dispatcher.Invoke(() => { FrameToPreview(); });
 
             if (SerialManager.PushFrame())
             {
@@ -341,7 +341,7 @@ namespace LMCSHD
             }
             else
             {
-                StartAsyncCapture();
+                StartCaptureAsync();
             }
         }
         void StartSerialSyncCapture()
@@ -349,10 +349,10 @@ namespace LMCSHD
             _fpsStopWatch = Stopwatch.StartNew();
             SerialManager.SerialAcknowledged += OnSerialAcknowledged;
             MatrixFrame.InjestGDIBitmap(ScreenRecorder.ScreenToBitmap(), ScreenRecorder.InterpMode);
-            Dispatcher.Invoke(() => { FrameToPreview(); });
+        //    Dispatcher.Invoke(() => { FrameToPreview(); });
             SerialManager.PushFrame();
         }
-        void StartAsyncCapture()
+        void StartCaptureAsync()
         {
             _fpsStopWatch = Stopwatch.StartNew();
             captureThread = new Thread(() => ScreenRecorder.StartRecording(PixelDataCallback));
@@ -364,7 +364,7 @@ namespace LMCSHD
             if (SyncSerial == true)
             {
                 MatrixFrame.InjestGDIBitmap(ScreenRecorder.ScreenToBitmap(), ScreenRecorder.InterpMode);
-                Dispatcher.Invoke(() => { FrameToPreview(); });
+           //     Dispatcher.Invoke(() => { FrameToPreview(); });
                 SerialManager.PushFrame();
                 LocalFPS = SerialFPS = _fpsStopWatch.ElapsedMilliseconds - _localPreviousMillis;
                 _localPreviousMillis = _fpsStopWatch.ElapsedMilliseconds;

@@ -1,4 +1,5 @@
 ﻿using System.Windows;
+using System;
 
 namespace LMCSHD
 {
@@ -12,6 +13,29 @@ namespace LMCSHD
         public Pixel(byte r, byte g, byte b)
         {
             R = r; G = g; B = b;
+        }
+
+        public Int32 GetBPP24RGB_Int32()
+        {
+           return R << 16 | G << 8 | B;
+        }
+        public Int32 GetBPP16RGB_Int32()
+        {
+            return ((R & 0xF8) << 16) | ((G & 0xFC) << 8) | (B & 0xF8);
+        }
+        public Int32 GetBPP8RGB_Int32()
+        {
+           return ((R & 0xE0) << 16) | ((G & 0xE0) << 8) | (B & 0xC0);
+        }
+        public Int32 GetBPP8Grayscale_Int32()
+        {
+            byte color = (byte)((R + G + B) / 3);
+            return color << 16 | color << 8 | color;
+        }
+        public Int32 GetBPP1Monochrome_Int32()
+        {
+            byte color = (byte)(((R + G + B) / 3) > 127 ? 255 : 0);
+            return color << 16 | color << 8 | color;
         }
     }
 

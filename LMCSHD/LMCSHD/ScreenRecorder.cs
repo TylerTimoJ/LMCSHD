@@ -7,9 +7,10 @@ namespace LMCSHD
 {
     public static class ScreenRecorder
     {
-        public static Rectangle CaptureRect;
-        public static bool doCapture, doOutline;
-        public static System.Drawing.Drawing2D.InterpolationMode InterpMode = System.Drawing.Drawing2D.InterpolationMode.HighQualityBicubic;
+        public static Rectangle CaptureRect { get; set; }
+        public static bool doCapture { get; set; }
+        public static bool doOutline { get; set; }
+        public static System.Drawing.Drawing2D.InterpolationMode InterpMode { get; set; } = System.Drawing.Drawing2D.InterpolationMode.HighQualityBicubic;
 
         public delegate void Callback(Bitmap capturedFrame);
         public static void StartRecording(Callback pixelDataCallback)
