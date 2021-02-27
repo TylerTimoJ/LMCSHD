@@ -13,7 +13,7 @@ namespace LMCSHD
     {
         //Frame & Preview
         private static WriteableBitmap MatrixBitmap { get; set; }
-        
+        private static WriteableBitmap MatrixBitmap_Borders { get; set; }
 
         #region Window
         public MainWindow()
@@ -46,6 +46,38 @@ namespace LMCSHD
         {
             MatrixBitmap = new WriteableBitmap(MatrixFrame.Width, MatrixFrame.Height, 96, 96, PixelFormats.Bgr32, null);
             MatrixImage.Source = MatrixBitmap;
+
+            int scale = 16;
+            MatrixBitmap_Borders = new WriteableBitmap(MatrixFrame.Width * scale, MatrixFrame.Height * scale, 96, 96, PixelFormats.Bgra32, null);
+
+            MatrixBitmap_Borders.Lock();
+            Int32[,] borderPixels = new Int32[MatrixFrame.Height * scale, MatrixFrame.Width * scale];
+            for (int x = 1; x < MatrixFrame.Height * scale; x++)
+            {
+                for (int y = 1; y < MatrixFrame.Width * scale; y++)
+                {
+                    if (x % scale == 0 || y % scale == 0)
+                    {
+                        borderPixels[x, y] = 255 << 24 | 0 << 16 | 0 << 8 | 0;
+                        if (x > 0 && y > 0)
+                            borderPixels[x - 1, y - 1] = 255 << 24 | 0 << 16 | 0 << 8 | 0;
+                    }
+                }
+            }
+            for (int x = 0; x < MatrixFrame.Height * scale; x++)
+            {
+                for (int y = 0; y < MatrixFrame.Width * scale; y++)
+                {
+                    if (x == 0 || y == 0 || x == MatrixFrame.Width * scale - 1 || y == MatrixFrame.Width * scale - 1)
+                        borderPixels[x, y] = 255 << 24 | 0 << 16 | 0 << 8 | 0;
+                }
+            }
+
+            Int32Rect rect = new Int32Rect(0, 0, MatrixFrame.Width * scale, MatrixFrame.Height * scale);
+            int stride = 4 * MatrixFrame.Width * scale;
+            MatrixBitmap_Borders.WritePixels(rect, borderPixels, stride, 0);
+            MatrixBitmap_Borders.Unlock();
+            MatrixImage_Borders.Source = MatrixBitmap_Borders;
 
             _matrixTitle.MatrixTitleDimensionX = MatrixFrame.Width;
             _matrixTitle.MatrixTitleDimensionY = MatrixFrame.Height;
@@ -103,7 +135,7 @@ namespace LMCSHD
             get { return MatrixFrame.Threshold; }
             set
             {
-                if(value != MatrixFrame.Threshold)
+                if (value != MatrixFrame.Threshold)
                 {
                     MatrixFrame.Threshold = value;
                     OnPropertyChanged();
@@ -236,12 +268,12 @@ namespace LMCSHD
 
         private void MatrixImage_MouseDown(object sender, MouseButtonEventArgs e)
         {
-            //    DrawPixel();
+            DrawPixel();
         }
 
         private void MatrixImage_MouseMove(object sender, System.Windows.Input.MouseEventArgs e)
         {
-            //    DrawPixel();
+            DrawPixel();
         }
 
         void DrawPixel()

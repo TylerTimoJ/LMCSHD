@@ -7,7 +7,7 @@
         xmlns:xctk="http://schemas.xceed.com/wpf/xaml/toolkit"
         x:Class="LMCSHD.MainWindow"
         mc:Ignorable="d"
-        Title="LED Matrix Control Software HD"
+        Title="LED Matrix Control Software HD Alpha"
         Height="694"
         MinHeight="714"
         Width="1348"
@@ -39,6 +39,8 @@
             <Setter Property="Margin" Value="2"/>
             <Setter Property="Width" Value="196"/>
         </Style>
+
+        <BooleanToVisibilityConverter x:Key="b2v" />
 
     </Window.Resources>
 
@@ -164,6 +166,9 @@
                         </MenuItem>
                     </MenuItem>
                 </MenuItem>
+                <MenuItem Header="View">
+                    <MenuItem Header="Show Pixel Borders" IsCheckable="True" Name="show_pixel_borders_check"/>
+                </MenuItem>
                 <MenuItem Header="About">
                     <MenuItem Header="Placeholder link to https://icons8.com"/>
                 </MenuItem>
@@ -175,9 +180,14 @@
                     <RowDefinition Height="*"/>
                 </Grid.RowDefinitions>
                 <TextBlock Text="{Binding Path=MatrixTitleString, Mode=OneWay}" Margin="2" HorizontalAlignment="Center" VerticalAlignment="Center"/>
-                <Border Grid.Row="2" BorderBrush="#FFA0A0A0" BorderThickness="1">
-                    <Image x:Name="MatrixImage" RenderOptions.BitmapScalingMode="NearestNeighbor" Cursor="Cross" MouseDown="MatrixImage_MouseDown" MouseMove="MatrixImage_MouseMove"/>
-                </Border>
+
+                <Image Grid.Row="2" x:Name="MatrixImage" RenderOptions.BitmapScalingMode="NearestNeighbor" Cursor="Cross" MouseDown="MatrixImage_MouseDown" MouseMove="MatrixImage_MouseMove"/>
+                <Image Grid.Row="2"
+                       x:Name="MatrixImage_Borders"
+                       Visibility="{Binding ElementName=show_pixel_borders_check, Path=IsChecked,Converter={StaticResource b2v}}"
+                       RenderOptions.BitmapScalingMode="NearestNeighbor"
+                       IsHitTestVisible="False"
+                       />
             </Grid>
 
             <StackPanel Orientation="Horizontal" HorizontalAlignment="Center" Margin="0,24,0,2" Grid.Column="1" Grid.Row="1">
