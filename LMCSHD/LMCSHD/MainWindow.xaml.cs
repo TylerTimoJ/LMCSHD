@@ -23,7 +23,6 @@ namespace LMCSHD
             MatrixFrame.DimensionsChanged += OnMatrixDimensionsChanged;
 
             MatrixFrame.FrameChanged += OnFrameChanged;
-            SerialManager.ColorModeChanged += OnColorModeChanged;
             MatrixFrame.SetDimensions(MatrixFrame.Width, MatrixFrame.Height);
             InitializeScreenCaptureUI();
             InitializeAudioCaptureUI();
@@ -34,7 +33,7 @@ namespace LMCSHD
         {
             EndAllThreads();
             SerialManager.Disconnect();
-            while (SerialManager.IsConnected()) ;
+            while (SerialManager.IsConnected()) SerialManager.Disconnect();
         }
 
         private void OnFrameChanged()
@@ -130,20 +129,6 @@ namespace LMCSHD
             }
         }
 
-        public int Threshold
-        {
-            get { return MatrixFrame.Threshold; }
-            set
-            {
-                if (value != MatrixFrame.Threshold)
-                {
-                    MatrixFrame.Threshold = value;
-                    OnPropertyChanged();
-                }
-            }
-        }
-
-
         #endregion
         #region Menu_File
         private void MenuItem_Menu_Export_Click(object sender, RoutedEventArgs e)
@@ -165,33 +150,45 @@ namespace LMCSHD
                 WindowStartupLocation = System.Windows.WindowStartupLocation.CenterOwner
             };
             m.ShowDialog();
-
+            OnColorModeChanged();
         }
         private void MenuItem_Serial_Disconnect_Click(object sender, RoutedEventArgs e)
         {
             SerialManager.Disconnect();
         }
+
+        #region Menu_Serial
         private void MenuItem_Serial_ColorMode_BPP24RGB_Click(object sender, RoutedEventArgs e)
         {
             SerialManager.ColorMode = SerialManager.CMode.BPP24RGB;
+            MatrixFrame.Refresh();
+            OnColorModeChanged();
         }
         private void MenuItem_Serial_ColorMode_BPP16RGB_Click(object sender, RoutedEventArgs e)
         {
             SerialManager.ColorMode = SerialManager.CMode.BPP16RGB;
+            MatrixFrame.Refresh();
+            OnColorModeChanged();
         }
         private void MenuItem_Serial_ColorMode_BPP8RGB_Click(object sender, RoutedEventArgs e)
         {
             SerialManager.ColorMode = SerialManager.CMode.BPP8RGB;
+            MatrixFrame.Refresh();
+            OnColorModeChanged();
         }
         private void MenuItem_Serial_ColorMode_BPP8Gray_Click(object sender, RoutedEventArgs e)
         {
             SerialManager.ColorMode = SerialManager.CMode.BPP8Gray;
+            MatrixFrame.Refresh();
+            OnColorModeChanged();
         }
         private void MenuItem_Serial_ColorMode_BPP1Mono_Click(object sender, RoutedEventArgs e)
         {
             SerialManager.ColorMode = SerialManager.CMode.BPP1Mono;
+            MatrixFrame.Refresh();
+            OnColorModeChanged();
         }
-
+        #endregion
 
 
         #endregion
@@ -199,35 +196,43 @@ namespace LMCSHD
         private void PixelOrder_Orientation_Horizontal_Click(object sender, RoutedEventArgs e)
         {
             MatrixFrame.orientation = PixelOrder.Orientation.HZ;
+            MatrixFrame.Refresh();
         }
         private void PixelOrder_Orientation_Vertical_Click(object sender, RoutedEventArgs e)
         {
             MatrixFrame.orientation = PixelOrder.Orientation.VT;
+            MatrixFrame.Refresh();
         }
 
         private void PixelOrder_StartCorner_TopLeft_Click(object sender, RoutedEventArgs e)
         {
             MatrixFrame.startCorner = PixelOrder.StartCorner.TL;
+            MatrixFrame.Refresh();
         }
         private void PixelOrder_StartCorner_TopRight_Click(object sender, RoutedEventArgs e)
         {
             MatrixFrame.startCorner = PixelOrder.StartCorner.TR;
+            MatrixFrame.Refresh();
         }
         private void PixelOrder_StartCorner_BottomLeft_Click(object sender, RoutedEventArgs e)
         {
             MatrixFrame.startCorner = PixelOrder.StartCorner.BL;
+            MatrixFrame.Refresh();
         }
         private void PixelOrder_StartCorner_BottomRight_Click(object sender, RoutedEventArgs e)
         {
             MatrixFrame.startCorner = PixelOrder.StartCorner.BR;
+            MatrixFrame.Refresh();
         }
         private void PixelOrder_NewLine_Scan_Click(object sender, RoutedEventArgs e)
         {
             MatrixFrame.newLine = PixelOrder.NewLine.SC;
+            MatrixFrame.Refresh();
         }
         private void PixelOrder_NewLine_Snake_Click(object sender, RoutedEventArgs e)
         {
             MatrixFrame.newLine = PixelOrder.NewLine.SN;
+            MatrixFrame.Refresh();
         }
 
         #endregion
@@ -278,7 +283,7 @@ namespace LMCSHD
 
         void DrawPixel()
         {
-            if (Mouse.LeftButton == MouseButtonState.Pressed)
+            if (Mouse.LeftButton == MouseButtonState.Pressed || Mouse.RightButton == MouseButtonState.Pressed)
             {
                 System.Windows.Point pos = Mouse.GetPosition(MatrixImage);
 
@@ -287,10 +292,10 @@ namespace LMCSHD
 
                 x = x > MatrixFrame.Width - 1 ? MatrixFrame.Width - 1 : x < 0 ? 0 : x;
                 y = y > MatrixFrame.Height - 1 ? MatrixFrame.Height - 1 : y < 0 ? 0 : y;
-
-                MatrixFrame.SetPixel(x, y, new Pixel(255, 32, 255));
-                FrameToPreview();
-                SerialManager.PushFrame();
+                if (Mouse.LeftButton == MouseButtonState.Pressed)
+                    MatrixFrame.SetPixel(x, y, new Pixel(255, 255, 255));
+                else
+                    MatrixFrame.SetPixel(x, y, new Pixel(0, 0, 0));
             }
         }
 

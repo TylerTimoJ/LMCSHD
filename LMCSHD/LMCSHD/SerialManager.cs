@@ -14,8 +14,7 @@ namespace LMCSHD
 
         public delegate void SerialAcknowledgedEventHandler();
         public static event SerialAcknowledgedEventHandler SerialAcknowledged;
-        public delegate void ColorModeChangedEventHandler();
-        public static event ColorModeChangedEventHandler ColorModeChanged;
+
         public static CMode ColorMode
         {
             get { return _colorMode; }
@@ -24,9 +23,13 @@ namespace LMCSHD
                 if (value != _colorMode)
                 {
                     _colorMode = value;
-                    ColorModeChanged?.Invoke();
                 }
             }
+        }
+
+        private static void OnFrameChanged()
+        {
+            PushFrame();
         }
 
         public static void OnSerialAcknowledged()
@@ -65,11 +68,11 @@ namespace LMCSHD
 
             }
         }
-        //NOTE Rework to work more efficiently with single dimensional pixel array
         public static bool PushFrame()
         {
             if (_serialReady)
             {
+                _serialReady = false;
                 byte[] orderedFrame = MatrixFrame.GetOrderedSerialFrame();
 
                 if (ColorMode == CMode.BPP24RGB)
@@ -79,12 +82,10 @@ namespace LMCSHD
                         byte[] header = { 0x41 };
                         _sp.BaseStream.Write(header, 0, 1);
                         _sp.BaseStream.WriteAsync(orderedFrame, 0, orderedFrame.Length);
-                        _serialReady = false;
                         return true;
                     }
                     catch (Exception e)
                     {
-                        _serialReady = false;
                         MessageBox.Show(e.Message);
                         return false;
                     }
@@ -106,12 +107,10 @@ namespace LMCSHD
                         }
                         _sp.BaseStream.Write(header, 0, 1);
                         _sp.BaseStream.WriteAsync(newOrderedFrame, 0, newOrderedFrame.Length);
-                        _serialReady = false;
                         return true;
                     }
                     catch (Exception e)
                     {
-                        _serialReady = false;
                         MessageBox.Show(e.Message);
                         return false;
                     }
@@ -134,12 +133,10 @@ namespace LMCSHD
                         }
                         _sp.BaseStream.Write(header, 0, 1);
                         _sp.BaseStream.WriteAsync(newOrderedFrame, 0, newOrderedFrame.Length);
-                        _serialReady = false;
                         return true;
                     }
                     catch (Exception e)
                     {
-                        _serialReady = false;
                         MessageBox.Show(e.Message);
                         return false;
                     }
@@ -156,12 +153,10 @@ namespace LMCSHD
                         }
                         _sp.BaseStream.Write(header, 0, 1);
                         _sp.BaseStream.WriteAsync(newOrderedFrame, 0, newOrderedFrame.Length);
-                        _serialReady = false;
                         return true;
                     }
                     catch (Exception e)
                     {
-                        _serialReady = false;
                         MessageBox.Show(e.Message);
                         return false;
                     }
@@ -194,17 +189,14 @@ namespace LMCSHD
                         }
                         _sp.BaseStream.Write(header, 0, 1);
                         _sp.BaseStream.WriteAsync(newOrderedFrame, 0, newOrderedFrame.Length);
-                        _serialReady = false;
                         return true;
                     }
                     catch (Exception e)
                     {
-                        _serialReady = false;
                         MessageBox.Show(e.Message);
                         return false;
                     }
                 }
-
                 else
                 {
                     return false;
@@ -215,9 +207,6 @@ namespace LMCSHD
                 return false;
             }
         }
-
-        //NOTE Rework to work more efficiently with single dimensional pixel array
-
 
         public static void SerialSendBlankFrame()
         {
@@ -290,6 +279,8 @@ namespace LMCSHD
             try
             {
                 _sp.Open();
+                MatrixFrame.FrameChanged -= OnFrameChanged;
+                MatrixFrame.FrameChanged += OnFrameChanged;
             }
             catch (Exception)
             {

@@ -197,8 +197,6 @@ namespace LMCSHD
             Dispatcher.Invoke(() =>
             {
                 MatrixFrame.FFTToFrame(fftData);
-                //FrameToPreview();
-                SerialManager.PushFrame();
             });
         }
         private void BeginAudioCapture()

@@ -24,7 +24,6 @@ namespace LMCSHD
         private int _scXMax;
         private int _scYMax;
         private bool? _scLockDim = false;
-        private bool? _syncSerial = false;
         private string _text_SC_WidthHeight;
 
         private int _scInterpolationModeIndex = 3;
@@ -36,33 +35,6 @@ namespace LMCSHD
                 if (value != _scLockDim)
                 {
                     _scLockDim = value;
-                    OnPropertyChanged();
-                }
-            }
-        }
-        public bool? SyncSerial
-        {
-            get { return _syncSerial; }
-            set
-            {
-                if (value != _syncSerial)
-                {
-                    AbortCapture();
-                    _syncSerial = value;
-                    if (_syncSerial == true) //has become checked
-                    {
-                        if (_isCapturing)
-                        {
-                            StartSerialSyncCapture();
-                        }
-                    }
-                    else //has become un-checked
-                    {
-                        if (_isCapturing)
-                        {
-                            StartCaptureAsync();
-                        }
-                    }
                     OnPropertyChanged();
                 }
             }
@@ -215,7 +187,7 @@ namespace LMCSHD
             }
         }
         #endregion
-            #region Event Handlers
+        #region Event Handlers
         private void SC_Start_Click(object sender, RoutedEventArgs e)
         {
             StartCapture();
@@ -304,13 +276,14 @@ namespace LMCSHD
 
             MatrixFrame.InjestGDIBitmap(capturedBitmap, ScreenRecorder.InterpMode);
 
-       //     Dispatcher.Invoke(() => { FrameToPreview(); });
-
-            if (SerialManager.PushFrame())
-            {
-                SerialFPS = _fpsStopWatch.ElapsedMilliseconds - _serialPreviousMillis;
-                _serialPreviousMillis = _fpsStopWatch.ElapsedMilliseconds;
-            }
+            //     Dispatcher.Invoke(() => { FrameToPreview(); });
+            /*
+                 if (SerialManager.PushFrame())
+                 {
+                     SerialFPS = _fpsStopWatch.ElapsedMilliseconds - _serialPreviousMillis;
+                     _serialPreviousMillis = _fpsStopWatch.ElapsedMilliseconds;
+                 }
+            */
             //GC.Collect();
         }
 
@@ -335,22 +308,15 @@ namespace LMCSHD
         }
         void StartCapture()
         {
-            if (SyncSerial == true)
-            {
-                StartSerialSyncCapture();
-            }
-            else
-            {
-                StartCaptureAsync();
-            }
+            StartCaptureAsync();
         }
         void StartSerialSyncCapture()
         {
             _fpsStopWatch = Stopwatch.StartNew();
             SerialManager.SerialAcknowledged += OnSerialAcknowledged;
             MatrixFrame.InjestGDIBitmap(ScreenRecorder.ScreenToBitmap(), ScreenRecorder.InterpMode);
-        //    Dispatcher.Invoke(() => { FrameToPreview(); });
-            SerialManager.PushFrame();
+            //    Dispatcher.Invoke(() => { FrameToPreview(); });
+            //SerialManager.PushFrame();
         }
         void StartCaptureAsync()
         {
@@ -361,14 +327,6 @@ namespace LMCSHD
 
         void OnSerialAcknowledged()
         {
-            if (SyncSerial == true)
-            {
-                MatrixFrame.InjestGDIBitmap(ScreenRecorder.ScreenToBitmap(), ScreenRecorder.InterpMode);
-           //     Dispatcher.Invoke(() => { FrameToPreview(); });
-                SerialManager.PushFrame();
-                LocalFPS = SerialFPS = _fpsStopWatch.ElapsedMilliseconds - _localPreviousMillis;
-                _localPreviousMillis = _fpsStopWatch.ElapsedMilliseconds;
-            }
         }
 
         void StartOutlineThread()

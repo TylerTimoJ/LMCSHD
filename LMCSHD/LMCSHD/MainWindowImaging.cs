@@ -306,7 +306,7 @@ namespace LMCSHD
             ContentBitmap = MatrixFrame.CreateBitmapSourceFromBitmap(ImageProcesser.WorkingBitmap);
             MatrixFrame.BitmapToFrame(ImageProcesser.WorkingBitmap, ImageProcesser.InterpMode);
             ImageProcesser.DisposeWorkingBitmap();
-            SerialManager.PushFrame();
+            //SerialManager.PushFrame();
         }
 
 
@@ -319,7 +319,7 @@ namespace LMCSHD
                 ContentBitmap = MatrixFrame.CreateBitmapSourceFromBitmap(ImageProcesser.WorkingBitmap);
                 MatrixFrame.BitmapToFrame(ImageProcesser.WorkingBitmap, ImageProcesser.InterpMode);
                 //FrameToPreview();
-                SerialManager.PushFrame();
+                //SerialManager.PushFrame();
             }
         }
 
@@ -339,7 +339,7 @@ namespace LMCSHD
                     ContentBitmap = MatrixFrame.CreateBitmapSourceFromBitmap(ImageProcesser.WorkingBitmap);
                     MatrixFrame.BitmapToFrame(ImageProcesser.WorkingBitmap, ImageProcesser.InterpMode);
                     //FrameToPreview();
-                    SerialManager.PushFrame();
+                    //SerialManager.PushFrame();
                 }
                 
             }
@@ -364,7 +364,7 @@ namespace LMCSHD
                     IMX1 = 0;
                     IMY1 = 0;
                     //FrameToPreview();
-                    SerialManager.PushFrame();
+                    //SerialManager.PushFrame();
                     ImageProcesser.ImageLoadState = ImageProcesser.LoadState.Still;
                     ResetSliders();
                 }
@@ -395,7 +395,7 @@ namespace LMCSHD
                     IMX1 = 0;
                     IMY1 = 0;
                     //FrameToPreview();
-                    SerialManager.PushFrame();
+                    //SerialManager.PushFrame();
                     ImageProcesser.ImageLoadState = ImageProcesser.LoadState.Gif;
                     ResetSliders();
                 }

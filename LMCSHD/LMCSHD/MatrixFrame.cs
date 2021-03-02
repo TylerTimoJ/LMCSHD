@@ -25,11 +25,11 @@ namespace LMCSHD
 
         public delegate void FrameChangedEventHandler();
         public static event FrameChangedEventHandler FrameChanged;
-        public static void OnFrameChanged() { FrameChanged?.Invoke(); }
+        private static void OnFrameChanged() { FrameChanged?.Invoke(); }
 
         public delegate void DimensionsChangedEventHandler();
         public static event DimensionsChangedEventHandler DimensionsChanged;
-        public static void OnDimensionsChanged() { DimensionsChanged?.Invoke(); }
+        private static void OnDimensionsChanged() { DimensionsChanged?.Invoke(); }
 
 
         public static void SetDimensions(int w, int h)
@@ -39,6 +39,11 @@ namespace LMCSHD
             Frame = null;
             Frame = new Pixel[Width * Height];
             OnDimensionsChanged();
+        }
+
+        public static void Refresh()
+        {
+            OnFrameChanged();
         }
 
         public static byte[] GetOrderedSerialFrame()
@@ -95,6 +100,7 @@ namespace LMCSHD
             y = y > Height - 1 ? Height - 1 : y < 0 ? 0 : y;
 
             Frame[y * Width + x] = color;
+            OnFrameChanged();
         }
         public static Pixel GetPixel(int x, int y)
         {
@@ -137,35 +143,10 @@ namespace LMCSHD
 
                 for (int i = 0; i < Width * Height; i++)
                     data[i] = Frame[i].GetBPP1Monochrome_Int32();
-
-
-
-                /* This feature allows for locally adaptive thresholding for binarizing the frame
-            int index = 0;
-            for (int y = 0; y < Height; y++)
-            {
-                for (int x = 0; x < Width; x++)
-                {
-                    int total = 0;
-                    for (int i = -1; i < 2; i++)
-                    {
-                        for (int e = -1; e < 2; e++)
-                        {
-                            total += GetPixelIntensity(GetPixel(x + i, y + e));
-                        }
-                    }
-                    total /= 9;
-                    data[index] = (GetPixelIntensity(GetPixel(x, y)) > (total * (Threshold / 100f)) ? (255 << 16 | 255 << 8 | 255) : 0x0);
-                    index++;
-                }
-            }
-            */
             }
 
             return data;
         }
-
-        public static int Threshold { get; set; }
 
         public static void InjestGDIBitmap(Bitmap b, InterpolationMode mode)
         {
