@@ -14,7 +14,7 @@ namespace LMCSHD
         //implmented get/set to expose references
         public static int Width { get; set; } = 16;
         public static int Height { get; set; } = 16;
-        public static System.Windows.Media.Color[] GradientColors { get; set; } = new System.Windows.Media.Color[2];
+        //public static System.Windows.Media.Color[] GradientColors { get; set; } = new System.Windows.Media.Color[2];
         public static Pixel[] Frame { get; set; }
         public static int FrameByteCount { get { return (Width * Height * 3); } }
         public static Orientation orientation { get; set; } = Orientation.HZ;
@@ -144,7 +144,6 @@ namespace LMCSHD
                 for (int i = 0; i < Width * Height; i++)
                     data[i] = Frame[i].GetBPP1Monochrome_Int32();
             }
-
             return data;
         }
 
@@ -153,74 +152,37 @@ namespace LMCSHD
             BitmapToFrame(b, mode);
             b.Dispose();
         }
-        public static void FFTToFrame(float[] fftData)
-        {
-            SetFrameColor(new Pixel(0, 0, 0));
-            float[] downSampledData = ResizeSampleArray(fftData, Width);
-            for (int i = 0; i < Width; i++)
-                DrawColumnMirrored(i, (int)(downSampledData[i] * Height));
-            OnFrameChanged();
-        }
-        public static float[] ResizeSampleArray(float[] rawData, int newSize)
-        {
-            float[] newData = new float[newSize];
 
-            for (int i = 0; i < newSize; i++)
-            {
-                float loopPercentage = (float)i / (float)newSize;
-                float nextLoopPercentage = (float)(i + 1) / (float)newSize;
-
-                int rawIndex = (int)((float)loopPercentage * (float)rawData.Length);
-                int nextRawIndex = (int)((float)nextLoopPercentage * (float)rawData.Length);
-                if (nextRawIndex >= rawData.Length)
-                    nextRawIndex = rawData.Length - 1;
-
-                int gap = nextRawIndex - rawIndex;
-                if (gap > 1)
-                {
-                    float average = 0;
-                    for (int e = 0; e < gap; e++)
-                    {
-                        average += rawData[rawIndex + e];
-                    }
-                    average /= gap;
-                    newData[i] = average;
-                }
-                else
-                {
-                    newData[i] = rawData[rawIndex];
-                }
-            }
-            return newData;
-        }
-        public static void SetFrameColor(Pixel color)
+        public static void FillFrame(Pixel color)
         {
-            for (int i = 0; i < Width * Height; i++)
+            for (int i = 0; i < Width * Height; ++i)
             {
                 Frame[i] = color;
             }
+            //OnFrameChanged();
         }
-        private static Pixel GetGradientColor(float percent)
+        private static Pixel GetGradientColor(float percent, System.Windows.Media.Color bottomColor, System.Windows.Media.Color topColor)
         {
             percent = percent < 0 ? 0 : percent > 1 ? 1 : percent;
             Pixel c = new Pixel(0, 0, 0);
-            c.R = (byte)((GradientColors[0].R * percent) + GradientColors[1].R * (1 - percent));
-            c.G = (byte)((GradientColors[0].G * percent) + GradientColors[1].G * (1 - percent));
-            c.B = (byte)((GradientColors[0].B * percent) + GradientColors[1].B * (1 - percent));
+            c.R = (byte)((bottomColor.R * percent) + topColor.R * (1 - percent));
+            c.G = (byte)((bottomColor.G * percent) + topColor.G * (1 - percent));
+            c.B = (byte)((bottomColor.B * percent) + topColor.B * (1 - percent));
             return c;
         }
 
-        public static void DrawColumnMirrored(int x, int height)
+        public static void DrawColumnMirrored(int x, int height, System.Windows.Media.Color bottomColor, System.Windows.Media.Color topColor)
         {
             int gradientIndex = 0;
-            Frame[((Height / 2) - 1) * Width + x] = GetGradientColor(1);
+            Frame[((Height / 2) - 1) * Width + x] = GetGradientColor(1, bottomColor, topColor);
             for (int y = (Height / 2) - 2; y > (Height / 2) - 2 - height; y--)
             {
                 if (y < 0)
                     break;
-                Frame[y * Width + x] = GetGradientColor((float)y / ((Height / 2) - 1));
+                Frame[y * Width + x] = GetGradientColor((float)y / ((Height / 2) - 1), bottomColor, topColor);
                 gradientIndex++;
             }
+
             /*
             gradientIndex = 0;
             Frame[(Height / 2) * Width + x] = GetGradientColor(1);

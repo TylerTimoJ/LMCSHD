@@ -129,7 +129,6 @@ namespace LMCSHD
                 if (_bottomColor != value)
                 {
                     _bottomColor = value;
-                    MatrixFrame.GradientColors[0] = value;
                     OnPropertyChanged();
                 }
             }
@@ -142,7 +141,6 @@ namespace LMCSHD
                 if (_topColor != value)
                 {
                     _topColor = value;
-                    MatrixFrame.GradientColors[1] = value;
                     OnPropertyChanged();
                 }
             }
@@ -154,8 +152,6 @@ namespace LMCSHD
         {
             RefreshAudioDeviceList();
             AudioProcesser.SetupAudioProcessor(FFTCallback);
-            MatrixFrame.GradientColors[0] = BottomColor;
-            MatrixFrame.GradientColors[1] = TopColor;
         }
 
 
@@ -196,9 +192,50 @@ namespace LMCSHD
         {
             Dispatcher.Invoke(() =>
             {
-                MatrixFrame.FFTToFrame(fftData);
+               // MatrixFrame.FFTToFrame(fftData);
+
+                MatrixFrame.FillFrame(new Pixel(0, 0, 0));
+                float[] downSampledData = ResizeSampleArray(fftData, MatrixFrame.Width);
+                for (int i = 0; i < MatrixFrame.Width; i++)
+                    MatrixFrame.DrawColumnMirrored(i, (int)(downSampledData[i] * MatrixFrame.Height), BottomColor, TopColor);
+
+                MatrixFrame.Refresh();
             });
         }
+
+        public static float[] ResizeSampleArray(float[] rawData, int newSize)
+        {
+            float[] newData = new float[newSize];
+
+            for (int i = 0; i < newSize; i++)
+            {
+                float loopPercentage = (float)i / (float)newSize;
+                float nextLoopPercentage = (float)(i + 1) / (float)newSize;
+
+                int rawIndex = (int)((float)loopPercentage * (float)rawData.Length);
+                int nextRawIndex = (int)((float)nextLoopPercentage * (float)rawData.Length);
+                if (nextRawIndex >= rawData.Length)
+                    nextRawIndex = rawData.Length - 1;
+
+                int gap = nextRawIndex - rawIndex;
+                if (gap > 1)
+                {
+                    float average = 0;
+                    for (int e = 0; e < gap; e++)
+                    {
+                        average += rawData[rawIndex + e];
+                    }
+                    average /= gap;
+                    newData[i] = average;
+                }
+                else
+                {
+                    newData[i] = rawData[rawIndex];
+                }
+            }
+            return newData;
+        }
+
         private void BeginAudioCapture()
         {
             AudioProcesser.BeginCapture(FFTCallback, SelectedDeviceIndex);
