@@ -11,9 +11,10 @@ namespace LMCSHD
     {
 
         #region DataProperites
-        private int _freqRangeMin = 20, _freqRangeMax = 20000, _freqRangeLowerVal = 20, _freqRangeUpperVal = 20000, _amplitudeVal = 1024, _selectedDeviceIndex = 0, _selectedWindowIndex = 0;
+        private int _freqRangeMin = 20, _freqRangeMax = 20000, _freqRangeLowerVal = 20, _freqRangeUpperVal = 20000, _amplitudeVal = 1024, _selectedDeviceIndex = 0, _selectedWindowIndex = 0, _selectedDisplayMode = 0;
         private ObservableCollection<string> _deviceList;
-        private Color _bottomColor = Color.FromRgb(255,0,0), _topColor = Color.FromRgb(0, 0, 255);
+        private Color _bottomColor = Color.FromRgb(255, 0, 0), _topColor = Color.FromRgb(0, 0, 255);
+        private Pixel _bottomColorPixel = new Pixel(255, 0, 0), _topColorPixel = new Pixel(0, 0, 255);
 
         public int FreqRangeMin
         {
@@ -94,6 +95,19 @@ namespace LMCSHD
             }
         }
 
+        public int SelectedDisplayMode
+        {
+            get { return _selectedDisplayMode; }
+            set
+            {
+                if (_selectedDisplayMode != value)
+                {
+                    _selectedDisplayMode = value;
+                    OnPropertyChanged();
+                }
+            }
+        }
+
         public int SelectedWindowIndex
         {
             get { return _selectedWindowIndex; }
@@ -129,6 +143,9 @@ namespace LMCSHD
                 if (_bottomColor != value)
                 {
                     _bottomColor = value;
+                    _bottomColorPixel.R = value.R;
+                    _bottomColorPixel.G = value.G;
+                    _bottomColorPixel.B = value.B;
                     OnPropertyChanged();
                 }
             }
@@ -141,6 +158,9 @@ namespace LMCSHD
                 if (_topColor != value)
                 {
                     _topColor = value;
+                    _topColorPixel.R = value.R;
+                    _topColorPixel.G = value.G;
+                    _topColorPixel.B = value.B;
                     OnPropertyChanged();
                 }
             }
@@ -192,13 +212,17 @@ namespace LMCSHD
         {
             Dispatcher.Invoke(() =>
             {
-               // MatrixFrame.FFTToFrame(fftData);
+                // MatrixFrame.FFTToFrame(fftData);
 
                 MatrixFrame.FillFrame(new Pixel(0, 0, 0));
                 float[] downSampledData = ResizeSampleArray(fftData, MatrixFrame.Width);
                 for (int i = 0; i < MatrixFrame.Width; i++)
-                    MatrixFrame.DrawColumnMirrored(i, (int)(downSampledData[i] * MatrixFrame.Height), BottomColor, TopColor);
-
+                {
+                    if (SelectedDisplayMode == 0)
+                        MatrixFrame.DrawColumnMirrored(i, (int)(downSampledData[i] * MatrixFrame.Height), _bottomColorPixel, _topColorPixel);
+                    if (SelectedDisplayMode == 1)
+                        MatrixFrame.DrawColumn(i, (int)(downSampledData[i] * MatrixFrame.Height), _bottomColorPixel, _topColorPixel);
+                }
                 MatrixFrame.Refresh();
             });
         }

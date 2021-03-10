@@ -112,6 +112,7 @@
     <Reference Include="NAudio, Version=1.10.0.0, Culture=neutral, processorArchitecture=MSIL">
       <HintPath>..\packages\NAudio.1.10.0\lib\net35\NAudio.dll</HintPath>
     </Reference>
+    <Reference Include="PresentationFramework.Aero2" />
     <Reference Include="System" />
     <Reference Include="System.Data" />
     <Reference Include="System.Drawing" />
@@ -298,6 +299,7 @@
   <ItemGroup>
     <Resource Include="Images\Menu\icons8-enlarge-32.png" />
   </ItemGroup>
+  <ItemGroup />
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <PropertyGroup>
     <PostBuildEvent>RMDIR "$(TargetDir)de/" /S /Q

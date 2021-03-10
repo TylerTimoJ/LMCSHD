@@ -161,7 +161,7 @@ namespace LMCSHD
             }
             //OnFrameChanged();
         }
-        private static Pixel GetGradientColor(float percent, System.Windows.Media.Color bottomColor, System.Windows.Media.Color topColor)
+        private static Pixel GetGradientColor(float percent, Pixel bottomColor, Pixel topColor)
         {
             percent = percent < 0 ? 0 : percent > 1 ? 1 : percent;
             Pixel c = new Pixel(0, 0, 0);
@@ -171,7 +171,7 @@ namespace LMCSHD
             return c;
         }
 
-        public static void DrawColumnMirrored(int x, int height, System.Windows.Media.Color bottomColor, System.Windows.Media.Color topColor)
+        public static void DrawColumnMirrored(int x, int height, Pixel bottomColor, Pixel topColor)
         {
             int gradientIndex = 0;
             Frame[((Height / 2) - 1) * Width + x] = GetGradientColor(1, bottomColor, topColor);
@@ -179,21 +179,35 @@ namespace LMCSHD
             {
                 if (y < 0)
                     break;
-                Frame[y * Width + x] = GetGradientColor((float)y / ((Height / 2) - 1), bottomColor, topColor);
+                Pixel color = GetGradientColor((float)y / ((Height / 2) - 1), bottomColor, topColor);
+                Frame[y * Width + x] = color;
+                Frame[y * Width + x] = color;
                 gradientIndex++;
             }
-
-            /*
-            gradientIndex = 0;
-            Frame[(Height / 2) * Width + x] = GetGradientColor(1);
+            /* 
+            
+          //  gradientIndex = 0;
+            Frame[(Height / 2) * Width + x] = GetGradientColor(1, bottomColor, topColor);
             for (int y = (Height / 2) + 1; y < (Height / 2) + 1 + height; y++)
             {
                 if (y > Height - 1)
                     break;
-                Frame[y * Width + x] = GetGradientColor((float)((Height / 2) + 1) / y);
-                gradientIndex++;
+                Frame[y * Width + x] = GetGradientColor((float)((Height / 2) + 1) / y, bottomColor, topColor);
+              //  gradientIndex++;
             }
             */
+        }
+        public static void DrawColumn(int x, int height, Pixel bottomColor, Pixel topColor)
+        {
+            int gradientIndex = 0;
+            Frame[((Height) - 1) * Width + x] = GetGradientColor(1, bottomColor, topColor);
+            for (int y = (Height) - 2; y > (Height) - 2 - height; y--)
+            {
+                if (y < 0)
+                    break;
+                Frame[y * Width + x] = GetGradientColor((float)y / ((Height) - 1), bottomColor, topColor);
+                gradientIndex++;
+            }
         }
 
         //****************************************************************************************************************************************************

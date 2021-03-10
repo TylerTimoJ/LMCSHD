@@ -27,7 +27,7 @@ namespace LMCSHD
         private static int _fftPos = 0;
         private static int _sampleRate;
         private static Complex[] _fftBuffer = new Complex[_fftLength];
-        private static int queueLength = 4;
+        private static int queueLength = 3;
         private static Queue<float>[] fftSampleQueue = new Queue<float>[_fftLength];
 
         private static MMDeviceEnumerator _deviceEnumerator = new MMDeviceEnumerator();
@@ -43,7 +43,6 @@ namespace LMCSHD
                 for (int e = 0; e < queueLength; e++)
                 {
                     fftSampleQueue[i].Enqueue(0);
-                   // fftSampleQueue[i].Enqueue(0.0f);
                 }
             }
 

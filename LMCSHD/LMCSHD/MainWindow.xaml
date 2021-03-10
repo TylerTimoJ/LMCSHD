@@ -42,6 +42,8 @@
 
         <BooleanToVisibilityConverter x:Key="b2v" />
 
+
+
     </Window.Resources>
 
     <Grid>
@@ -55,125 +57,129 @@
                 <RowDefinition Height="20"/>
                 <RowDefinition Height="*"/>
             </Grid.RowDefinitions>
+            <DockPanel Grid.ColumnSpan="3">
+                <Menu>
+                    <MenuItem Header="_File">
+                        <MenuItem Header="_Save Config" IsEnabled="False"/>
+                        <MenuItem Header="_Open Config" IsEnabled="False"/>
+                        <Separator/>
+                        <MenuItem Header="_Export Frame" Click="MenuItem_Menu_Export_Click"/>
+                        <Separator/>
+                        <MenuItem Header="_Exit" Click="MenuItem_File_Exit_Click"/>
+                    </MenuItem>
+                    <MenuItem Header="_Serial">
+                        <MenuItem x:Name="MIConnect" Header="Connect" Click="MenuItem_Serial_Connect_Click" >
+                            <MenuItem.Icon>
+                                <Image Source="/Images/Menu/icons8-link-32.png" />
+                            </MenuItem.Icon>
+                        </MenuItem>
+                        <MenuItem Header="Disconnect" Click="MenuItem_Serial_Disconnect_Click">
+                            <MenuItem.Icon>
+                                <Image Source="/Images/Menu/icons8-broken-link-32.png" />
+                            </MenuItem.Icon>
+                        </MenuItem>
+                    </MenuItem>
+                    <MenuItem Header="Edit">
+                        <MenuItem Header="Matrix Dimensions" Click="MenuItem_Edit_MatrixDimensions_Click">
+                            <MenuItem.Icon>
+                                <Image Source="/Images/Menu/icons8-enlarge-32.png"/>
+                            </MenuItem.Icon>
+                        </MenuItem>
+                        <MenuItem Header="Pixel Order">
+                            <MenuItem.Icon>
+                                <Image Source="/Images/Menu/icons8-numbers-input-form-32.png" />
+                            </MenuItem.Icon>
+                            <MenuItem Header="Orientation">
+                                <MenuItem.Icon>
+                                    <Image Source="/Images/Menu/icons8-directions-four-way-32.png" />
+                                </MenuItem.Icon>
+                                <MenuItem Header="Horizontal" Click="PixelOrder_Orientation_Horizontal_Click">
+                                    <MenuItem.Icon>
+                                        <Image Source="/Images/Menu/icons8-width-32.png" />
+                                    </MenuItem.Icon>
+                                </MenuItem>
+                                <MenuItem Header="Vertical" Click="PixelOrder_Orientation_Vertical_Click">
+                                    <MenuItem.Icon>
+                                        <Image Source="/Images/Menu/icons8-height-32.png" />
+                                    </MenuItem.Icon>
+                                </MenuItem>
+                            </MenuItem>
+                            <MenuItem Header="Origin">
+                                <MenuItem.Icon>
+                                    <Image Source="/Images/Menu/icons8-map-pin-32.png" />
+                                </MenuItem.Icon>
+                                <MenuItem Header="Top Left" Click="PixelOrder_StartCorner_TopLeft_Click">
+                                    <MenuItem.Icon>
+                                        <Image Source="/Images/Menu/icons8-grid-2-top-left-32.png" />
+                                    </MenuItem.Icon>
+                                </MenuItem>
+                                <MenuItem Header="Top Right" Click="PixelOrder_StartCorner_TopRight_Click">
+                                    <MenuItem.Icon>
+                                        <Image Source="/Images/Menu/icons8-grid-2-top-right-32.png" />
+                                    </MenuItem.Icon>
+                                </MenuItem>
+                                <MenuItem Header="Bottom Left" Click="PixelOrder_StartCorner_BottomLeft_Click">
+                                    <MenuItem.Icon>
+                                        <Image Source="/Images/Menu/icons8-grid-2-bottom-left-32.png" />
+                                    </MenuItem.Icon>
+                                </MenuItem>
+                                <MenuItem Header="Bottom Right" Click="PixelOrder_StartCorner_BottomRight_Click">
+                                    <MenuItem.Icon>
+                                        <Image Source="/Images/Menu/icons8-grid-2-bottom-right-32.png" />
+                                    </MenuItem.Icon>
+                                </MenuItem>
+                            </MenuItem>
+                            <MenuItem Header="New Line">
+                                <MenuItem.Icon>
+                                    <Image Source="/Images/Menu/icons8-shift-down-32.png" />
+                                </MenuItem.Icon>
+                                <MenuItem Header="Scan" Click="PixelOrder_NewLine_Scan_Click">
+                                    <MenuItem.Icon>
+                                        <Image Source="/Images/Menu/icons8-scan-32.png" />
+                                    </MenuItem.Icon>
+                                </MenuItem>
+                                <MenuItem Header="Snake" Click="PixelOrder_NewLine_Snake_Click">
+                                    <MenuItem.Icon>
+                                        <Image Source="/Images/Menu/icons8-snake-32.png" />
+                                    </MenuItem.Icon>
+                                </MenuItem>
+                            </MenuItem>
+                        </MenuItem>
+                        <MenuItem Header="Color Mode">
+                            <MenuItem.Icon>
+                                <Image Source="/Images/Menu/icons8-color-mode-32.png" />
+                            </MenuItem.Icon>
+                            <MenuItem Header="24bpp RGB" InputGestureText="True Color" Click="MenuItem_Serial_ColorMode_BPP24RGB_Click">
+                                <MenuItem.Icon>
+                                    <Image Source="/Images/Menu/icons8-volume-level-32.png" />
+                                </MenuItem.Icon>
+                            </MenuItem>
+                            <MenuItem Header="16bpp RGB" InputGestureText="High Color" Click="MenuItem_Serial_ColorMode_BPP16RGB_Click">
+                                <MenuItem.Icon>
+                                    <Image Source="/Images/Menu/icons8-volume-level-med-32.png" />
+                                </MenuItem.Icon>
+                            </MenuItem>
+                            <MenuItem Header="8bpp RGB" InputGestureText="256 Color" Click="MenuItem_Serial_ColorMode_BPP8RGB_Click">
+                                <MenuItem.Icon>
+                                    <Image Source="/Images/Menu/icons8-volume-level-low-32.png" />
+                                </MenuItem.Icon>
+                            </MenuItem>
+                            <MenuItem Header="8bpp" InputGestureText="Grayscale" Click="MenuItem_Serial_ColorMode_BPP8Gray_Click"/>
+                            <MenuItem Header="1bpp" InputGestureText="Monochrome" Click="MenuItem_Serial_ColorMode_BPP1Mono_Click"/>
+                        </MenuItem>
+                    </MenuItem>
+                    <MenuItem Header="View">
+                        <MenuItem Header="Show Pixel Borders" IsCheckable="True" Name="show_pixel_borders_check"/>
+                    </MenuItem>
+                    <MenuItem Header="About">
+                        <MenuItem Header="Placeholder link to https://icons8.com"/>
+                    </MenuItem>
+                </Menu>
+                <CheckBox IsChecked="True" VerticalAlignment="Center" HorizontalAlignment="Right"/>
+            </DockPanel>
 
-            <Menu Grid.ColumnSpan="3">
-                <MenuItem Header="_File">
-                    <MenuItem Header="_Save Config" IsEnabled="False"/>
-                    <MenuItem Header="_Open Config" IsEnabled="False"/>
-                    <Separator/>
-                    <MenuItem Header="_Export Frame" Click="MenuItem_Menu_Export_Click"/>
-                    <Separator/>
-                    <MenuItem Header="_Exit" Click="MenuItem_File_Exit_Click"/>
-                </MenuItem>
-                <MenuItem Header="_Serial">
-                    <MenuItem x:Name="MIConnect" Header="Connect" Click="MenuItem_Serial_Connect_Click" >
-                        <MenuItem.Icon>
-                            <Image Source="/Images/Menu/icons8-link-32.png" />
-                        </MenuItem.Icon>
-                    </MenuItem>
-                    <MenuItem Header="Disconnect" Click="MenuItem_Serial_Disconnect_Click">
-                        <MenuItem.Icon>
-                            <Image Source="/Images/Menu/icons8-broken-link-32.png" />
-                        </MenuItem.Icon>
-                    </MenuItem>
-                </MenuItem>
-                <MenuItem Header="Edit">
-                    <MenuItem Header="Matrix Dimensions" Click="MenuItem_Edit_MatrixDimensions_Click">
-                        <MenuItem.Icon>
-                            <Image Source="/Images/Menu/icons8-enlarge-32.png"/>
-                        </MenuItem.Icon>
-                    </MenuItem>
-                    <MenuItem Header="Pixel Order">
-                        <MenuItem.Icon>
-                            <Image Source="/Images/Menu/icons8-numbers-input-form-32.png" />
-                        </MenuItem.Icon>
-                        <MenuItem Header="Orientation">
-                            <MenuItem.Icon>
-                                <Image Source="/Images/Menu/icons8-directions-four-way-32.png" />
-                            </MenuItem.Icon>
-                            <MenuItem Header="Horizontal" Click="PixelOrder_Orientation_Horizontal_Click">
-                                <MenuItem.Icon>
-                                    <Image Source="/Images/Menu/icons8-width-32.png" />
-                                </MenuItem.Icon>
-                            </MenuItem>
-                            <MenuItem Header="Vertical" Click="PixelOrder_Orientation_Vertical_Click">
-                                <MenuItem.Icon>
-                                    <Image Source="/Images/Menu/icons8-height-32.png" />
-                                </MenuItem.Icon>
-                            </MenuItem>
-                        </MenuItem>
-                        <MenuItem Header="Origin">
-                            <MenuItem.Icon>
-                                <Image Source="/Images/Menu/icons8-map-pin-32.png" />
-                            </MenuItem.Icon>
-                            <MenuItem Header="Top Left" Click="PixelOrder_StartCorner_TopLeft_Click">
-                                <MenuItem.Icon>
-                                    <Image Source="/Images/Menu/icons8-grid-2-top-left-32.png" />
-                                </MenuItem.Icon>
-                            </MenuItem>
-                            <MenuItem Header="Top Right" Click="PixelOrder_StartCorner_TopRight_Click">
-                                <MenuItem.Icon>
-                                    <Image Source="/Images/Menu/icons8-grid-2-top-right-32.png" />
-                                </MenuItem.Icon>
-                            </MenuItem>
-                            <MenuItem Header="Bottom Left" Click="PixelOrder_StartCorner_BottomLeft_Click">
-                                <MenuItem.Icon>
-                                    <Image Source="/Images/Menu/icons8-grid-2-bottom-left-32.png" />
-                                </MenuItem.Icon>
-                            </MenuItem>
-                            <MenuItem Header="Bottom Right" Click="PixelOrder_StartCorner_BottomRight_Click">
-                                <MenuItem.Icon>
-                                    <Image Source="/Images/Menu/icons8-grid-2-bottom-right-32.png" />
-                                </MenuItem.Icon>
-                            </MenuItem>
-                        </MenuItem>
-                        <MenuItem Header="New Line">
-                            <MenuItem.Icon>
-                                <Image Source="/Images/Menu/icons8-shift-down-32.png" />
-                            </MenuItem.Icon>
-                            <MenuItem Header="Scan" Click="PixelOrder_NewLine_Scan_Click">
-                                <MenuItem.Icon>
-                                    <Image Source="/Images/Menu/icons8-scan-32.png" />
-                                </MenuItem.Icon>
-                            </MenuItem>
-                            <MenuItem Header="Snake" Click="PixelOrder_NewLine_Snake_Click">
-                                <MenuItem.Icon>
-                                    <Image Source="/Images/Menu/icons8-snake-32.png" />
-                                </MenuItem.Icon>
-                            </MenuItem>
-                        </MenuItem>
-                    </MenuItem>
-                    <MenuItem Header="Color Mode">
-                        <MenuItem.Icon>
-                            <Image Source="/Images/Menu/icons8-color-mode-32.png" />
-                        </MenuItem.Icon>
-                        <MenuItem Header="24bpp RGB" InputGestureText="True Color" Click="MenuItem_Serial_ColorMode_BPP24RGB_Click">
-                            <MenuItem.Icon>
-                                <Image Source="/Images/Menu/icons8-volume-level-32.png" />
-                            </MenuItem.Icon>
-                        </MenuItem>
-                        <MenuItem Header="16bpp RGB" InputGestureText="High Color" Click="MenuItem_Serial_ColorMode_BPP16RGB_Click">
-                            <MenuItem.Icon>
-                                <Image Source="/Images/Menu/icons8-volume-level-med-32.png" />
-                            </MenuItem.Icon>
-                        </MenuItem>
-                        <MenuItem Header="8bpp RGB" InputGestureText="256 Color" Click="MenuItem_Serial_ColorMode_BPP8RGB_Click">
-                            <MenuItem.Icon>
-                                <Image Source="/Images/Menu/icons8-volume-level-low-32.png" />
-                            </MenuItem.Icon>
-                        </MenuItem>
-                        <MenuItem Header="8bpp" InputGestureText="Grayscale" Click="MenuItem_Serial_ColorMode_BPP8Gray_Click"/>
-                        <MenuItem Header="1bpp" InputGestureText="Monochrome" Click="MenuItem_Serial_ColorMode_BPP1Mono_Click"/>
-                    </MenuItem>
-                </MenuItem>
-                <MenuItem Header="View">
-                    <MenuItem Header="Show Pixel Borders" IsCheckable="True" Name="show_pixel_borders_check"/>
-                </MenuItem>
-                <MenuItem Header="About">
-                    <MenuItem Header="Placeholder link to https://icons8.com"/>
-                </MenuItem>
-            </Menu>
-            
+
+
             <Grid Grid.Row="1" Grid.Column="2" Margin="2">
                 <Grid.RowDefinitions>
                     <RowDefinition Height="auto"/>
@@ -197,11 +203,11 @@
             <TabControl Grid.Row="1" Width="300" Margin="2" SelectedIndex="{Binding Path=TabControlIndex, Mode=TwoWay}">
                 <TabItem Header="Screen Recorder">
 
-                        <Grid>
-                            <Grid.ColumnDefinitions>
-                                <ColumnDefinition Width="*"/>
-                                <ColumnDefinition Width="*"/>
-                            </Grid.ColumnDefinitions>
+                    <Grid>
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*"/>
+                            <ColumnDefinition Width="*"/>
+                        </Grid.ColumnDefinitions>
                         <Grid.RowDefinitions>
                             <RowDefinition Height="auto"/>
                             <RowDefinition Height="auto"/>
@@ -217,82 +223,83 @@
                         <Button x:Name="SCStart"
                                     Content="Start Capture"
                                     Click="SC_Start_Click"/>
-                            
-                            <Button x:Name="SCStop"
+
+                        <Button x:Name="SCStop"
                                 IsEnabled="False"
                                 Grid.Column="1"
                                 Content="Stop Capture"
                                 Click="SC_Stop_Click"/>
 
-                            <TextBlock Grid.Row="1" Margin="2" Text="Interpolation Mode" HorizontalAlignment="Right" VerticalAlignment="Center"/>
+                        <TextBlock Grid.Row="1" Margin="2" Text="Interpolation Mode" HorizontalAlignment="Right" VerticalAlignment="Center"/>
 
-                            <ComboBox x:Name="SCInterpModeDrop" Grid.Column="1" Grid.Row="1" Margin="2" SelectedIndex="{Binding Path=SCInterpolationModeIndex, Mode=TwoWay}">
-                                <ComboBoxItem Content="Nearest Neighbor"/>
-                                <ComboBoxItem Content="Bicubic"/>
-                                <ComboBoxItem Content="Bilinear"/>
-                                <ComboBoxItem Content="High Quality Bicubic"/>
-                                <ComboBoxItem Content="High Quality Bilinear"/>
-                            </ComboBox>
+                        <ComboBox x:Name="SCInterpModeDrop" Grid.Column="1" Grid.Row="1" Margin="2" SelectedIndex="{Binding Path=SCInterpolationModeIndex, Mode=TwoWay}">
+                            <ComboBoxItem Content="Nearest Neighbor"/>
+                            <ComboBoxItem Content="Bicubic"/>
+                            <ComboBoxItem Content="Bilinear"/>
+                            <ComboBoxItem Content="High Quality Bicubic"/>
+                            <ComboBoxItem Content="High Quality Bilinear"/>
+                        </ComboBox>
 
 
 
-                            <StackPanel Grid.ColumnSpan="2" Grid.Row="2">
-                                <GroupBox Header="Start X">
-                                    <StackPanel Orientation="Horizontal">
-                                        <xctk:IntegerUpDown Value="{Binding Path=SCX1, Mode=TwoWay}" Minimum="0" Maximum="{Binding Path=SCXMax, Mode=TwoWay}"/>
-                                        <Slider Value="{Binding Path=SCX1, Mode=TwoWay}" Minimum="0" Maximum="{Binding Path=SCXMax, Mode=TwoWay}" SmallChange="1"/>
-                                    </StackPanel>
-                                </GroupBox>
+                        <StackPanel Grid.ColumnSpan="2" Grid.Row="2">
+                            <GroupBox Header="Start X">
+                                <StackPanel Orientation="Horizontal">
+                                    <xctk:IntegerUpDown Value="{Binding Path=SCX1, Mode=TwoWay}" Minimum="0" Maximum="{Binding Path=SCXMax, Mode=TwoWay}"/>
+                                    <Slider Value="{Binding Path=SCX1, Mode=TwoWay}" Minimum="0" Maximum="{Binding Path=SCXMax, Mode=TwoWay}" SmallChange="1"/>
+                                </StackPanel>
+                            </GroupBox>
 
-                                <GroupBox Header="Start Y" Grid.Row="1">
-                                    <StackPanel Orientation="Horizontal">
-                                        <xctk:IntegerUpDown Value="{Binding Path=SCY1, Mode=TwoWay}" Minimum="0" Maximum="{Binding Path=SCYMax, Mode=TwoWay}"/>
-                                        <Slider Value="{Binding Path=SCY1, Mode=TwoWay}" Minimum="0" Maximum="{Binding Path=SCYMax, Mode=TwoWay}" SmallChange="1"/>
-                                    </StackPanel>
-                                </GroupBox>
+                            <GroupBox Header="Start Y" Grid.Row="1">
+                                <StackPanel Orientation="Horizontal">
+                                    <xctk:IntegerUpDown Value="{Binding Path=SCY1, Mode=TwoWay}" Minimum="0" Maximum="{Binding Path=SCYMax, Mode=TwoWay}"/>
+                                    <Slider Value="{Binding Path=SCY1, Mode=TwoWay}" Minimum="0" Maximum="{Binding Path=SCYMax, Mode=TwoWay}" SmallChange="1"/>
+                                </StackPanel>
+                            </GroupBox>
 
-                                <GroupBox Header="End X" Grid.Row="2">
-                                    <GroupBox.Style>
-                                        <Style>
-                                            <Style.Triggers>
-                                                <DataTrigger Binding='{Binding Path=IsChecked, ElementName=SCLockDimCheck}' Value='True'>
-                                                    <Setter Property='GroupBox.IsEnabled' Value='False'/>
-                                                </DataTrigger>
-                                            </Style.Triggers>
-                                        </Style>
-                                    </GroupBox.Style>
-                                    <StackPanel Orientation="Horizontal">
-                                        <xctk:IntegerUpDown Value="{Binding Path=SCX2, Mode=TwoWay}" Minimum="0" Maximum="{Binding Path=SCXMax, Mode=TwoWay}"/>
-                                        <Slider Value="{Binding Path=SCX2, Mode=TwoWay}" Minimum="0" Maximum="{Binding Path=SCXMax, Mode=TwoWay}" SmallChange="1"/>
-                                    </StackPanel>
-                                </GroupBox>
+                            <GroupBox Header="End X" Grid.Row="2">
+                                <GroupBox.Style>
+                                    <Style>
+                                        <Style.Triggers>
+                                            <DataTrigger Binding='{Binding Path=IsChecked, ElementName=SCLockDimCheck}' Value='True'>
+                                                <Setter Property='GroupBox.IsEnabled' Value='False'/>
+                                            </DataTrigger>
+                                        </Style.Triggers>
+                                    </Style>
+                                </GroupBox.Style>
+                                <StackPanel Orientation="Horizontal">
+                                    <xctk:IntegerUpDown Value="{Binding Path=SCX2, Mode=TwoWay}" Minimum="0" Maximum="{Binding Path=SCXMax, Mode=TwoWay}"/>
+                                    <Slider Value="{Binding Path=SCX2, Mode=TwoWay}" Minimum="0" Maximum="{Binding Path=SCXMax, Mode=TwoWay}" SmallChange="1"/>
+                                </StackPanel>
+                            </GroupBox>
 
-                                <GroupBox Header="End Y" Grid.Row="3">
-                                    <GroupBox.Style>
-                                        <Style>
-                                            <Style.Triggers>
-                                                <DataTrigger Binding='{Binding Path=IsChecked, ElementName=SCLockDimCheck}' Value='True'>
-                                                    <Setter Property='GroupBox.IsEnabled' Value='False'/>
-                                                </DataTrigger>
-                                            </Style.Triggers>
-                                        </Style>
-                                    </GroupBox.Style>
-                                    <StackPanel Orientation="Horizontal">
-                                        <xctk:IntegerUpDown Value="{Binding Path=SCY2, Mode=TwoWay}" Minimum="0" Maximum="{Binding Path=SCYMax, Mode=TwoWay}"/>
-                                        <Slider Value="{Binding Path=SCY2, Mode=TwoWay}" Minimum="0" Maximum="{Binding Path=SCYMax, Mode=TwoWay}" SmallChange="1"/>
-                                    </StackPanel>
-                                </GroupBox>
-                            </StackPanel>
+                            <GroupBox Header="End Y" Grid.Row="3">
+                                <GroupBox.Style>
+                                    <Style>
+                                        <Style.Triggers>
+                                            <DataTrigger Binding='{Binding Path=IsChecked, ElementName=SCLockDimCheck}' Value='True'>
+                                                <Setter Property='GroupBox.IsEnabled' Value='False'/>
+                                            </DataTrigger>
+                                        </Style.Triggers>
+                                    </Style>
+                                </GroupBox.Style>
+                                <StackPanel Orientation="Horizontal">
+                                    <xctk:IntegerUpDown Value="{Binding Path=SCY2, Mode=TwoWay}" Minimum="0" Maximum="{Binding Path=SCYMax, Mode=TwoWay}"/>
+                                    <Slider Value="{Binding Path=SCY2, Mode=TwoWay}" Minimum="0" Maximum="{Binding Path=SCYMax, Mode=TwoWay}" SmallChange="1"/>
+                                </StackPanel>
+                            </GroupBox>
+                        </StackPanel>
 
-                            <Button Grid.Row="3"
+                        <Button Grid.Row="3"
                                        Content="Reset Bounds" Click="SCResetSliders_Click"/>
-                            <CheckBox Grid.Row="4"
+                        <CheckBox Grid.Row="4"
                                       x:Name="SCLockDimCheck"
                                       IsChecked="{Binding Path=SCLockDim, Mode=TwoWay}"
                                           Margin="2"
                                           Content="Lock Dimensions"/>
-                            <TextBlock Grid.Column="1" Grid.Row="3" Margin="2" HorizontalAlignment="Center" VerticalAlignment="Center" Text="{Binding Path=Text_SC_WidthHeight, Mode=TwoWay}"/>
-                                <CheckBox x:Name="SCDisplayOutline"
+                        <TextBlock Grid.Column="1" Grid.Row="3" Margin="2" HorizontalAlignment="Center" VerticalAlignment="Center" Text="{Binding Path=Text_SC_WidthHeight, Mode=TwoWay}"/>
+                        <CheckBox x:Name="SCDisplayOutline"
+                                  
                                       Margin="2"
                                       Grid.Row="4"
                                       Grid.Column="1"
@@ -301,7 +308,7 @@
                                       Checked="SCDisplayOutline_Checked"
                                       Unchecked="SCDisplayOutline_Unchecked"/>
 
-                            <Separator Grid.Row="5" Grid.ColumnSpan="2" Margin="2" />
+                        <Separator Grid.Row="5" Grid.ColumnSpan="2" Margin="2" />
 
                         <TextBlock Grid.Row="6" Margin="2" Text="{Binding StringFormat=Capture FPS: {0}, Path=LocalFPS, Mode=OneWay}"/>
                     </Grid>
@@ -445,12 +452,12 @@
                                   Grid.Column="1"
                                   Grid.Row="6"
                                   Margin="2"
-                                  SelectedIndex="0">
+                                  SelectedIndex="{Binding Path=SelectedDisplayMode, Mode=TwoWay}">
 
                             <ComboBoxItem Content="Mirrored"/>
                             <ComboBoxItem Content="Standard"/>
                         </ComboBox>
-                        
+
                         <TextBlock Grid.Row="7"
                                    Margin="2"
                                    Text="FFT Window"
@@ -461,7 +468,7 @@
                                   Grid.Row="7"
                                   Margin="2"
                                   SelectedIndex="{Binding Path=SelectedWindowIndex, Mode=TwoWay}">
-                            
+
                             <ComboBoxItem Content="BlackmannHarris"/>
                             <ComboBoxItem Content="Hamming"/>
                             <ComboBoxItem Content="Hann"/>
@@ -500,9 +507,9 @@
                                 </StackPanel>
                             </ToggleButton>
                         </Grid>
-                        
-                        
-                        
+
+
+
                         <TextBlock Grid.Row="1" Margin="2" Text="Interpolation Mode" HorizontalAlignment="Right" VerticalAlignment="Center"/>
 
                         <ComboBox x:Name="ImagingInterpModeDrop" Grid.Column="1" Grid.Row="1" Margin="2" SelectedIndex="{Binding Path=IMInterpolationModeIndex, Mode=TwoWay}">
