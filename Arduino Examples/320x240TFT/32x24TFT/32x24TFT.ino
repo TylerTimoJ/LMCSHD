@@ -6,13 +6,15 @@
 #define BPP24_LEN 230400
 #define UINT16_LEN 76800
 
+#define width 320
+#define height 240
+
 DMAMEM uint16_t fb1[320 * 240];
 DMAMEM uint16_t fb2[320 * 240];
 
 ILI9341_t3n tft = ILI9341_t3n(9, 10, 8);
 
-const int width = 320;
-const int height = 240;
+
 
 char sBuf[width * height * 3];
 
@@ -48,7 +50,7 @@ void setup() {
   tft.updateScreen();
   while (micros() - startTime < waitTime);
 
-  tft.fillScreen(ILI9341_WHITE);
+  tft.fillScreen(ILI9341_BLACK);
   startTime = micros();
   tft.updateScreen();
   while (micros() - startTime < waitTime);
@@ -79,65 +81,107 @@ void serialEvent()
       break;
 
     case 0x41:
-      Serial.readBytes(sBuf, BPP24_LEN);
+      Serial.readBytes(sBuf, width * height * 3);
+      DelayFrameInterval(99500);
+      tft.fillScreen(ILI9341_BLACK);
       tft.setCursor(random(0, 300), random(0, 200));
       tft.setTextColor(ILI9341_PINK);
       tft.print("not supported");
+      PrintFPS();
       tft.updateScreen();
       Serial.write(0x06);
       break;
 
-    case 0x42: //16BPP Frame
+    case 0x42: //16BPP RGB FRAME
 
-      Serial.readBytes(sBuf, BPP16_LEN);
+      Serial.readBytes(sBuf, width * height * 2);
 
-      if (usingFB1) {
-        usingFB1 = false;
-        for (int i = 0; i < 320 * 240; i++) {
-          fb2[i] = sBuf[i * 2] << 8 | sBuf[i * 2 + 1];
-        }
-      }
-      else {
-        usingFB1 = true;
-        for (int i = 0; i < 320 * 240; i++) {
-          fb1[i] = sBuf[i * 2] << 8 | sBuf[i * 2 + 1];
-        }
-      }
       tft.waitUpdateAsyncComplete();
 
-      tft.setFrameBuffer(usingFB1 ? fb1 : fb2);
+      int i = 0;
+
+      for (int y = 0; y < height; y++) {
+        for (int x = 0; x < width; x++) {
+          tft.fillRect(x * 320 / width, y * 240 / height, 320 / width, 240 / height, sBuf[i * 2] << 8 | sBuf[i * 2 + 1]);
+          i++;
+        }
+      }
+
+
+
+      /*
+            int offset = 0;
+            if (usingFB1) {
+              usingFB1 = false;
+              for (int i = 0; i < width * height; i++) {
+                fb2[i * 10 + offset] = sBuf[i * 2] << 8 | sBuf[i * 2 + 1];
+                offset += 10;
+              }
+            }
+            else {
+              usingFB1 = true;
+              for (int i = 0; i < width * height; i++) {
+                fb1[i * 10 + offset] = sBuf[i * 2] << 8 | sBuf[i * 2 + 1];
+                offset += 10;
+              }
+            }
+      */
+
+
+      // tft.setFrameBuffer(usingFB1 ? fb1 : fb2);
 
       PrintFPS();
-      //DelayFrameInterval();
-
       tft.updateScreenAsync(false);
       Serial.write(0x06); //acknowledge
       break;
 
 
-    case 0x43:
-      Serial.readBytes(sBuf, UINT16_LEN);
-      tft.waitUpdateAsyncComplete();
+    case 0x43: // 8BPP RGB FRAME
+      Serial.readBytes(sBuf, width * height);
 
-      cP = tft.getFrameBuffer();
-      for (int i = 0; i < UINT16_LEN; i++)
-        *cP++ = ((sBuf[i] & B11100000) << 8) | ((sBuf[i] & B00011100) << 6) | ((sBuf[i] & B00000011) << 3);
+      if (usingFB1) {
+        usingFB1 = false;
+        for (int i = 0; i < 320 * 240; i++) {
+          fb2[i] = ((sBuf[i] & B11100000) << 8) | ((sBuf[i] & B00011100) << 6) | ((sBuf[i] & B00000011) << 3);
+        }
+      }
+      else {
+        usingFB1 = true;
+        for (int i = 0; i < 320 * 240; i++) {
+          fb1[i] = ((sBuf[i] & B11100000) << 8) | ((sBuf[i] & B00011100) << 6) | ((sBuf[i] & B00000011) << 3);
+        }
+      }
+      tft.waitUpdateAsyncComplete();
+      PrintFPS();
       tft.updateScreenAsync();
       Serial.write(0x06);
       break;
 
-    case 0x44:
-      Serial.readBytes(sBuf, UINT16_LEN);
+    case 0x44: // 8BPP GREYSCALE FRAME
+      Serial.readBytes(sBuf, width * height);
+
+      if (usingFB1) {
+        usingFB1 = false;
+        for (int i = 0; i < 320 * 240; i++) {
+          fb2[i] = ((sBuf[i] & B11111000) << 8) | ((sBuf[i] & B11111100) << 3) | ((sBuf[i] & B11111000) >> 3);
+        }
+      }
+      else {
+        usingFB1 = true;
+        for (int i = 0; i < 320 * 240; i++) {
+          fb1[i] = ((sBuf[i] & B11111000) << 8) | ((sBuf[i] & B11111100) << 3) | ((sBuf[i] & B11111000) >> 3);
+        }
+      }
+
       tft.waitUpdateAsyncComplete();
-      cP = tft.getFrameBuffer();
-      for (int i = 0; i < UINT16_LEN; i++)
-        *cP++ = ((sBuf[i] & B11111000) << 8) | ((sBuf[i] & B11111100) << 3) | ((sBuf[i] & B11111000) >> 3);
+      PrintFPS();
       tft.updateScreenAsync();
       Serial.write(0x06);
       break;
 
-    case 0x45:
+    case 0x45: // 1BPP MONOCHROME FRAME
       Serial.readBytes(sBuf, ((width * height) / 8) + ((width * height) % 8));
+
       tft.waitUpdateAsyncComplete();
       cP = tft.getFrameBuffer();
       for (int i = 0; i < ((width * height) / 8) + ((width * height) % 8); i++) {
@@ -151,10 +195,8 @@ void serialEvent()
         *cP++ = sBuf[i] & B00000100 ? 0xFFFF : 0x0000;
         *cP++ = sBuf[i] & B00000010 ? 0xFFFF : 0x0000;
         *cP++ = sBuf[i] & B00000001 ? 0xFFFF : 0x0000;
-        // CL(23, 23, 23);
-
-        // *cP++ = ((sBuf[i] & B11111000) << 8) | ((sBuf[i] & B11111100) << 3) | ((sBuf[i] & B11111000) >> 3);
       }
+      PrintFPS();
       tft.updateScreenAsync();
       Serial.write(0x06);
       break;
@@ -189,28 +231,9 @@ void PrintFPS() {
 
   uint16_t compColor = (((~r) & 0x1F) << 11) | (((~g) & 0x3F) << 5) | ((~b) & 0x1F);
 
-  //tft.fillRect(50, 0, 50, 50, compColor);
   tft.setCursor(2, 2);
   tft.setTextColor(compColor);
   tft.print(1000000 / elapsedTime);
   tft.print(" FPS");
-  /*
-  tft.print(" r:");
-  tft.print(r);
 
-  tft.print(" g:");
-  tft.print(g);
-
-  tft.print(" b:");
-  tft.print(b);
-
-  tft.print(" r':");
-  tft.print(compColor >> 11);
-
-  tft.print(" g':");
-  tft.print(((compColor >> 5) & 0x3F));
-
-  tft.print(" b':");
-  tft.print((compColor & 0x1F));
-  */
 }
