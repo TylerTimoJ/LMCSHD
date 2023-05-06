@@ -52,9 +52,9 @@ namespace LMCSHD
 
             int index = 0;
 
-            int startX = startCorner == StartCorner.TR || startCorner == StartCorner.BR ? MatrixFrame.Width - 1 : 0;
-            int termX = startCorner == StartCorner.TR || startCorner == StartCorner.BR ? -1 : MatrixFrame.Width;
-            int incX = startCorner == StartCorner.TR || startCorner == StartCorner.BR ? -1 : 1;
+            int startX = startCorner == StartCorner.TR || startCorner == StartCorner.BL ? MatrixFrame.Width - 1 : 0;
+            int termX = startCorner == StartCorner.TR || startCorner == StartCorner.BL ? -1 : MatrixFrame.Width;
+            int incX = startCorner == StartCorner.TR || startCorner == StartCorner.BL ? -1 : 1;
 
             int startY = startCorner == StartCorner.BL || startCorner == StartCorner.BR ? MatrixFrame.Height - 1 : 0;
             int termY = startCorner == StartCorner.BL || startCorner == StartCorner.BR ? -1 : MatrixFrame.Height;
