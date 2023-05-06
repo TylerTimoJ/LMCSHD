@@ -24,6 +24,8 @@ Under the `Serial` menu tab click `Connect`. Specify the correct COM port, baud 
 If a serial connection is not available, or not applicable, everything can be used normally, and the resulting images can be exported under the `File` menu tab and `Export`.
 
 ## Contributing
+Thanks: benmartens!
+
 Help with the development of LMCSHD is greatly appreciated, and necessary. Help can be provided in a number of ways
 * Leaving feedback, or suggestions on the various [YouTube showcase videos](https://www.youtube.com/watch?v=LmrzyJAwyCQ&list=PLt5bhXqA0WNq3WJG-4qe4-SQdlFvXctAs) associated with the project
 * Reporting issues
