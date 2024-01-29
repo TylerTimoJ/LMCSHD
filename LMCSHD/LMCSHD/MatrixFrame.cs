@@ -52,9 +52,9 @@ namespace LMCSHD
 
             int index = 0;
 
-            int startX = startCorner == StartCorner.TR || startCorner == StartCorner.BL ? MatrixFrame.Width - 1 : 0;
-            int termX = startCorner == StartCorner.TR || startCorner == StartCorner.BL ? -1 : MatrixFrame.Width;
-            int incX = startCorner == StartCorner.TR || startCorner == StartCorner.BL ? -1 : 1;
+            int startX = startCorner == StartCorner.TR || startCorner == StartCorner.BR ? MatrixFrame.Width - 1 : 0;
+            int termX = startCorner == StartCorner.TR || startCorner == StartCorner.BR ? -1 : MatrixFrame.Width;
+            int incX = startCorner == StartCorner.TR || startCorner == StartCorner.BR ? -1 : 1;
 
             int startY = startCorner == StartCorner.BL || startCorner == StartCorner.BR ? MatrixFrame.Height - 1 : 0;
             int termY = startCorner == StartCorner.BL || startCorner == StartCorner.BR ? -1 : MatrixFrame.Height;
@@ -76,6 +76,8 @@ namespace LMCSHD
                     }
                 }
             }
+            // This code doesn't work so I'm commenting it out
+            /*
             else
             {
                 for (int y = startY; y != termY; y += incY)
@@ -84,6 +86,24 @@ namespace LMCSHD
                     {
                         int i = newLine == NewLine.SC || x % 2 == 0 ? y : MatrixFrame.Height - 1 - y;
                         i += (x * MatrixFrame.Height);
+                        orderedFrame[index * 3] = MatrixFrame.Frame[i].R;
+                        orderedFrame[index * 3 + 1] = MatrixFrame.Frame[i].G;
+                        orderedFrame[index * 3 + 2] = MatrixFrame.Frame[i].B;
+                        index++;
+                    }
+                }
+            }
+            */
+            // Here's the working version
+            else
+            {
+                for (int x = startX; x != termX; x += incX)
+                {
+                    for (int y = startY; y != termY; y += incY)
+                    {
+                        int i = newLine == NewLine.SC || x % 2 == 0 ? y : MatrixFrame.Height - 1 - y;
+                        i = i * MatrixFrame.Width;
+                        i += x;
                         orderedFrame[index * 3] = MatrixFrame.Frame[i].R;
                         orderedFrame[index * 3 + 1] = MatrixFrame.Frame[i].G;
                         orderedFrame[index * 3 + 2] = MatrixFrame.Frame[i].B;
